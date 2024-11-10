@@ -5,3 +5,4 @@ subprocess
 json
 shlex
 yfinance
+Jinja2
