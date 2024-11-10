@@ -1,8 +1,5 @@
 flask
 pandas
 plotly
-subprocess
-json
-shlex
 yfinance
 Jinja2
