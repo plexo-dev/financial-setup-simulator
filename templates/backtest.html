@@ -1,0 +1,52 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Backtest
+{% endblock %}
+
+{% block main %}
+    <div>
+        <p class="fs-3" style="margin-left: 6px;">
+            <a href="/" style="text-decoration: none; color: black;">
+                Home
+            </a>
+        </p>
+        <table class="table table-borderless">
+            <td class="fs-5">Name: {{ name }}</td>
+            <td class="fs-5">Period: {{ period }}</td>
+            <td class="fs-5">Interval: {{ interval }}</td>
+            <td class="fs-5">Gains: $ {{ gains }}</td>
+        </table>
+    </div>
+    <div id="chart" class="chart"></div>
+    <br>
+    <br>
+    <p class="fs-3" style="margin-left: 6px;">Log</p>
+    <br>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Action</th>
+                <th>Message</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in output %}
+                <tr>
+                    <td>{{ row["Action"] }}</td>
+                    <td>{{ row["Message"] }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div id="graph-data" style="display:none;">{{ graph | safe }}</div>
+{% endblock %}
+
+{% block script %}
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script>
+        var graphData = JSON.parse(document.getElementById('graph-data').textContent);
+
+        Plotly.plot("chart", graphData, {});
+    </script>
+{% endblock %}
