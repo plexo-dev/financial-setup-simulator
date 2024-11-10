@@ -1,0 +1,13 @@
+{
+  "name": "financial-setup-simulator",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "install": "python3 -m pip install -r requirements.txt",
+    "start": "python3 -m flask run"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": ""
+}
