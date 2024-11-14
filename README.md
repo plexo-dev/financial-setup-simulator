@@ -70,6 +70,7 @@ git clone https://github.com/HenriqueOliveiraCoder/financial-setup-simulator
 
 
 Go to the project directory
+```
 
 ```bash
   cd financial-setup-simulator
