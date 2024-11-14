@@ -67,23 +67,20 @@ Ensure you have **npm**, **Python 3**, and **Node.js** installed on your system.
 ### Clone the Project
 ```bash
 git clone https://github.com/HenriqueOliveiraCoder/financial-setup-simulator
-
-
-Go to the project directory
 ```
 
+
+### Go to the project directory
 ```bash
   cd financial-setup-simulator
 ```
 
-Install dependencies
-
+### Install dependencies
 ```bash
   npm install
 ```
 
-Start the web application
-
+### Start the web application
 ```bash
   npm start
 ```
