@@ -79,10 +79,18 @@ git clone https://github.com/HenriqueOliveiraCoder/financial-setup-simulator
 ```bash
   npm install
 ```
+or alternatively run
+```bash
+   python3 -m pip install -r requirements.txt
+```
 
 ### Start the web application
 ```bash
-  npm start
+   npm start
+```
+or alternatively run
+```bash
+   python3 -m flask run
 ```
 
 
