@@ -3,7 +3,7 @@
 A web application that simulates financial market trade setups, developed as my final project for the CS50x course.
 
 ## Video Demo
-**TODO**
+**[https://www.youtube.com/watch?v=BCfI9axqTiU](https://www.youtube.com/watch?v=BCfI9axqTiU)**
 
 ## Table of Contents
 - [General Info](#general-info)
