@@ -46,7 +46,7 @@ def index():
                         
             # Initialize portfolio dict, basically a bank account simulation
             portfolio = {"amount": initial_stocks, "price_bought": 0, "price_sold": float("inf"),
-                        "date_bought": 0, "balance": initial_balance, "symbol": symbol, "stoploss": 0, "takeprofit": 0}
+                        "date_bought": 0, "balance": initial_balance, "symbol": symbol}
 
             # Fetching data from yfinance
             full_df = get_stocks(symbol, period, interval)
