@@ -47,6 +47,6 @@
     <script>
         var graphData = JSON.parse(document.getElementById('graph-data').textContent);
 
-        Plotly.plot("chart", graphData, {});
+        Plotly.newPlot("chart", graphData.data, graphData.layout, {responsive: true});
     </script>
 {% endblock %}
