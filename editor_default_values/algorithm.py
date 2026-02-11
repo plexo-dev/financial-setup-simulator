@@ -29,7 +29,7 @@ def check_selling_conditions(df, price, portfolio, comission):
     Args:
         df (_pandas.core.frame.DataFrame_): _Pandas Data frame with fetched financial data_
         price (_float64_): _df["Close"].iloc[-1]_
-        portfolio (_dict_): _{"amount" : _int_, "price_bought" : _float64_, "balance" : _float64_, "symbol" : _str_, "stoploss" : _numpy.float64_, "takeprofit" : _numpy.float64_}_
+        portfolio (_dict_): _{"amount" : _int_, "price_bought" : _float64_, "balance" : _float64_, "symbol" : _str_}_
         comission (_float_): _The commission payed into the sells_
 
     Returns:
@@ -53,7 +53,7 @@ def check_buying_conditions(df, price, portfolio):
     Args:
         df (_pandas.core.frame.DataFrame_): _Pandas Data frame with fetched financial data_
         price (_float64_): _df["Close"].iloc[-1]_
-        portfolio (_dict_): _{"amount" : _int_, "price_bought" : _float64_, "balance" : _float64_, "symbol" : _str_, "stoploss" : _numpy.float64_, "takeprofit" : _numpy.float64_}_
+        portfolio (_dict_): _{"amount" : _int_, "price_bought" : _float64_, "balance" : _float64_, "symbol" : _str_}_
 
     Returns:
         _bool_: _returns wether the stocks sould be bought(True) or not(False)_
