@@ -1,0 +1,37 @@
+---
+description: Flask financial simulator stack conventions and skill routing
+alwaysApply: true
+---
+
+# Flask Stack Rules
+
+This app is a **Flask 3** + **Jinja2** + **Bootstrap 5** + **Plotly** financial trade setup simulator (CS50x final project).
+
+## Stack
+
+- Python 3.12, Flask, Pandas, yfinance, Plotly
+- Templates in `templates/`, static assets in `static/`
+- Custom user algorithms via `exec()` — prototype/local use only
+
+## Skills for this project
+
+Apply the matching project skill when the task touches its domain:
+
+- Run server / smoke test / demo flow → `flask-prototype`
+- Build / edit backtest algorithms (indicators, entries, exits) → `finance-algorithm`
+- Finance UI / trading charts / numbers / simulation output → `finance-ux`
+- Visual judgment / hierarchy / polish → `taste`
+- Accessibility / forms / tables / charts → `accessibility-review`
+- Screenshot QA / responsive checks → `visual-regression`
+
+## Conventions
+
+- Keep templates extending `layout.html`; blocks: `title`, `main`, `script`.
+- Plotly graph JSON is embedded in `backtest.html` via `{{ graph | safe }}`.
+- Default algorithm lives in `editor_default_values/algorithm.py`.
+- Prefer minimal, focused diffs — this is a small prototype, not a full rewrite.
+
+## Do not assume
+
+- No React, Next.js, TanStack Query, or shadcn in this repo.
+- No automated pytest suite unless one is added explicitly.

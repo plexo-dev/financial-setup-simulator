@@ -1,5 +1,44 @@
+import re
+
 import yfinance as yf
 import plotly.graph_objects as go
+
+B3_TICKER_PATTERN = re.compile(r"^[A-Z]{4}\d{1,2}\.SA$")
+
+# Common liquid B3 tickers (Yahoo Finance uses the .SA suffix).
+B3_SYMBOLS = (
+    "PETR4.SA",
+    "VALE3.SA",
+    "ITUB4.SA",
+    "BBDC4.SA",
+    "ABEV3.SA",
+    "WEGE3.SA",
+    "BBAS3.SA",
+    "RENT3.SA",
+    "B3SA3.SA",
+    "SUZB3.SA",
+)
+
+
+def normalize_b3_symbol(symbol):
+    symbol = str(symbol).strip().upper()
+    if not symbol.endswith(".SA"):
+        symbol = f"{symbol}.SA"
+    return symbol
+
+
+def is_b3_symbol(symbol):
+    return bool(B3_TICKER_PATTERN.fullmatch(symbol))
+
+
+def validate_b3_symbol(symbol):
+    normalized = normalize_b3_symbol(symbol)
+    if not is_b3_symbol(normalized):
+        raise ValueError(
+            "Only B3 (Bovespa) stocks are supported. "
+            "Use a ticker like PETR4.SA or VALE3.SA."
+        )
+    return normalized
 
 
 # get_stocks(symbol)
@@ -15,8 +54,10 @@ def get_stocks(symbol, period, interval):
         _<pandas.core.frame.DataFrame_: _Historical data and selected indicators pandas DataFrame_
     """
 
+    symbol = validate_b3_symbol(symbol)
+
     # Fetch data
-    ticker = yf.Ticker(symbol.upper())
+    ticker = yf.Ticker(symbol)
     df = ticker.history(period, interval)
 
     return df
@@ -91,6 +132,7 @@ def get_amount(lot_size, balance, price):
 
 
 def get_stock_name(symbol):
-    ticker = yf.Ticker(symbol.upper())
+    symbol = validate_b3_symbol(symbol)
+    ticker = yf.Ticker(symbol)
     name = ticker.info["longName"]
     return name

@@ -1,72 +1,51 @@
-# Algorythm for trend following using moving averages of 8 candles
+# SMA-8 trend follower — ATR trailing stop, multi-SMA trend filter
 import pandas as pd
+from algorithm_helpers import reluctant_entry
+
+
+def _atr(df, window=14):
+    prev = df["Close"].shift()
+    tr = pd.concat(
+        [df["High"] - df["Low"], (df["High"] - prev).abs(), (df["Low"] - prev).abs()],
+        axis=1,
+    ).max(axis=1)
+    return tr.ewm(alpha=1 / window, adjust=False).mean()
 
 
 def process_data(df):
-    """_preprocess data from a pandas dataframe for financial analysis_
-
-    Args:
-        df (_pandas.core.frame.DataFrame_): _{"Open": _float64_, "High": _float64_, "Low": _float64_, "Close": _float64_, "Volume": _int64_, "Dividends": _float64_, "Stock Splits": _float64_, }_
-
-    Returns:
-        _pandas.core.frame.DataFrame_: _Same df but with added columns_
-    """
-
-    # Fetch moving averages.
-
-    Moving_averages = [8]  # Moving averages to be calculed.
-    for i in Moving_averages:
-        df[f"sma{i}"] = df["Close"].rolling(window=i).mean()  # Calcules moving averages.
-    # Drop empty cells.
-    df = df.dropna()
-
-    return df
+    df["sma8"] = df["Close"].rolling(window=8).mean()
+    df["sma21"] = df["Close"].rolling(window=21).mean()
+    df["sma50"] = df["Close"].rolling(window=50).mean()
+    df["sma8_slope"] = df["sma8"].diff(2)
+    df["atr14"] = _atr(df)
+    df["high22"] = df["High"].rolling(window=22).max()
+    return df.dropna()
 
 
 def check_selling_conditions(df, price, portfolio, comission):
-    """_returns wether the stocks sould be selled(True) or not(False)_
-
-    Args:
-        df (_pandas.core.frame.DataFrame_): _Pandas Data frame with fetched financial data_
-        price (_float64_): _df["Close"].iloc[-1]_
-        portfolio (_dict_): _{"amount" : _int_, "price_bought" : _float64_, "balance" : _float64_, "symbol" : _str_}_
-        comission (_float_): _The commission payed into the sells_
-
-    Returns:
-        _bool_: _returns wether the stocks sould be selled(True) or not(False)_
-    """
-
-    # Checks if the price is smaller than the moving average of 8 candles.
-    # Signs a downtrend. Algorythm will try to leave operation.
-    if price < df["sma8"].iloc[-1]:
-        # Check if sell gives profit.
-        if price > (portfolio["price_bought"] * (1 + comission)):
-            # Sell stocks.
-            return True
-    # Don't sell stocks.
+    entry = portfolio["price_bought"]
+    if not entry:
+        return False
+    atr = df["atr14"].iloc[-1]
+    if price < entry - 3.0 * atr:
+        return True
+    trail = df["high22"].iloc[-1] - 2.5 * atr
+    if price < trail:
+        return True
+    if price < df["sma21"].iloc[-1]:
+        return True
     return False
 
 
 def check_buying_conditions(df, price, portfolio):
-    """_returns wether the stocks sould be bought(True) or not(False)_
-
-    Args:
-        df (_pandas.core.frame.DataFrame_): _Pandas Data frame with fetched financial data_
-        price (_float64_): _df["Close"].iloc[-1]_
-        portfolio (_dict_): _{"amount" : _int_, "price_bought" : _float64_, "balance" : _float64_, "symbol" : _str_}_
-
-    Returns:
-        _bool_: _returns wether the stocks sould be bought(True) or not(False)_
-    """
-    # Adjust the volatility for your time frame and stock
-    volatility = 1
-
-    # Checks if there is a uptrend (price is higher than moving average of 8 candles).
-    if price > df["sma8"].iloc[-1]:
-        # Check if previous sell won't be overriden or if the stocks went straight up
-        if price < (portfolio["price_sold"] * (1 - 0.1 * volatility)) or price > (portfolio["price_sold"] * (1 + 0.2 * volatility)):
-            # Buy stocks.
-            return True
-
-    # Don't buy stocks
-    return False
+    sma8 = df["sma8"].iloc[-1]
+    if price <= sma8 or df["sma8_slope"].iloc[-1] <= 0:
+        return reluctant_entry(False, portfolio)
+    if price < df["sma21"].iloc[-1] or price < df["sma50"].iloc[-1]:
+        return reluctant_entry(False, portfolio)
+    if price > sma8 * 1.035:
+        return reluctant_entry(False, portfolio)
+    sold = portfolio["price_sold"]
+    if sold != float("inf") and sold * 0.96 < price < sold * 1.05:
+        return reluctant_entry(False, portfolio)
+    return reluctant_entry(True, portfolio)
