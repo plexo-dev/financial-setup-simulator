@@ -5,6 +5,120 @@ body {
     margin-bottom: 7.5%;
 }
 
+.setup-header {
+    margin-top: 3em;
+}
+
+.loading-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.92);
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.loading-label {
+    margin-bottom: 1.5rem;
+    color: #495057;
+    font-size: 1.1rem;
+}
+
+.back-link {
+    text-decoration: none;
+    color: #212529;
+}
+
+.back-link:hover {
+    text-decoration: underline;
+}
+
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+}
+
+.bi-summary {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.bi-chart {
+    min-height: 360px;
+}
+
+.summary-card {
+    border: 1px solid #dee2e6;
+    border-radius: 0.5rem;
+    padding: 1rem 1.25rem;
+    background: #f8f9fa;
+}
+
+.summary-label {
+    display: block;
+    font-size: 0.85rem;
+    color: #6c757d;
+    margin-bottom: 0.25rem;
+}
+
+.summary-value {
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.gain-positive {
+    color: #198754;
+}
+
+.gain-negative {
+    color: #dc3545;
+}
+
+.chart {
+    min-height: 420px;
+}
+
+.log-buy td:first-child {
+    color: #dc3545;
+    font-weight: 600;
+}
+
+.log-sell td:first-child {
+    color: #198754;
+    font-weight: 600;
+}
+
+.log-summary td:first-child {
+    font-weight: 600;
+}
+
+.error-panel {
+    margin-top: 3em;
+}
+
+.error-message {
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-family: inherit;
+    font-size: 0.95rem;
+}
+
+@media (max-width: 768px) {
+    body {
+        margin-left: 5%;
+        margin-right: 5%;
+    }
+
+    .summary-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
 .code_editor {
     width: 50vw;
     height: 30vw;

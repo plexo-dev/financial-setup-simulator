@@ -1,0 +1,98 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Strategy Benchmark
+{% endblock %}
+
+{% block main %}
+    <nav class="backtest-nav mb-4">
+        <a href="/" class="back-link">← New simulation</a>
+        <span class="text-muted mx-2">·</span>
+        <a href="/bi?refresh=1" class="back-link">Refresh data</a>
+    </nav>
+
+    <header class="backtest-header mb-4">
+        <h1 class="fs-2 mb-1">Strategy benchmark</h1>
+        <p class="text-muted mb-0">{{ scenario }} · Historical simulation (not live trading)</p>
+        <p class="text-muted small mb-0">Last updated {{ generated_at }}</p>
+    </header>
+
+    <div class="summary-grid bi-summary mb-4">
+        <div class="summary-card">
+            <span class="summary-label">Tests run</span>
+            <span class="summary-value">{{ test_count }}</span>
+        </div>
+        <div class="summary-card">
+            <span class="summary-label">Algorithms</span>
+            <span class="summary-value">{{ algorithm_count }}</span>
+        </div>
+        <div class="summary-card">
+            <span class="summary-label">Avg simulated return</span>
+            <span class="summary-value {% if summary.avg_return_pct >= 0 %}gain-positive{% else %}gain-negative{% endif %}">
+                {{ "%.2f"|format(summary.avg_return_pct) }}%
+            </span>
+        </div>
+        <div class="summary-card">
+            <span class="summary-label">Best run</span>
+            <span class="summary-value gain-positive">{{ "%.2f"|format(summary.best_return_pct) }}%</span>
+        </div>
+        <div class="summary-card">
+            <span class="summary-label">Worst run</span>
+            <span class="summary-value gain-negative">{{ "%.2f"|format(summary.worst_return_pct) }}%</span>
+        </div>
+        <div class="summary-card">
+            <span class="summary-label">Profitable runs</span>
+            <span class="summary-value">{{ summary.positive_runs }} / {{ test_count }}</span>
+        </div>
+    </div>
+
+    <div id="return-chart" class="chart bi-chart mb-4" role="img" aria-label="Bar chart comparing simulated returns across test runs"></div>
+    <div id="algorithm-chart" class="chart bi-chart mb-5" role="img" aria-label="Bar chart comparing average return by algorithm"></div>
+
+    <section class="trade-log">
+        <h2 class="fs-4 mb-3">Test results (10 runs · 5 algorithms)</h2>
+        <div class="table-responsive">
+            <table class="table table-sm table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Algorithm</th>
+                        <th scope="col">Symbol</th>
+                        <th scope="col">Trades</th>
+                        <th scope="col">Portfolio value</th>
+                        <th scope="col">Simulated return</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in results %}
+                        <tr>
+                            <td>{{ row.test_id }}</td>
+                            <td>{{ row.algorithm }}</td>
+                            <td>{{ row.symbol }}</td>
+                            <td>{{ row.trade_count }} <span class="text-muted">({{ row.buys }}B / {{ row.sells }}S)</span></td>
+                            <td>${{ "{:,.2f}".format(row.total_value) }}</td>
+                            <td class="{% if row.return_pct >= 0 %}gain-positive{% else %}gain-negative{% endif %}">
+                                {% if row.status == "error" %}
+                                    <span class="text-danger">Error</span>
+                                {% else %}
+                                    {% if row.gain_amount >= 0 %}+{% endif %}${{ "{:,.2f}".format(row.gain_amount) }} ({{ "%.2f"|format(row.return_pct) }}%)
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <div id="chart-data" style="display:none;">{{ chart_data | safe }}</div>
+{% endblock %}
+
+{% block script %}
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script>
+        const chartData = JSON.parse(document.getElementById('chart-data').textContent);
+        Plotly.newPlot('return-chart', chartData.returns.data, chartData.returns.layout, {responsive: true});
+        Plotly.newPlot('algorithm-chart', chartData.algorithms.data, chartData.algorithms.layout, {responsive: true});
+    </script>
+{% endblock %}
