@@ -48,8 +48,196 @@ body {
     grid-template-columns: repeat(3, 1fr);
 }
 
+@media (min-width: 992px) {
+    .bi-summary {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
 .bi-chart {
     min-height: 360px;
+}
+
+.bi-accordion-toolbar h2 {
+    flex: 1;
+    min-width: 12rem;
+}
+
+.accordion-button {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.bi-test-title {
+    flex: 1;
+    text-align: left;
+}
+
+.bi-test-return {
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.bi-test-meta {
+    font-size: 0.95rem;
+}
+
+.bi-test-setup {
+    padding: 0.75rem 1rem;
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    background: #f8f9fa;
+}
+
+.bi-test-setup-grid {
+    display: grid;
+    gap: 0.65rem 1.25rem;
+    grid-template-columns: 1fr;
+}
+
+.bi-test-setup-item {
+    display: grid;
+    gap: 0.15rem;
+}
+
+.bi-test-setup-item dt {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: #6c757d;
+    margin: 0;
+}
+
+.bi-test-setup-item dd {
+    margin: 0;
+    font-size: 0.95rem;
+}
+
+@media (min-width: 768px) {
+    .bi-test-setup-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (min-width: 1200px) {
+    .bi-test-setup-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+.bi-test-chart {
+    min-height: 360px;
+}
+
+.algo-theory-grid {
+    display: grid;
+    gap: 0.85rem 1.25rem;
+    grid-template-columns: 1fr;
+}
+
+.algo-theory-item {
+    display: grid;
+    gap: 0.2rem;
+}
+
+.algo-theory-item dt {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: #6c757d;
+    margin: 0;
+}
+
+.algo-theory-item dd {
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+@media (min-width: 768px) {
+    .algo-theory-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .algo-theory-item:first-child {
+        grid-column: 1 / -1;
+    }
+}
+
+.algo-code-block {
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    overflow: hidden;
+    background: #fff;
+}
+
+.algo-code-block h4 {
+    padding: 0.65rem 1rem 0;
+    color: #495057;
+}
+
+.algo-code {
+    margin: 0;
+    padding: 1rem;
+    max-height: 28rem;
+    overflow: auto;
+    font-size: 0.8rem;
+    line-height: 1.45;
+    background: #212529;
+    color: #f8f9fa;
+    border-radius: 0;
+}
+
+.algo-perf-table th {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    color: #6c757d;
+}
+
+.bi-export-actions .btn {
+    white-space: nowrap;
+}
+
+.bi-export-chart-image {
+    display: block;
+    max-width: 100%;
+}
+
+.bi-compare-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+}
+
+.benchmark-ibov {
+    color: #6f42c1;
+    font-weight: 600;
+}
+
+.benchmark-buyhold {
+    color: #fd7e14;
+    font-weight: 600;
+}
+
+.benchmark-dollar {
+    color: #20c997;
+    font-weight: 600;
+}
+
+@media (min-width: 768px) {
+    .bi-compare-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (min-width: 1200px) {
+    .bi-compare-grid {
+        grid-template-columns: repeat(5, 1fr);
+    }
 }
 
 .summary-card {
@@ -77,6 +265,27 @@ body {
 
 .gain-negative {
     color: #dc3545;
+}
+
+.position-bought {
+    color: #dc3545;
+    font-weight: 600;
+}
+
+.position-sold {
+    color: #198754;
+    font-weight: 600;
+}
+
+.position-neutral {
+    color: #6c757d;
+    font-weight: 600;
+}
+
+.bi-test-position {
+    font-size: 0.85rem;
+    font-weight: 600;
+    white-space: nowrap;
 }
 
 .chart {

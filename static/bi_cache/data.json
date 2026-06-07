@@ -1,0 +1,2756 @@
+{
+  "benchmark_version": 9,
+  "generated_at": "2026-06-07 19:12 UTC",
+  "market": "B3 (Bovespa)",
+  "scenario": "B3 \u00b7 5 algorithms \u00d7 10 stocks \u00b7 1y / 1d \u00b7 R$ 10,000 starting balance",
+  "test_count": 50,
+  "algorithm_count": 5,
+  "stock_count": 10,
+  "period": "1y",
+  "interval": "1d",
+  "summary": {
+    "best_return_pct": 21.24169297637938,
+    "worst_return_pct": -12.283844668292986,
+    "avg_return_pct": 1.2175720763435358,
+    "avg_buy_hold_pct": 2.1758776655197143,
+    "ibovespa_return_pct": 24.063389999706388,
+    "dollar_return_pct": -8.53856072580912,
+    "avg_vs_buy_hold_pct": -0.9583055891761787,
+    "beat_buy_hold_count": 25,
+    "beat_ibovespa_count": 0,
+    "beat_dollar_count": 48,
+    "positive_runs": 20
+  },
+  "market_benchmark": {
+    "name": "Ibovespa",
+    "symbol": "^BVSP",
+    "period": "1y",
+    "interval": "1d",
+    "buy_hold_total_value": 12406.338999970638,
+    "buy_hold_gain_amount": 2406.3389999706387,
+    "buy_hold_return_pct": 24.063389999706388,
+    "buy_hold_shares": 0,
+    "buy_hold_entry_price": 136236.0,
+    "buy_hold_exit_price": 169019.0
+  },
+  "dollar_benchmark": {
+    "name": "USD/BRL",
+    "symbol": "USDBRL=X",
+    "period": "1y",
+    "interval": "1d",
+    "buy_hold_total_value": 9146.143927419089,
+    "buy_hold_gain_amount": -853.856072580912,
+    "buy_hold_return_pct": -8.53856072580912,
+    "buy_hold_shares": 0,
+    "buy_hold_entry_price": 5.6321001052856445,
+    "buy_hold_exit_price": 5.151199817657471
+  },
+  "results": [
+    {
+      "test_id": 1,
+      "algorithm": "SMA-8 trend",
+      "symbol": "ITUB4.SA",
+      "status": "ok",
+      "vs_ibovespa_pct": -15.16256875107968,
+      "vs_dollar_pct": 17.439381974435825,
+      "name": "Ita\u00fa Unibanco Holding S.A.",
+      "period": "1y",
+      "interval": "1d",
+      "period_start": "2025-06-05",
+      "period_end": "2026-06-05",
+      "initial_balance": 10000.0,
+      "total_value": 10890.08212486267,
+      "gain_amount": 890.0821248626708,
+      "return_pct": 8.900821248626707,
+      "trade_count": 8,
+      "buys": 4,
+      "sells": 4,
+      "final_shares": 0,
+      "final_balance": 10890.08212486267,
+      "final_position": "Sold",
+      "vs_buy_hold_pct": -10.776006143951419,
+      "buy_hold_total_value": 11967.682739257812,
+      "buy_hold_gain_amount": 1967.6827392578125,
+      "buy_hold_return_pct": 19.676827392578126,
+      "buy_hold_shares": 308,
+      "buy_hold_entry_price": 32.44142150878906,
+      "buy_hold_exit_price": 38.83000183105469,
+      "output": [
+        {
+          "Action": "Buy",
+          "Message": "Bought at 33.79; balance: 2532.62"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 33.92; balance: 9952.95"
+        },
+        {
+          "Action": "Buy",
+          "Message": "Bought at 35.71; balance: 2489.61"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 36.16; balance: 9971.81"
+        },
+        {
+          "Action": "Buy",
+          "Message": "Bought at 38.36; balance: 2530.48"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 37.49; balance: 9729.89"
+        },
+        {
+          "Action": "Buy",
+          "Message": "Bought at 39.55; balance: 2452.66"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 46.32; balance: 10890.08"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Final position: Sold (0 shares, cash R$ 10890.08)"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Buy & hold: R$ 1967.68 (19.68%) \u00b7 Strategy vs buy & hold: -10.78 pp"
+        }
+      ],
+      "graph_path": "static/bi_cache/graphs/1.json"
+    },
+    {
+      "test_id": 2,
+      "algorithm": "SMA-8 trend",
+      "symbol": "BBDC4.SA",
+      "status": "ok",
+      "vs_ibovespa_pct": -16.68293193829738,
+      "vs_dollar_pct": 15.919018787218128,
+      "name": "Banco Bradesco S.A.",
+      "period": "1y",
+      "interval": "1d",
+      "period_start": "2025-06-05",
+      "period_end": "2026-06-05",
+      "initial_balance": 10000.0,
+      "total_value": 10738.0458061409,
+      "gain_amount": 738.0458061409008,
+      "return_pct": 7.380458061409008,
+      "trade_count": 6,
+      "buys": 3,
+      "sells": 3,
+      "final_shares": 0,
+      "final_balance": 10738.0458061409,
+      "final_position": "Sold",
+      "vs_buy_hold_pct": -11.540037925529468,
+      "buy_hold_total_value": 11892.049598693848,
+      "buy_hold_gain_amount": 1892.0495986938477,
+      "buy_hold_return_pct": 18.920495986938477,
+      "buy_hold_shares": 680,
+      "buy_hold_entry_price": 14.687573432922363,
+      "buy_hold_exit_price": 17.469999313354492,
+      "output": [
+        {
+          "Action": "Buy",
+          "Message": "Bought at 15.02; balance: 2502.82"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 16.36; balance: 10582.61"
+        },
+        {
+          "Action": "Buy",
+          "Message": "Bought at 17.20; balance: 2654.70"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 17.99; balance: 10865.40"
+        },
+        {
+          "Action": "Buy",
+          "Message": "Bought at 20.88; balance: 2721.85"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 20.76; balance: 10738.05"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Final position: Sold (0 shares, cash R$ 10738.05)"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Buy & hold: R$ 1892.05 (18.92%) \u00b7 Strategy vs buy & hold: -11.54 pp"
+        }
+      ],
+      "graph_path": "static/bi_cache/graphs/2.json"
+    },
+    {
+      "test_id": 3,
+      "algorithm": "SMA-8 trend",
+      "symbol": "RADL3.SA",
+      "status": "ok",
+      "vs_ibovespa_pct": -12.978602152759677,
+      "vs_dollar_pct": 19.62334857275583,
+      "name": "Raia Drogasil S.A.",
+      "period": "1y",
+      "interval": "1d",
+      "period_start": "2025-06-05",
+      "period_end": "2026-06-05",
+      "initial_balance": 10000.0,
+      "total_value": 11108.478784694671,
+      "gain_amount": 1108.478784694671,
+      "return_pct": 11.08478784694671,
+      "trade_count": 10,
+      "buys": 5,
+      "sells": 5,
+      "final_shares": 0,
+      "final_balance": 11108.478784694671,
+      "final_position": "Sold",
+      "vs_buy_hold_pct": -10.390607164955142,
+      "buy_hold_total_value": 12147.539501190186,
+      "buy_hold_gain_amount": 2147.5395011901855,
+      "buy_hold_return_pct": 21.475395011901853,
+      "buy_hold_shares": 695,
+      "buy_hold_entry_price": 14.370014190673828,
+      "buy_hold_exit_price": 17.459999084472656,
+      "output": [
+        {
+          "Action": "Buy",
+          "Message": "Bought at 16.97; balance: 2515.13"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 16.79; balance: 9845.07"
+        },
+        {
+          "Action": "Buy",
+          "Message": "Bought at 17.67; balance: 2477.67"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 17.02; balance: 9504.35"
+        },
+        {
+          "Action": "Buy",
+          "Message": "Bought at 18.15; balance: 2388.66"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 22.19; balance: 10998.65"
+        },
+        {
+          "Action": "Buy",
+          "Message": "Bought at 23.34; balance: 2759.92"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 22.93; balance: 10772.93"
+        },
+        {
+          "Action": "Buy",
+          "Message": "Bought at 24.08; balance: 2704.50"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 25.34; balance: 11108.48"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Final position: Sold (0 shares, cash R$ 11108.48)"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Buy & hold: R$ 2147.54 (21.48%) \u00b7 Strategy vs buy & hold: -10.39 pp"
+        }
+      ],
+      "graph_path": "static/bi_cache/graphs/3.json"
+    },
+    {
+      "test_id": 4,
+      "algorithm": "SMA-8 trend",
+      "symbol": "WEGE3.SA",
+      "status": "ok",
+      "vs_ibovespa_pct": -15.256556719524498,
+      "vs_dollar_pct": 17.34539400599101,
+      "name": "WEG S.A.",
+      "period": "1y",
+      "interval": "1d",
+      "period_start": "2025-06-05",
+      "period_end": "2026-06-05",
+      "initial_balance": 10000.0,
+      "total_value": 10880.683328018189,
+      "gain_amount": 880.6833280181891,
+      "return_pct": 8.80683328018189,
+      "trade_count": 6,
+      "buys": 3,
+      "sells": 3,
+      "final_shares": 0,
+      "final_balance": 10880.683328018189,
+      "final_position": "Sold",
+      "vs_buy_hold_pct": 4.142607816314702,
+      "buy_hold_total_value": 10466.422546386719,
+      "buy_hold_gain_amount": 466.42254638671875,
+      "buy_hold_return_pct": 4.664225463867187,
+      "buy_hold_shares": 246,
+      "buy_hold_entry_price": 40.56397247314453,
+      "buy_hold_exit_price": 42.459999084472656,
+      "output": [
+        {
+          "Action": "Buy",
+          "Message": "Bought at 35.83; balance: 2511.45"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 42.35; balance: 11274.32"
+        },
+        {
+          "Action": "Buy",
+          "Message": "Bought at 48.59; balance: 2819.67"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 47.60; balance: 11018.57"
+        },
+        {
+          "Action": "Buy",
+          "Message": "Bought at 51.61; balance: 2761.40"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 51.26; balance: 10880.68"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Final position: Sold (0 shares, cash R$ 10880.68)"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Buy & hold: R$ 466.42 (4.66%) \u00b7 Strategy vs buy & hold: +4.14 pp"
+        }
+      ],
+      "graph_path": "static/bi_cache/graphs/4.json"
+    },
+    {
+      "test_id": 5,
+      "algorithm": "SMA-8 trend",
+      "symbol": "ABEV3.SA",
+      "status": "ok",
+      "vs_ibovespa_pct": -20.50940911820614,
+      "vs_dollar_pct": 12.092541607309366,
+      "name": "Ambev S.A.",
+      "period": "1y",
+      "interval": "1d",
+      "period_start": "2025-06-05",
+      "period_end": "2026-06-05",
+      "initial_balance": 10000.0,
+      "total_value": 10355.398088150025,
+      "gain_amount": 355.3980881500247,
+      "return_pct": 3.5539808815002467,
+      "trade_count": 8,
+      "buys": 4,
+      "sells": 4,
+      "final_shares": 0,
+      "final_balance": 10355.398088150025,
+      "final_position": "Sold",
+      "vs_buy_hold_pct": -18.383671611022944,
+      "buy_hold_total_value": 12193.76524925232,
+      "buy_hold_gain_amount": 2193.7652492523193,
+      "buy_hold_return_pct": 21.937652492523192,
+      "buy_hold_shares": 754,
+      "buy_hold_entry_price": 13.260497093200684,
+      "buy_hold_exit_price": 16.170000076293945,
+      "output": [
+        {
+          "Action": "Buy",
+          "Message": "Bought at 12.15; balance: 2502.54"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 11.56; balance: 9562.95"
+        },
+        {
+          "Action": "Buy",
+          "Message": "Bought at 12.51; balance: 2397.47"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 13.01; balance: 9778.74"
+        },
+        {
+          "Action": "Buy",
+          "Message": "Bought at 13.72; balance: 2452.26"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 15.57; balance: 10683.50"
+        },
+        {
+          "Action": "Buy",
+          "Message": "Bought at 16.59; balance: 2687.12"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 16.07; balance: 10355.40"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Final position: Sold (0 shares, cash R$ 10355.40)"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Buy & hold: R$ 2193.77 (21.94%) \u00b7 Strategy vs buy & hold: -18.38 pp"
+        }
+      ],
+      "graph_path": "static/bi_cache/graphs/5.json"
+    },
+    {
+      "test_id": 6,
+      "algorithm": "SMA-8 trend",
+      "symbol": "BBAS3.SA",
+      "status": "ok",
+      "vs_ibovespa_pct": -30.463940108616015,
+      "vs_dollar_pct": 2.138010616899491,
+      "name": "Banco do Brasil S.A.",
+      "period": "1y",
+      "interval": "1d",
+      "period_start": "2025-06-05",
+      "period_end": "2026-06-05",
+      "initial_balance": 10000.0,
+      "total_value": 9359.944989109037,
+      "gain_amount": -640.0550108909629,
+      "return_pct": -6.400550108909629,
+      "trade_count": 8,
+      "buys": 4,
+      "sells": 4,
+      "final_shares": 0,
+      "final_balance": 9359.944989109037,
+      "final_position": "Sold",
+      "vs_buy_hold_pct": 5.376412552833536,
+      "buy_hold_total_value": 8822.303733825684,
+      "buy_hold_gain_amount": -1177.6962661743164,
+      "buy_hold_return_pct": -11.776962661743164,
+      "buy_hold_shares": 460,
+      "buy_hold_entry_price": 21.730209350585938,
+      "buy_hold_exit_price": 19.170000076293945,
+      "output": [
+        {
+          "Action": "Buy",
+          "Message": "Bought at 20.16; balance: 2501.55"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 21.26; balance: 10331.63"
+        },
+        {
+          "Action": "Buy",
+          "Message": "Bought at 22.37; balance: 2593.24"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 21.38; balance: 9916.21"
+        },
+        {
+          "Action": "Buy",
+          "Message": "Bought at 24.77; balance: 2484.58"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 23.90; balance: 9582.26"
+        },
+        {
+          "Action": "Buy",
+          "Message": "Bought at 25.36; balance: 2404.97"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 24.82; balance: 9359.94"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Final position: Sold (0 shares, cash R$ 9359.94)"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Buy & hold: R$ -1177.70 (-11.78%) \u00b7 Strategy vs buy & hold: +5.38 pp"
+        }
+      ],
+      "graph_path": "static/bi_cache/graphs/6.json"
+    },
+    {
+      "test_id": 7,
+      "algorithm": "SMA-8 trend",
+      "symbol": "RENT3.SA",
+      "status": "ok",
+      "vs_ibovespa_pct": -17.72736354859554,
+      "vs_dollar_pct": 14.874587176919967,
+      "name": "Localiza Rent a Car S.A.",
+      "period": "1y",
+      "interval": "1d",
+      "period_start": "2025-06-05",
+      "period_end": "2026-06-05",
+      "initial_balance": 10000.0,
+      "total_value": 10633.602645111085,
+      "gain_amount": 633.6026451110847,
+      "return_pct": 6.336026451110848,
+      "trade_count": 10,
+      "buys": 5,
+      "sells": 5,
+      "final_shares": 0,
+      "final_balance": 10633.602645111085,
+      "final_position": "Sold",
+      "vs_buy_hold_pct": 9.909144279479989,
+      "buy_hold_total_value": 9642.688217163086,
+      "buy_hold_gain_amount": -357.31178283691406,
+      "buy_hold_return_pct": -3.5731178283691407,
+      "buy_hold_shares": 237,
+      "buy_hold_entry_price": 42.087646484375,
+      "buy_hold_exit_price": 40.58000183105469,
+      "output": [
+        {
+          "Action": "Buy",
+          "Message": "Bought at 35.06; balance: 2532.22"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 37.33; balance: 10404.31"
+        },
+        {
+          "Action": "Buy",
+          "Message": "Bought at 39.95; balance: 2614.22"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 43.95; balance: 11099.51"
+        },
+        {
+          "Action": "Buy",
+          "Message": "Bought at 46.39; balance: 2796.42"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 44.25; balance: 10637.42"
+        },
+        {
+          "Action": "Buy",
+          "Message": "Bought at 49.48; balance: 2670.96"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 49.87; balance: 10619.19"
+        },
+        {
+          "Action": "Buy",
+          "Message": "Bought at 47.75; balance: 2692.69"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 48.32; balance: 10633.60"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Final position: Sold (0 shares, cash R$ 10633.60)"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Buy & hold: R$ -357.31 (-3.57%) \u00b7 Strategy vs buy & hold: +9.91 pp"
+        }
+      ],
+      "graph_path": "static/bi_cache/graphs/7.json"
+    },
+    {
+      "test_id": 8,
+      "algorithm": "SMA-8 trend",
+      "symbol": "LREN3.SA",
+      "status": "ok",
+      "vs_ibovespa_pct": -32.51597875312055,
+      "vs_dollar_pct": 0.08597197239495458,
+      "name": "Lojas Renner S.A.",
+      "period": "1y",
+      "interval": "1d",
+      "period_start": "2025-06-05",
+      "period_end": "2026-06-05",
+      "initial_balance": 10000.0,
+      "total_value": 9154.741124658583,
+      "gain_amount": -845.2588753414166,
+      "return_pct": -8.452588753414165,
+      "trade_count": 6,
+      "buys": 3,
+      "sells": 3,
+      "final_shares": 0,
+      "final_balance": 9154.741124658583,
+      "final_position": "Sold",
+      "vs_buy_hold_pct": 6.100452542591082,
+      "buy_hold_total_value": 8544.695870399475,
+      "buy_hold_gain_amount": -1455.304129600525,
+      "buy_hold_return_pct": -14.553041296005247,
+      "buy_hold_shares": 573,
+      "buy_hold_entry_price": 17.429798126220703,
+      "buy_hold_exit_price": 14.890000343322754,
+      "output": [
+        {
+          "Action": "Buy",
+          "Message": "Bought at 16.18; balance: 2507.10"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 15.56; balance: 9640.10"
+        },
+        {
+          "Action": "Buy",
+          "Message": "Bought at 14.70; balance: 2420.97"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 14.59; balance: 9511.34"
+        },
+        {
+          "Action": "Buy",
+          "Message": "Bought at 15.37; balance: 2380.32"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 14.75; balance: 9154.74"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Final position: Sold (0 shares, cash R$ 9154.74)"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Buy & hold: R$ -1455.30 (-14.55%) \u00b7 Strategy vs buy & hold: +6.10 pp"
+        }
+      ],
+      "graph_path": "static/bi_cache/graphs/8.json"
+    },
+    {
+      "test_id": 9,
+      "algorithm": "SMA-8 trend",
+      "symbol": "CYRE3.SA",
+      "status": "ok",
+      "vs_ibovespa_pct": -22.20388196690762,
+      "vs_dollar_pct": 10.398068758607888,
+      "name": "Cyrela Brazil Realty S.A. Empreendimentos e Participa\u00e7\u00f5es",
+      "period": "1y",
+      "interval": "1d",
+      "period_start": "2025-06-05",
+      "period_end": "2026-06-05",
+      "initial_balance": 10000.0,
+      "total_value": 10185.950803279877,
+      "gain_amount": 185.9508032798767,
+      "return_pct": 1.8595080327987672,
+      "trade_count": 8,
+      "buys": 4,
+      "sells": 4,
+      "final_shares": 0,
+      "final_balance": 10185.950803279877,
+      "final_position": "Sold",
+      "vs_buy_hold_pct": 17.508831496238706,
+      "buy_hold_total_value": 8435.067653656006,
+      "buy_hold_gain_amount": -1564.9323463439941,
+      "buy_hold_return_pct": -15.64932346343994,
+      "buy_hold_shares": 425,
+      "buy_hold_entry_price": 23.51219367980957,
+      "buy_hold_exit_price": 19.829999923706055,
+      "output": [
+        {
+          "Action": "Buy",
+          "Message": "Bought at 23.79; balance: 2506.53"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 22.93; balance: 9657.65"
+        },
+        {
+          "Action": "Buy",
+          "Message": "Bought at 25.60; balance: 2439.58"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 27.67; balance: 10164.66"
+        },
+        {
+          "Action": "Buy",
+          "Message": "Bought at 31.29; balance: 2560.15"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 31.81; balance: 10212.83"
+        },
+        {
+          "Action": "Buy",
+          "Message": "Bought at 30.51; balance: 2554.82"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 30.71; balance: 10185.95"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Final position: Sold (0 shares, cash R$ 10185.95)"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Buy & hold: R$ -1564.93 (-15.65%) \u00b7 Strategy vs buy & hold: +17.51 pp"
+        }
+      ],
+      "graph_path": "static/bi_cache/graphs/9.json"
+    },
+    {
+      "test_id": 10,
+      "algorithm": "SMA-8 trend",
+      "symbol": "SUZB3.SA",
+      "status": "ok",
+      "vs_ibovespa_pct": -32.93415100167478,
+      "vs_dollar_pct": -0.3322002761592664,
+      "name": "Suzano S.A.",
+      "period": "1y",
+      "interval": "1d",
+      "period_start": "2025-06-05",
+      "period_end": "2026-06-05",
+      "initial_balance": 10000.0,
+      "total_value": 9112.923899803161,
+      "gain_amount": -887.0761001968385,
+      "return_pct": -8.870761001968386,
+      "trade_count": 8,
+      "buys": 4,
+      "sells": 4,
+      "final_shares": 0,
+      "final_balance": 9112.923899803161,
+      "final_position": "Sold",
+      "vs_buy_hold_pct": 10.492636329269406,
+      "buy_hold_total_value": 8063.660266876221,
+      "buy_hold_gain_amount": -1936.3397331237793,
+      "buy_hold_return_pct": -19.363397331237792,
+      "buy_hold_shares": 193,
+      "buy_hold_entry_price": 51.772850036621094,
+      "buy_hold_exit_price": 41.7400016784668,
+      "output": [
+        {
+          "Action": "Buy",
+          "Message": "Bought at 52.76; balance: 2507.89"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 51.37; balance: 9729.71"
+        },
+        {
+          "Action": "Buy",
+          "Message": "Bought at 47.91; balance: 2447.84"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 47.67; balance: 9621.55"
+        },
+        {
+          "Action": "Buy",
+          "Message": "Bought at 51.67; balance: 2438.76"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 49.93; balance: 9310.30"
+        },
+        {
+          "Action": "Buy",
+          "Message": "Bought at 56.85; balance: 2374.08"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 55.79; balance: 9112.92"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Final position: Sold (0 shares, cash R$ 9112.92)"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Buy & hold: R$ -1936.34 (-19.36%) \u00b7 Strategy vs buy & hold: +10.49 pp"
+        }
+      ],
+      "graph_path": "static/bi_cache/graphs/10.json"
+    },
+    {
+      "test_id": 11,
+      "algorithm": "SMA-20 trend",
+      "symbol": "ITUB4.SA",
+      "status": "ok",
+      "vs_ibovespa_pct": -21.888713304454914,
+      "vs_dollar_pct": 10.713237421060594,
+      "name": "Ita\u00fa Unibanco Holding S.A.",
+      "period": "1y",
+      "interval": "1d",
+      "period_start": "2025-06-05",
+      "period_end": "2026-06-05",
+      "initial_balance": 10000.0,
+      "total_value": 10217.467669525147,
+      "gain_amount": 217.46766952514736,
+      "return_pct": 2.1746766952514736,
+      "trade_count": 2,
+      "buys": 1,
+      "sells": 1,
+      "final_shares": 0,
+      "final_balance": 10217.467669525147,
+      "final_position": "Sold",
+      "vs_buy_hold_pct": -17.502150697326652,
+      "buy_hold_total_value": 11967.682739257812,
+      "buy_hold_gain_amount": 1967.6827392578125,
+      "buy_hold_return_pct": 19.676827392578126,
+      "buy_hold_shares": 308,
+      "buy_hold_entry_price": 32.44142150878906,
+      "buy_hold_exit_price": 38.83000183105469,
+      "output": [
+        {
+          "Action": "Buy",
+          "Message": "Bought at 32.98; balance: 2512.68"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 34.28; balance: 10217.47"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Final position: Sold (0 shares, cash R$ 10217.47)"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Buy & hold: R$ 1967.68 (19.68%) \u00b7 Strategy vs buy & hold: -17.50 pp"
+        }
+      ],
+      "graph_path": "static/bi_cache/graphs/11.json"
+    },
+    {
+      "test_id": 12,
+      "algorithm": "SMA-20 trend",
+      "symbol": "BBDC4.SA",
+      "status": "ok",
+      "vs_ibovespa_pct": -21.232773865062835,
+      "vs_dollar_pct": 11.36917686045267,
+      "name": "Banco Bradesco S.A.",
+      "period": "1y",
+      "interval": "1d",
+      "period_start": "2025-06-05",
+      "period_end": "2026-06-05",
+      "initial_balance": 10000.0,
+      "total_value": 10283.061613464355,
+      "gain_amount": 283.0616134643551,
+      "return_pct": 2.830616134643551,
+      "trade_count": 2,
+      "buys": 1,
+      "sells": 1,
+      "final_shares": 0,
+      "final_balance": 10283.061613464355,
+      "final_position": "Sold",
+      "vs_buy_hold_pct": -16.089879852294924,
+      "buy_hold_total_value": 11892.049598693848,
+      "buy_hold_gain_amount": 1892.0495986938477,
+      "buy_hold_return_pct": 18.920495986938477,
+      "buy_hold_shares": 680,
+      "buy_hold_entry_price": 14.687573432922363,
+      "buy_hold_exit_price": 17.469999313354492,
+      "output": [
+        {
+          "Action": "Buy",
+          "Message": "Bought at 15.51; balance: 2508.07"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 16.26; balance: 10283.06"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Final position: Sold (0 shares, cash R$ 10283.06)"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Buy & hold: R$ 1892.05 (18.92%) \u00b7 Strategy vs buy & hold: -16.09 pp"
+        }
+      ],
+      "graph_path": "static/bi_cache/graphs/12.json"
+    },
+    {
+      "test_id": 13,
+      "algorithm": "SMA-20 trend",
+      "symbol": "RADL3.SA",
+      "status": "ok",
+      "vs_ibovespa_pct": -24.063389999706388,
+      "vs_dollar_pct": 8.53856072580912,
+      "name": "Raia Drogasil S.A.",
+      "period": "1y",
+      "interval": "1d",
+      "period_start": "2025-06-05",
+      "period_end": "2026-06-05",
+      "initial_balance": 10000.0,
+      "total_value": 10000.0,
+      "gain_amount": 0.0,
+      "return_pct": 0.0,
+      "trade_count": 0,
+      "buys": 0,
+      "sells": 0,
+      "final_shares": 0,
+      "final_balance": 10000.0,
+      "final_position": "Neutral",
+      "vs_buy_hold_pct": -21.475395011901853,
+      "buy_hold_total_value": 12147.539501190186,
+      "buy_hold_gain_amount": 2147.5395011901855,
+      "buy_hold_return_pct": 21.475395011901853,
+      "buy_hold_shares": 695,
+      "buy_hold_entry_price": 14.370014190673828,
+      "buy_hold_exit_price": 17.459999084472656,
+      "output": [
+        {
+          "Action": "Summary",
+          "Message": "Final position: Neutral (0 shares, cash R$ 10000.00)"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Buy & hold: R$ 2147.54 (21.48%) \u00b7 Strategy vs buy & hold: -21.48 pp"
+        }
+      ],
+      "graph_path": "static/bi_cache/graphs/13.json"
+    },
+    {
+      "test_id": 14,
+      "algorithm": "SMA-20 trend",
+      "symbol": "WEGE3.SA",
+      "status": "ok",
+      "vs_ibovespa_pct": -24.063389999706388,
+      "vs_dollar_pct": 8.53856072580912,
+      "name": "WEG S.A.",
+      "period": "1y",
+      "interval": "1d",
+      "period_start": "2025-06-05",
+      "period_end": "2026-06-05",
+      "initial_balance": 10000.0,
+      "total_value": 10000.0,
+      "gain_amount": 0.0,
+      "return_pct": 0.0,
+      "trade_count": 0,
+      "buys": 0,
+      "sells": 0,
+      "final_shares": 0,
+      "final_balance": 10000.0,
+      "final_position": "Neutral",
+      "vs_buy_hold_pct": -4.664225463867187,
+      "buy_hold_total_value": 10466.422546386719,
+      "buy_hold_gain_amount": 466.42254638671875,
+      "buy_hold_return_pct": 4.664225463867187,
+      "buy_hold_shares": 246,
+      "buy_hold_entry_price": 40.56397247314453,
+      "buy_hold_exit_price": 42.459999084472656,
+      "output": [
+        {
+          "Action": "Summary",
+          "Message": "Final position: Neutral (0 shares, cash R$ 10000.00)"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Buy & hold: R$ 466.42 (4.66%) \u00b7 Strategy vs buy & hold: -4.66 pp"
+        }
+      ],
+      "graph_path": "static/bi_cache/graphs/14.json"
+    },
+    {
+      "test_id": 15,
+      "algorithm": "SMA-20 trend",
+      "symbol": "ABEV3.SA",
+      "status": "ok",
+      "vs_ibovespa_pct": -24.063389999706388,
+      "vs_dollar_pct": 8.53856072580912,
+      "name": "Ambev S.A.",
+      "period": "1y",
+      "interval": "1d",
+      "period_start": "2025-06-05",
+      "period_end": "2026-06-05",
+      "initial_balance": 10000.0,
+      "total_value": 10000.0,
+      "gain_amount": 0.0,
+      "return_pct": 0.0,
+      "trade_count": 0,
+      "buys": 0,
+      "sells": 0,
+      "final_shares": 0,
+      "final_balance": 10000.0,
+      "final_position": "Neutral",
+      "vs_buy_hold_pct": -21.937652492523192,
+      "buy_hold_total_value": 12193.76524925232,
+      "buy_hold_gain_amount": 2193.7652492523193,
+      "buy_hold_return_pct": 21.937652492523192,
+      "buy_hold_shares": 754,
+      "buy_hold_entry_price": 13.260497093200684,
+      "buy_hold_exit_price": 16.170000076293945,
+      "output": [
+        {
+          "Action": "Summary",
+          "Message": "Final position: Neutral (0 shares, cash R$ 10000.00)"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Buy & hold: R$ 2193.77 (21.94%) \u00b7 Strategy vs buy & hold: -21.94 pp"
+        }
+      ],
+      "graph_path": "static/bi_cache/graphs/15.json"
+    },
+    {
+      "test_id": 16,
+      "algorithm": "SMA-20 trend",
+      "symbol": "BBAS3.SA",
+      "status": "ok",
+      "vs_ibovespa_pct": -23.892110086376317,
+      "vs_dollar_pct": 8.709840639139193,
+      "name": "Banco do Brasil S.A.",
+      "period": "1y",
+      "interval": "1d",
+      "period_start": "2025-06-05",
+      "period_end": "2026-06-05",
+      "initial_balance": 10000.0,
+      "total_value": 10017.127991333007,
+      "gain_amount": 17.12799133300723,
+      "return_pct": 0.1712799133300723,
+      "trade_count": 2,
+      "buys": 1,
+      "sells": 1,
+      "final_shares": 0,
+      "final_balance": 10017.127991333007,
+      "final_position": "Sold",
+      "vs_buy_hold_pct": 11.948242575073238,
+      "buy_hold_total_value": 8822.303733825684,
+      "buy_hold_gain_amount": -1177.6962661743164,
+      "buy_hold_return_pct": -11.776962661743164,
+      "buy_hold_shares": 460,
+      "buy_hold_entry_price": 21.730209350585938,
+      "buy_hold_exit_price": 19.170000076293945,
+      "output": [
+        {
+          "Action": "Buy",
+          "Message": "Bought at 20.47; balance: 2508.06"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 20.72; balance: 10017.13"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Final position: Sold (0 shares, cash R$ 10017.13)"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Buy & hold: R$ -1177.70 (-11.78%) \u00b7 Strategy vs buy & hold: +11.95 pp"
+        }
+      ],
+      "graph_path": "static/bi_cache/graphs/16.json"
+    },
+    {
+      "test_id": 17,
+      "algorithm": "SMA-20 trend",
+      "symbol": "RENT3.SA",
+      "status": "ok",
+      "vs_ibovespa_pct": -24.063389999706388,
+      "vs_dollar_pct": 8.53856072580912,
+      "name": "Localiza Rent a Car S.A.",
+      "period": "1y",
+      "interval": "1d",
+      "period_start": "2025-06-05",
+      "period_end": "2026-06-05",
+      "initial_balance": 10000.0,
+      "total_value": 10000.0,
+      "gain_amount": 0.0,
+      "return_pct": 0.0,
+      "trade_count": 0,
+      "buys": 0,
+      "sells": 0,
+      "final_shares": 0,
+      "final_balance": 10000.0,
+      "final_position": "Neutral",
+      "vs_buy_hold_pct": 3.5731178283691407,
+      "buy_hold_total_value": 9642.688217163086,
+      "buy_hold_gain_amount": -357.31178283691406,
+      "buy_hold_return_pct": -3.5731178283691407,
+      "buy_hold_shares": 237,
+      "buy_hold_entry_price": 42.087646484375,
+      "buy_hold_exit_price": 40.58000183105469,
+      "output": [
+        {
+          "Action": "Summary",
+          "Message": "Final position: Neutral (0 shares, cash R$ 10000.00)"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Buy & hold: R$ -357.31 (-3.57%) \u00b7 Strategy vs buy & hold: +3.57 pp"
+        }
+      ],
+      "graph_path": "static/bi_cache/graphs/17.json"
+    },
+    {
+      "test_id": 18,
+      "algorithm": "SMA-20 trend",
+      "symbol": "LREN3.SA",
+      "status": "ok",
+      "vs_ibovespa_pct": -24.063389999706388,
+      "vs_dollar_pct": 8.53856072580912,
+      "name": "Lojas Renner S.A.",
+      "period": "1y",
+      "interval": "1d",
+      "period_start": "2025-06-05",
+      "period_end": "2026-06-05",
+      "initial_balance": 10000.0,
+      "total_value": 10000.0,
+      "gain_amount": 0.0,
+      "return_pct": 0.0,
+      "trade_count": 0,
+      "buys": 0,
+      "sells": 0,
+      "final_shares": 0,
+      "final_balance": 10000.0,
+      "final_position": "Neutral",
+      "vs_buy_hold_pct": 14.553041296005247,
+      "buy_hold_total_value": 8544.695870399475,
+      "buy_hold_gain_amount": -1455.304129600525,
+      "buy_hold_return_pct": -14.553041296005247,
+      "buy_hold_shares": 573,
+      "buy_hold_entry_price": 17.429798126220703,
+      "buy_hold_exit_price": 14.890000343322754,
+      "output": [
+        {
+          "Action": "Summary",
+          "Message": "Final position: Neutral (0 shares, cash R$ 10000.00)"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Buy & hold: R$ -1455.30 (-14.55%) \u00b7 Strategy vs buy & hold: +14.55 pp"
+        }
+      ],
+      "graph_path": "static/bi_cache/graphs/18.json"
+    },
+    {
+      "test_id": 19,
+      "algorithm": "SMA-20 trend",
+      "symbol": "CYRE3.SA",
+      "status": "ok",
+      "vs_ibovespa_pct": -24.063389999706388,
+      "vs_dollar_pct": 8.53856072580912,
+      "name": "Cyrela Brazil Realty S.A. Empreendimentos e Participa\u00e7\u00f5es",
+      "period": "1y",
+      "interval": "1d",
+      "period_start": "2025-06-05",
+      "period_end": "2026-06-05",
+      "initial_balance": 10000.0,
+      "total_value": 10000.0,
+      "gain_amount": 0.0,
+      "return_pct": 0.0,
+      "trade_count": 0,
+      "buys": 0,
+      "sells": 0,
+      "final_shares": 0,
+      "final_balance": 10000.0,
+      "final_position": "Neutral",
+      "vs_buy_hold_pct": 15.64932346343994,
+      "buy_hold_total_value": 8435.067653656006,
+      "buy_hold_gain_amount": -1564.9323463439941,
+      "buy_hold_return_pct": -15.64932346343994,
+      "buy_hold_shares": 425,
+      "buy_hold_entry_price": 23.51219367980957,
+      "buy_hold_exit_price": 19.829999923706055,
+      "output": [
+        {
+          "Action": "Summary",
+          "Message": "Final position: Neutral (0 shares, cash R$ 10000.00)"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Buy & hold: R$ -1564.93 (-15.65%) \u00b7 Strategy vs buy & hold: +15.65 pp"
+        }
+      ],
+      "graph_path": "static/bi_cache/graphs/19.json"
+    },
+    {
+      "test_id": 20,
+      "algorithm": "SMA-20 trend",
+      "symbol": "SUZB3.SA",
+      "status": "ok",
+      "vs_ibovespa_pct": -25.250263076717502,
+      "vs_dollar_pct": 7.351687648798006,
+      "name": "Suzano S.A.",
+      "period": "1y",
+      "interval": "1d",
+      "period_start": "2025-06-05",
+      "period_end": "2026-06-05",
+      "initial_balance": 10000.0,
+      "total_value": 9881.312692298889,
+      "gain_amount": -118.68730770111142,
+      "return_pct": -1.1868730770111142,
+      "trade_count": 4,
+      "buys": 2,
+      "sells": 2,
+      "final_shares": 0,
+      "final_balance": 9881.312692298889,
+      "final_position": "Sold",
+      "vs_buy_hold_pct": 18.176524254226678,
+      "buy_hold_total_value": 8063.660266876221,
+      "buy_hold_gain_amount": -1936.3397331237793,
+      "buy_hold_return_pct": -19.363397331237792,
+      "buy_hold_shares": 193,
+      "buy_hold_entry_price": 51.772850036621094,
+      "buy_hold_exit_price": 41.7400016784668,
+      "output": [
+        {
+          "Action": "Buy",
+          "Message": "Bought at 52.19; balance: 2536.30"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 51.19; balance: 9782.65"
+        },
+        {
+          "Action": "Buy",
+          "Message": "Bought at 48.42; balance: 2471.85"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 49.56; balance: 9881.31"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Final position: Sold (0 shares, cash R$ 9881.31)"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Buy & hold: R$ -1936.34 (-19.36%) \u00b7 Strategy vs buy & hold: +18.18 pp"
+        }
+      ],
+      "graph_path": "static/bi_cache/graphs/20.json"
+    },
+    {
+      "test_id": 21,
+      "algorithm": "SMA crossover",
+      "symbol": "ITUB4.SA",
+      "status": "ok",
+      "vs_ibovespa_pct": -24.063389999706388,
+      "vs_dollar_pct": 8.53856072580912,
+      "name": "Ita\u00fa Unibanco Holding S.A.",
+      "period": "1y",
+      "interval": "1d",
+      "period_start": "2025-06-05",
+      "period_end": "2026-06-05",
+      "initial_balance": 10000.0,
+      "total_value": 10000.0,
+      "gain_amount": 0.0,
+      "return_pct": 0.0,
+      "trade_count": 0,
+      "buys": 0,
+      "sells": 0,
+      "final_shares": 0,
+      "final_balance": 10000.0,
+      "final_position": "Neutral",
+      "vs_buy_hold_pct": -19.676839141845704,
+      "buy_hold_total_value": 11967.68391418457,
+      "buy_hold_gain_amount": 1967.6839141845703,
+      "buy_hold_return_pct": 19.676839141845704,
+      "buy_hold_shares": 308,
+      "buy_hold_entry_price": 32.4414176940918,
+      "buy_hold_exit_price": 38.83000183105469,
+      "output": [
+        {
+          "Action": "Summary",
+          "Message": "Final position: Neutral (0 shares, cash R$ 10000.00)"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Buy & hold: R$ 1967.68 (19.68%) \u00b7 Strategy vs buy & hold: -19.68 pp"
+        }
+      ],
+      "graph_path": "static/bi_cache/graphs/21.json"
+    },
+    {
+      "test_id": 22,
+      "algorithm": "SMA crossover",
+      "symbol": "BBDC4.SA",
+      "status": "ok",
+      "vs_ibovespa_pct": -25.20382105630123,
+      "vs_dollar_pct": 7.398129669214276,
+      "name": "Banco Bradesco S.A.",
+      "period": "1y",
+      "interval": "1d",
+      "period_start": "2025-06-05",
+      "period_end": "2026-06-05",
+      "initial_balance": 10000.0,
+      "total_value": 9885.956894340516,
+      "gain_amount": -114.04310565948435,
+      "return_pct": -1.1404310565948435,
+      "trade_count": 4,
+      "buys": 2,
+      "sells": 2,
+      "final_shares": 0,
+      "final_balance": 9885.956894340516,
+      "final_position": "Sold",
+      "vs_buy_hold_pct": -20.060920558547966,
+      "buy_hold_total_value": 11892.048950195312,
+      "buy_hold_gain_amount": 1892.0489501953125,
+      "buy_hold_return_pct": 18.920489501953124,
+      "buy_hold_shares": 680,
+      "buy_hold_entry_price": 14.68757438659668,
+      "buy_hold_exit_price": 17.469999313354492,
+      "output": [
+        {
+          "Action": "Buy",
+          "Message": "Bought at 17.23; balance: 2506.73"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 18.10; balance: 10299.71"
+        },
+        {
+          "Action": "Buy",
+          "Message": "Bought at 20.74; balance: 2583.56"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 19.83; balance: 9885.96"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Final position: Sold (0 shares, cash R$ 9885.96)"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Buy & hold: R$ 1892.05 (18.92%) \u00b7 Strategy vs buy & hold: -20.06 pp"
+        }
+      ],
+      "graph_path": "static/bi_cache/graphs/22.json"
+    },
+    {
+      "test_id": 23,
+      "algorithm": "SMA crossover",
+      "symbol": "RADL3.SA",
+      "status": "ok",
+      "vs_ibovespa_pct": -2.8216970233270082,
+      "vs_dollar_pct": 29.7802537021885,
+      "name": "Raia Drogasil S.A.",
+      "period": "1y",
+      "interval": "1d",
+      "period_start": "2025-06-05",
+      "period_end": "2026-06-05",
+      "initial_balance": 10000.0,
+      "total_value": 12124.169297637938,
+      "gain_amount": 2124.169297637938,
+      "return_pct": 21.24169297637938,
+      "trade_count": 4,
+      "buys": 2,
+      "sells": 2,
+      "final_shares": 0,
+      "final_balance": 12124.169297637938,
+      "final_position": "Sold",
+      "vs_buy_hold_pct": -0.2337086635589749,
+      "buy_hold_total_value": 12147.540163993835,
+      "buy_hold_gain_amount": 2147.5401639938354,
+      "buy_hold_return_pct": 21.475401639938354,
+      "buy_hold_shares": 695,
+      "buy_hold_entry_price": 14.370013236999512,
+      "buy_hold_exit_price": 17.459999084472656,
+      "output": [
+        {
+          "Action": "Buy",
+          "Message": "Bought at 17.49; balance: 2512.64"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 22.53; balance: 12058.48"
+        },
+        {
+          "Action": "Buy",
+          "Message": "Bought at 24.55; balance: 3022.98"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 24.98; balance: 12124.17"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Final position: Sold (0 shares, cash R$ 12124.17)"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Buy & hold: R$ 2147.54 (21.48%) \u00b7 Strategy vs buy & hold: -0.23 pp"
+        }
+      ],
+      "graph_path": "static/bi_cache/graphs/23.json"
+    },
+    {
+      "test_id": 24,
+      "algorithm": "SMA crossover",
+      "symbol": "WEGE3.SA",
+      "status": "ok",
+      "vs_ibovespa_pct": -8.22150180619442,
+      "vs_dollar_pct": 24.38044891932109,
+      "name": "WEG S.A.",
+      "period": "1y",
+      "interval": "1d",
+      "period_start": "2025-06-05",
+      "period_end": "2026-06-05",
+      "initial_balance": 10000.0,
+      "total_value": 11584.188819351197,
+      "gain_amount": 1584.1888193511968,
+      "return_pct": 15.841888193511968,
+      "trade_count": 4,
+      "buys": 2,
+      "sells": 2,
+      "final_shares": 0,
+      "final_balance": 11584.188819351197,
+      "final_position": "Sold",
+      "vs_buy_hold_pct": 11.177653345489507,
+      "buy_hold_total_value": 10466.423484802246,
+      "buy_hold_gain_amount": 466.4234848022461,
+      "buy_hold_return_pct": 4.664234848022461,
+      "buy_hold_shares": 246,
+      "buy_hold_entry_price": 40.563968658447266,
+      "buy_hold_exit_price": 42.459999084472656,
+      "output": [
+        {
+          "Action": "Buy",
+          "Message": "Bought at 35.96; balance: 2521.23"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 42.35; balance: 11242.18"
+        },
+        {
+          "Action": "Buy",
+          "Message": "Bought at 43.39; balance: 2824.25"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 45.61; balance: 11584.19"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Final position: Sold (0 shares, cash R$ 11584.19)"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Buy & hold: R$ 466.42 (4.66%) \u00b7 Strategy vs buy & hold: +11.18 pp"
+        }
+      ],
+      "graph_path": "static/bi_cache/graphs/24.json"
+    },
+    {
+      "test_id": 25,
+      "algorithm": "SMA crossover",
+      "symbol": "ABEV3.SA",
+      "status": "ok",
+      "vs_ibovespa_pct": -26.794676108867762,
+      "vs_dollar_pct": 5.807274616647746,
+      "name": "Ambev S.A.",
+      "period": "1y",
+      "interval": "1d",
+      "period_start": "2025-06-05",
+      "period_end": "2026-06-05",
+      "initial_balance": 10000.0,
+      "total_value": 9726.871389083863,
+      "gain_amount": -273.1286109161374,
+      "return_pct": -2.731286109161374,
+      "trade_count": 4,
+      "buys": 2,
+      "sells": 2,
+      "final_shares": 0,
+      "final_balance": 9726.871389083863,
+      "final_position": "Sold",
+      "vs_buy_hold_pct": -24.668938601684566,
+      "buy_hold_total_value": 12193.76524925232,
+      "buy_hold_gain_amount": 2193.7652492523193,
+      "buy_hold_return_pct": 21.937652492523192,
+      "buy_hold_shares": 754,
+      "buy_hold_entry_price": 13.260497093200684,
+      "buy_hold_exit_price": 16.170000076293945,
+      "output": [
+        {
+          "Action": "Buy",
+          "Message": "Bought at 11.68; balance: 2511.19"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 11.50; balance: 9809.84"
+        },
+        {
+          "Action": "Buy",
+          "Message": "Bought at 15.45; balance: 2455.64"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 15.43; balance: 9726.87"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Final position: Sold (0 shares, cash R$ 9726.87)"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Buy & hold: R$ 2193.77 (21.94%) \u00b7 Strategy vs buy & hold: -24.67 pp"
+        }
+      ],
+      "graph_path": "static/bi_cache/graphs/25.json"
+    },
+    {
+      "test_id": 26,
+      "algorithm": "SMA crossover",
+      "symbol": "BBAS3.SA",
+      "status": "ok",
+      "vs_ibovespa_pct": -25.780506941921367,
+      "vs_dollar_pct": 6.82144378359414,
+      "name": "Banco do Brasil S.A.",
+      "period": "1y",
+      "interval": "1d",
+      "period_start": "2025-06-05",
+      "period_end": "2026-06-05",
+      "initial_balance": 10000.0,
+      "total_value": 9828.288305778502,
+      "gain_amount": -171.71169422149796,
+      "return_pct": -1.7171169422149797,
+      "trade_count": 4,
+      "buys": 2,
+      "sells": 2,
+      "final_shares": 0,
+      "final_balance": 9828.288305778502,
+      "final_position": "Sold",
+      "vs_buy_hold_pct": 10.059836945724474,
+      "buy_hold_total_value": 8822.304611206055,
+      "buy_hold_gain_amount": -1177.6953887939453,
+      "buy_hold_return_pct": -11.776953887939454,
+      "buy_hold_shares": 460,
+      "buy_hold_entry_price": 21.730207443237305,
+      "buy_hold_exit_price": 19.170000076293945,
+      "output": [
+        {
+          "Action": "Buy",
+          "Message": "Bought at 20.59; balance: 2506.32"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 20.92; balance: 10044.78"
+        },
+        {
+          "Action": "Buy",
+          "Message": "Bought at 21.73; balance: 2527.18"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 21.31; balance: 9828.29"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Final position: Sold (0 shares, cash R$ 9828.29)"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Buy & hold: R$ -1177.70 (-11.78%) \u00b7 Strategy vs buy & hold: +10.06 pp"
+        }
+      ],
+      "graph_path": "static/bi_cache/graphs/26.json"
+    },
+    {
+      "test_id": 27,
+      "algorithm": "SMA crossover",
+      "symbol": "RENT3.SA",
+      "status": "ok",
+      "vs_ibovespa_pct": -24.063389999706388,
+      "vs_dollar_pct": 8.53856072580912,
+      "name": "Localiza Rent a Car S.A.",
+      "period": "1y",
+      "interval": "1d",
+      "period_start": "2025-06-05",
+      "period_end": "2026-06-05",
+      "initial_balance": 10000.0,
+      "total_value": 10000.0,
+      "gain_amount": 0.0,
+      "return_pct": 0.0,
+      "trade_count": 0,
+      "buys": 0,
+      "sells": 0,
+      "final_shares": 0,
+      "final_balance": 10000.0,
+      "final_position": "Neutral",
+      "vs_buy_hold_pct": 3.5731178283691407,
+      "buy_hold_total_value": 9642.688217163086,
+      "buy_hold_gain_amount": -357.31178283691406,
+      "buy_hold_return_pct": -3.5731178283691407,
+      "buy_hold_shares": 237,
+      "buy_hold_entry_price": 42.087646484375,
+      "buy_hold_exit_price": 40.58000183105469,
+      "output": [
+        {
+          "Action": "Summary",
+          "Message": "Final position: Neutral (0 shares, cash R$ 10000.00)"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Buy & hold: R$ -357.31 (-3.57%) \u00b7 Strategy vs buy & hold: +3.57 pp"
+        }
+      ],
+      "graph_path": "static/bi_cache/graphs/27.json"
+    },
+    {
+      "test_id": 28,
+      "algorithm": "SMA crossover",
+      "symbol": "LREN3.SA",
+      "status": "ok",
+      "vs_ibovespa_pct": -36.34723466799937,
+      "vs_dollar_pct": -3.7452839424838658,
+      "name": "Lojas Renner S.A.",
+      "period": "1y",
+      "interval": "1d",
+      "period_start": "2025-06-05",
+      "period_end": "2026-06-05",
+      "initial_balance": 10000.0,
+      "total_value": 8771.615533170701,
+      "gain_amount": -1228.3844668292986,
+      "return_pct": -12.283844668292986,
+      "trade_count": 4,
+      "buys": 2,
+      "sells": 2,
+      "final_shares": 0,
+      "final_balance": 8771.615533170701,
+      "final_position": "Sold",
+      "vs_buy_hold_pct": 2.2691966277122617,
+      "buy_hold_total_value": 8544.695870399475,
+      "buy_hold_gain_amount": -1455.304129600525,
+      "buy_hold_return_pct": -14.553041296005247,
+      "buy_hold_shares": 573,
+      "buy_hold_entry_price": 17.429798126220703,
+      "buy_hold_exit_price": 14.890000343322754,
+      "output": [
+        {
+          "Action": "Buy",
+          "Message": "Bought at 15.44; balance: 2511.60"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 14.19; balance: 9324.93"
+        },
+        {
+          "Action": "Buy",
+          "Message": "Bought at 15.72; balance: 2345.25"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 14.62; balance: 8771.62"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Final position: Sold (0 shares, cash R$ 8771.62)"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Buy & hold: R$ -1455.30 (-14.55%) \u00b7 Strategy vs buy & hold: +2.27 pp"
+        }
+      ],
+      "graph_path": "static/bi_cache/graphs/28.json"
+    },
+    {
+      "test_id": 29,
+      "algorithm": "SMA crossover",
+      "symbol": "CYRE3.SA",
+      "status": "ok",
+      "vs_ibovespa_pct": -16.5709120503732,
+      "vs_dollar_pct": 16.03103867514231,
+      "name": "Cyrela Brazil Realty S.A. Empreendimentos e Participa\u00e7\u00f5es",
+      "period": "1y",
+      "interval": "1d",
+      "period_start": "2025-06-05",
+      "period_end": "2026-06-05",
+      "initial_balance": 10000.0,
+      "total_value": 10749.247794933319,
+      "gain_amount": 749.2477949333188,
+      "return_pct": 7.492477949333189,
+      "trade_count": 4,
+      "buys": 2,
+      "sells": 2,
+      "final_shares": 0,
+      "final_balance": 10749.247794933319,
+      "final_position": "Sold",
+      "vs_buy_hold_pct": 23.141801412773127,
+      "buy_hold_total_value": 8435.067653656006,
+      "buy_hold_gain_amount": -1564.9323463439941,
+      "buy_hold_return_pct": -15.64932346343994,
+      "buy_hold_shares": 425,
+      "buy_hold_entry_price": 23.51219367980957,
+      "buy_hold_exit_price": 19.829999923706055,
+      "output": [
+        {
+          "Action": "Buy",
+          "Message": "Bought at 23.41; balance: 2508.55"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 22.93; balance: 9773.19"
+        },
+        {
+          "Action": "Buy",
+          "Message": "Bought at 27.78; balance: 2466.72"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 31.81; balance: 10749.25"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Final position: Sold (0 shares, cash R$ 10749.25)"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Buy & hold: R$ -1564.93 (-15.65%) \u00b7 Strategy vs buy & hold: +23.14 pp"
+        }
+      ],
+      "graph_path": "static/bi_cache/graphs/29.json"
+    },
+    {
+      "test_id": 30,
+      "algorithm": "SMA crossover",
+      "symbol": "SUZB3.SA",
+      "status": "ok",
+      "vs_ibovespa_pct": -24.063389999706388,
+      "vs_dollar_pct": 8.53856072580912,
+      "name": "Suzano S.A.",
+      "period": "1y",
+      "interval": "1d",
+      "period_start": "2025-06-05",
+      "period_end": "2026-06-05",
+      "initial_balance": 10000.0,
+      "total_value": 10000.0,
+      "gain_amount": 0.0,
+      "return_pct": 0.0,
+      "trade_count": 0,
+      "buys": 0,
+      "sells": 0,
+      "final_shares": 0,
+      "final_balance": 10000.0,
+      "final_position": "Neutral",
+      "vs_buy_hold_pct": 19.363397331237792,
+      "buy_hold_total_value": 8063.660266876221,
+      "buy_hold_gain_amount": -1936.3397331237793,
+      "buy_hold_return_pct": -19.363397331237792,
+      "buy_hold_shares": 193,
+      "buy_hold_entry_price": 51.772850036621094,
+      "buy_hold_exit_price": 41.7400016784668,
+      "output": [
+        {
+          "Action": "Summary",
+          "Message": "Final position: Neutral (0 shares, cash R$ 10000.00)"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Buy & hold: R$ -1936.34 (-19.36%) \u00b7 Strategy vs buy & hold: +19.36 pp"
+        }
+      ],
+      "graph_path": "static/bi_cache/graphs/30.json"
+    },
+    {
+      "test_id": 31,
+      "algorithm": "RSI reversion",
+      "symbol": "ITUB4.SA",
+      "status": "ok",
+      "vs_ibovespa_pct": -25.500005442363864,
+      "vs_dollar_pct": 7.101945283151644,
+      "name": "Ita\u00fa Unibanco Holding S.A.",
+      "period": "1y",
+      "interval": "1d",
+      "period_start": "2025-06-05",
+      "period_end": "2026-06-05",
+      "initial_balance": 10000.0,
+      "total_value": 9856.338455734252,
+      "gain_amount": -143.66154426574758,
+      "return_pct": -1.4366154426574758,
+      "trade_count": 4,
+      "buys": 2,
+      "sells": 2,
+      "final_shares": 0,
+      "final_balance": 9856.338455734252,
+      "final_position": "Sold",
+      "vs_buy_hold_pct": -21.11345458450318,
+      "buy_hold_total_value": 11967.68391418457,
+      "buy_hold_gain_amount": 1967.6839141845703,
+      "buy_hold_return_pct": 19.676839141845704,
+      "buy_hold_shares": 308,
+      "buy_hold_entry_price": 32.4414176940918,
+      "buy_hold_exit_price": 38.83000183105469,
+      "output": [
+        {
+          "Action": "Buy",
+          "Message": "Bought at 43.96; balance: 2526.89"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 44.58; balance: 10030.29"
+        },
+        {
+          "Action": "Buy",
+          "Message": "Bought at 43.10; balance: 2531.29"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 42.52; balance: 9856.34"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Final position: Sold (0 shares, cash R$ 9856.34)"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Buy & hold: R$ 1967.68 (19.68%) \u00b7 Strategy vs buy & hold: -21.11 pp"
+        }
+      ],
+      "graph_path": "static/bi_cache/graphs/31.json"
+    },
+    {
+      "test_id": 32,
+      "algorithm": "RSI reversion",
+      "symbol": "BBDC4.SA",
+      "status": "ok",
+      "vs_ibovespa_pct": -23.615324685222742,
+      "vs_dollar_pct": 8.986626040292768,
+      "name": "Banco Bradesco S.A.",
+      "period": "1y",
+      "interval": "1d",
+      "period_start": "2025-06-05",
+      "period_end": "2026-06-05",
+      "initial_balance": 10000.0,
+      "total_value": 10044.806531448365,
+      "gain_amount": 44.806531448364694,
+      "return_pct": 0.44806531448364695,
+      "trade_count": 2,
+      "buys": 1,
+      "sells": 1,
+      "final_shares": 0,
+      "final_balance": 10044.806531448365,
+      "final_position": "Sold",
+      "vs_buy_hold_pct": -18.47242418746948,
+      "buy_hold_total_value": 11892.048950195312,
+      "buy_hold_gain_amount": 1892.0489501953125,
+      "buy_hold_return_pct": 18.920489501953124,
+      "buy_hold_shares": 680,
+      "buy_hold_entry_price": 14.68757438659668,
+      "buy_hold_exit_price": 17.469999313354492,
+      "output": [
+        {
+          "Action": "Buy",
+          "Message": "Bought at 15.99; balance: 2515.71"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 16.25; balance: 10044.81"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Final position: Sold (0 shares, cash R$ 10044.81)"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Buy & hold: R$ 1892.05 (18.92%) \u00b7 Strategy vs buy & hold: -18.47 pp"
+        }
+      ],
+      "graph_path": "static/bi_cache/graphs/32.json"
+    },
+    {
+      "test_id": 33,
+      "algorithm": "RSI reversion",
+      "symbol": "RADL3.SA",
+      "status": "ok",
+      "vs_ibovespa_pct": -17.82110204957212,
+      "vs_dollar_pct": 14.780848675943389,
+      "name": "Raia Drogasil S.A.",
+      "period": "1y",
+      "interval": "1d",
+      "period_start": "2025-06-05",
+      "period_end": "2026-06-05",
+      "initial_balance": 10000.0,
+      "total_value": 10624.228795013427,
+      "gain_amount": 624.2287950134269,
+      "return_pct": 6.242287950134268,
+      "trade_count": 4,
+      "buys": 2,
+      "sells": 2,
+      "final_shares": 0,
+      "final_balance": 10624.228795013427,
+      "final_position": "Sold",
+      "vs_buy_hold_pct": -15.233113689804085,
+      "buy_hold_total_value": 12147.540163993835,
+      "buy_hold_gain_amount": 2147.5401639938354,
+      "buy_hold_return_pct": 21.475401639938354,
+      "buy_hold_shares": 695,
+      "buy_hold_entry_price": 14.370013236999512,
+      "buy_hold_exit_price": 17.459999084472656,
+      "output": [
+        {
+          "Action": "Buy",
+          "Message": "Bought at 16.95; balance: 2506.70"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 19.00; balance: 10818.92"
+        },
+        {
+          "Action": "Buy",
+          "Message": "Bought at 25.34; balance: 2710.15"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 24.98; balance: 10624.23"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Final position: Sold (0 shares, cash R$ 10624.23)"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Buy & hold: R$ 2147.54 (21.48%) \u00b7 Strategy vs buy & hold: -15.23 pp"
+        }
+      ],
+      "graph_path": "static/bi_cache/graphs/33.json"
+    },
+    {
+      "test_id": 34,
+      "algorithm": "RSI reversion",
+      "symbol": "WEGE3.SA",
+      "status": "ok",
+      "vs_ibovespa_pct": -26.251813383800627,
+      "vs_dollar_pct": 6.3501373417148805,
+      "name": "WEG S.A.",
+      "period": "1y",
+      "interval": "1d",
+      "period_start": "2025-06-05",
+      "period_end": "2026-06-05",
+      "initial_balance": 10000.0,
+      "total_value": 9781.157661590576,
+      "gain_amount": -218.84233840942397,
+      "return_pct": -2.1884233840942398,
+      "trade_count": 4,
+      "buys": 2,
+      "sells": 2,
+      "final_shares": 0,
+      "final_balance": 9781.157661590576,
+      "final_position": "Sold",
+      "vs_buy_hold_pct": -6.852658232116701,
+      "buy_hold_total_value": 10466.423484802246,
+      "buy_hold_gain_amount": 466.4234848022461,
+      "buy_hold_return_pct": 4.664234848022461,
+      "buy_hold_shares": 246,
+      "buy_hold_entry_price": 40.563968658447266,
+      "buy_hold_exit_price": 42.459999084472656,
+      "output": [
+        {
+          "Action": "Buy",
+          "Message": "Bought at 45.61; balance: 2519.89"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 46.00; balance: 9988.38"
+        },
+        {
+          "Action": "Buy",
+          "Message": "Bought at 50.17; balance: 2512.98"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 49.27; balance: 9781.16"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Final position: Sold (0 shares, cash R$ 9781.16)"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Buy & hold: R$ 466.42 (4.66%) \u00b7 Strategy vs buy & hold: -6.85 pp"
+        }
+      ],
+      "graph_path": "static/bi_cache/graphs/34.json"
+    },
+    {
+      "test_id": 35,
+      "algorithm": "RSI reversion",
+      "symbol": "ABEV3.SA",
+      "status": "ok",
+      "vs_ibovespa_pct": -23.935960490734224,
+      "vs_dollar_pct": 8.665990234781283,
+      "name": "Ambev S.A.",
+      "period": "1y",
+      "interval": "1d",
+      "period_start": "2025-06-05",
+      "period_end": "2026-06-05",
+      "initial_balance": 10000.0,
+      "total_value": 10012.742950897216,
+      "gain_amount": 12.74295089721636,
+      "return_pct": 0.1274295089721636,
+      "trade_count": 2,
+      "buys": 1,
+      "sells": 1,
+      "final_shares": 0,
+      "final_balance": 10012.742950897216,
+      "final_position": "Sold",
+      "vs_buy_hold_pct": -21.81022298355103,
+      "buy_hold_total_value": 12193.76524925232,
+      "buy_hold_gain_amount": 2193.7652492523193,
+      "buy_hold_return_pct": 21.937652492523192,
+      "buy_hold_shares": 754,
+      "buy_hold_entry_price": 13.260497093200684,
+      "buy_hold_exit_price": 16.170000076293945,
+      "output": [
+        {
+          "Action": "Buy",
+          "Message": "Bought at 15.23; balance: 2506.84"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 15.41; balance: 10012.74"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Final position: Sold (0 shares, cash R$ 10012.74)"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Buy & hold: R$ 2193.77 (21.94%) \u00b7 Strategy vs buy & hold: -21.81 pp"
+        }
+      ],
+      "graph_path": "static/bi_cache/graphs/35.json"
+    },
+    {
+      "test_id": 36,
+      "algorithm": "RSI reversion",
+      "symbol": "BBAS3.SA",
+      "status": "ok",
+      "vs_ibovespa_pct": -26.775283667308933,
+      "vs_dollar_pct": 5.826667058206576,
+      "name": "Banco do Brasil S.A.",
+      "period": "1y",
+      "interval": "1d",
+      "period_start": "2025-06-05",
+      "period_end": "2026-06-05",
+      "initial_balance": 10000.0,
+      "total_value": 9728.810633239746,
+      "gain_amount": -271.1893667602544,
+      "return_pct": -2.711893667602544,
+      "trade_count": 4,
+      "buys": 2,
+      "sells": 2,
+      "final_shares": 0,
+      "final_balance": 9728.810633239746,
+      "final_position": "Sold",
+      "vs_buy_hold_pct": 9.06506022033691,
+      "buy_hold_total_value": 8822.304611206055,
+      "buy_hold_gain_amount": -1177.6953887939453,
+      "buy_hold_return_pct": -11.776953887939454,
+      "buy_hold_shares": 460,
+      "buy_hold_entry_price": 21.730207443237305,
+      "buy_hold_exit_price": 19.170000076293945,
+      "output": [
+        {
+          "Action": "Buy",
+          "Message": "Bought at 20.64; balance: 2509.17"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 20.70; balance: 9949.67"
+        },
+        {
+          "Action": "Buy",
+          "Message": "Bought at 24.06; balance: 2491.21"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 23.58; balance: 9728.81"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Final position: Sold (0 shares, cash R$ 9728.81)"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Buy & hold: R$ -1177.70 (-11.78%) \u00b7 Strategy vs buy & hold: +9.07 pp"
+        }
+      ],
+      "graph_path": "static/bi_cache/graphs/36.json"
+    },
+    {
+      "test_id": 37,
+      "algorithm": "RSI reversion",
+      "symbol": "RENT3.SA",
+      "status": "ok",
+      "vs_ibovespa_pct": -27.789801127178297,
+      "vs_dollar_pct": 4.812149598337209,
+      "name": "Localiza Rent a Car S.A.",
+      "period": "1y",
+      "interval": "1d",
+      "period_start": "2025-06-05",
+      "period_end": "2026-06-05",
+      "initial_balance": 10000.0,
+      "total_value": 9627.358887252809,
+      "gain_amount": -372.6411127471911,
+      "return_pct": -3.7264111274719105,
+      "trade_count": 4,
+      "buys": 2,
+      "sells": 2,
+      "final_shares": 0,
+      "final_balance": 9627.358887252809,
+      "final_position": "Sold",
+      "vs_buy_hold_pct": -0.1532932991027698,
+      "buy_hold_total_value": 9642.688217163086,
+      "buy_hold_gain_amount": -357.31178283691406,
+      "buy_hold_return_pct": -3.5731178283691407,
+      "buy_hold_shares": 237,
+      "buy_hold_entry_price": 42.087646484375,
+      "buy_hold_exit_price": 40.58000183105469,
+      "output": [
+        {
+          "Action": "Buy",
+          "Message": "Bought at 35.95; balance: 2521.51"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 35.92; balance: 9917.17"
+        },
+        {
+          "Action": "Buy",
+          "Message": "Bought at 44.37; balance: 2507.23"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 43.07; balance: 9627.36"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Final position: Sold (0 shares, cash R$ 9627.36)"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Buy & hold: R$ -357.31 (-3.57%) \u00b7 Strategy vs buy & hold: -0.15 pp"
+        }
+      ],
+      "graph_path": "static/bi_cache/graphs/37.json"
+    },
+    {
+      "test_id": 38,
+      "algorithm": "RSI reversion",
+      "symbol": "LREN3.SA",
+      "status": "ok",
+      "vs_ibovespa_pct": -24.063389999706388,
+      "vs_dollar_pct": 8.53856072580912,
+      "name": "Lojas Renner S.A.",
+      "period": "1y",
+      "interval": "1d",
+      "period_start": "2025-06-05",
+      "period_end": "2026-06-05",
+      "initial_balance": 10000.0,
+      "total_value": 10000.0,
+      "gain_amount": 0.0,
+      "return_pct": 0.0,
+      "trade_count": 0,
+      "buys": 0,
+      "sells": 0,
+      "final_shares": 0,
+      "final_balance": 10000.0,
+      "final_position": "Neutral",
+      "vs_buy_hold_pct": 14.553041296005247,
+      "buy_hold_total_value": 8544.695870399475,
+      "buy_hold_gain_amount": -1455.304129600525,
+      "buy_hold_return_pct": -14.553041296005247,
+      "buy_hold_shares": 573,
+      "buy_hold_entry_price": 17.429798126220703,
+      "buy_hold_exit_price": 14.890000343322754,
+      "output": [
+        {
+          "Action": "Summary",
+          "Message": "Final position: Neutral (0 shares, cash R$ 10000.00)"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Buy & hold: R$ -1455.30 (-14.55%) \u00b7 Strategy vs buy & hold: +14.55 pp"
+        }
+      ],
+      "graph_path": "static/bi_cache/graphs/38.json"
+    },
+    {
+      "test_id": 39,
+      "algorithm": "RSI reversion",
+      "symbol": "CYRE3.SA",
+      "status": "ok",
+      "vs_ibovespa_pct": -24.86312930787289,
+      "vs_dollar_pct": 7.738821417642621,
+      "name": "Cyrela Brazil Realty S.A. Empreendimentos e Participa\u00e7\u00f5es",
+      "period": "1y",
+      "interval": "1d",
+      "period_start": "2025-06-05",
+      "period_end": "2026-06-05",
+      "initial_balance": 10000.0,
+      "total_value": 9920.02606918335,
+      "gain_amount": -79.97393081664995,
+      "return_pct": -0.7997393081664996,
+      "trade_count": 2,
+      "buys": 1,
+      "sells": 1,
+      "final_shares": 0,
+      "final_balance": 9920.02606918335,
+      "final_position": "Sold",
+      "vs_buy_hold_pct": 14.84958415527344,
+      "buy_hold_total_value": 8435.067653656006,
+      "buy_hold_gain_amount": -1564.9323463439941,
+      "buy_hold_return_pct": -15.64932346343994,
+      "buy_hold_shares": 425,
+      "buy_hold_entry_price": 23.51219367980957,
+      "buy_hold_exit_price": 19.829999923706055,
+      "output": [
+        {
+          "Action": "Buy",
+          "Message": "Bought at 26.94; balance: 2510.07"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 26.92; balance: 9920.03"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Final position: Sold (0 shares, cash R$ 9920.03)"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Buy & hold: R$ -1564.93 (-15.65%) \u00b7 Strategy vs buy & hold: +14.85 pp"
+        }
+      ],
+      "graph_path": "static/bi_cache/graphs/39.json"
+    },
+    {
+      "test_id": 40,
+      "algorithm": "RSI reversion",
+      "symbol": "SUZB3.SA",
+      "status": "ok",
+      "vs_ibovespa_pct": -27.510325322277197,
+      "vs_dollar_pct": 5.091625403238313,
+      "name": "Suzano S.A.",
+      "period": "1y",
+      "interval": "1d",
+      "period_start": "2025-06-05",
+      "period_end": "2026-06-05",
+      "initial_balance": 10000.0,
+      "total_value": 9655.30646774292,
+      "gain_amount": -344.69353225708073,
+      "return_pct": -3.4469353225708073,
+      "trade_count": 4,
+      "buys": 2,
+      "sells": 2,
+      "final_shares": 0,
+      "final_balance": 9655.30646774292,
+      "final_position": "Sold",
+      "vs_buy_hold_pct": 15.916462008666985,
+      "buy_hold_total_value": 8063.660266876221,
+      "buy_hold_gain_amount": -1936.3397331237793,
+      "buy_hold_return_pct": -19.363397331237792,
+      "buy_hold_shares": 193,
+      "buy_hold_entry_price": 51.772850036621094,
+      "buy_hold_exit_price": 41.7400016784668,
+      "output": [
+        {
+          "Action": "Buy",
+          "Message": "Bought at 51.43; balance: 2542.61"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 50.86; balance: 9843.94"
+        },
+        {
+          "Action": "Buy",
+          "Message": "Bought at 55.79; balance: 2479.09"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 54.91; balance: 9655.31"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Final position: Sold (0 shares, cash R$ 9655.31)"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Buy & hold: R$ -1936.34 (-19.36%) \u00b7 Strategy vs buy & hold: +15.92 pp"
+        }
+      ],
+      "graph_path": "static/bi_cache/graphs/40.json"
+    },
+    {
+      "test_id": 41,
+      "algorithm": "20-day breakout",
+      "symbol": "ITUB4.SA",
+      "status": "ok",
+      "vs_ibovespa_pct": -17.208175738842122,
+      "vs_dollar_pct": 15.393774986673387,
+      "name": "Ita\u00fa Unibanco Holding S.A.",
+      "period": "1y",
+      "interval": "1d",
+      "period_start": "2025-06-05",
+      "period_end": "2026-06-05",
+      "initial_balance": 10000.0,
+      "total_value": 10685.521426086427,
+      "gain_amount": 685.5214260864268,
+      "return_pct": 6.855214260864267,
+      "trade_count": 2,
+      "buys": 1,
+      "sells": 1,
+      "final_shares": 0,
+      "final_balance": 10685.521426086427,
+      "final_position": "Sold",
+      "vs_buy_hold_pct": -12.821648379516594,
+      "buy_hold_total_value": 11967.686264038086,
+      "buy_hold_gain_amount": 1967.686264038086,
+      "buy_hold_return_pct": 19.67686264038086,
+      "buy_hold_shares": 308,
+      "buy_hold_entry_price": 32.441410064697266,
+      "buy_hold_exit_price": 38.83000183105469,
+      "output": [
+        {
+          "Action": "Buy",
+          "Message": "Bought at 41.24; balance: 2535.09"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 45.48; balance: 10685.52"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Final position: Sold (0 shares, cash R$ 10685.52)"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Buy & hold: R$ 1967.69 (19.68%) \u00b7 Strategy vs buy & hold: -12.82 pp"
+        }
+      ],
+      "graph_path": "static/bi_cache/graphs/41.json"
+    },
+    {
+      "test_id": 42,
+      "algorithm": "20-day breakout",
+      "symbol": "BBDC4.SA",
+      "status": "ok",
+      "vs_ibovespa_pct": -25.547172815258136,
+      "vs_dollar_pct": 7.054777910257371,
+      "name": "Banco Bradesco S.A.",
+      "period": "1y",
+      "interval": "1d",
+      "period_start": "2025-06-05",
+      "period_end": "2026-06-05",
+      "initial_balance": 10000.0,
+      "total_value": 9851.621718444825,
+      "gain_amount": -148.3782815551749,
+      "return_pct": -1.483782815551749,
+      "trade_count": 2,
+      "buys": 1,
+      "sells": 1,
+      "final_shares": 0,
+      "final_balance": 9851.621718444825,
+      "final_position": "Sold",
+      "vs_buy_hold_pct": -20.404278802490225,
+      "buy_hold_total_value": 11892.049598693848,
+      "buy_hold_gain_amount": 1892.0495986938477,
+      "buy_hold_return_pct": 18.920495986938477,
+      "buy_hold_shares": 680,
+      "buy_hold_entry_price": 14.687573432922363,
+      "buy_hold_exit_price": 17.469999313354492,
+      "output": [
+        {
+          "Action": "Buy",
+          "Message": "Bought at 20.13; balance: 2512.42"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 19.93; balance: 9851.62"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Final position: Sold (0 shares, cash R$ 9851.62)"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Buy & hold: R$ 1892.05 (18.92%) \u00b7 Strategy vs buy & hold: -20.40 pp"
+        }
+      ],
+      "graph_path": "static/bi_cache/graphs/42.json"
+    },
+    {
+      "test_id": 43,
+      "algorithm": "20-day breakout",
+      "symbol": "RADL3.SA",
+      "status": "ok",
+      "vs_ibovespa_pct": -26.42968063996518,
+      "vs_dollar_pct": 6.172270085550325,
+      "name": "Raia Drogasil S.A.",
+      "period": "1y",
+      "interval": "1d",
+      "period_start": "2025-06-05",
+      "period_end": "2026-06-05",
+      "initial_balance": 10000.0,
+      "total_value": 9763.37093597412,
+      "gain_amount": -236.62906402587942,
+      "return_pct": -2.366290640258794,
+      "trade_count": 2,
+      "buys": 1,
+      "sells": 1,
+      "final_shares": 0,
+      "final_balance": 9763.37093597412,
+      "final_position": "Sold",
+      "vs_buy_hold_pct": -23.841685652160646,
+      "buy_hold_total_value": 12147.539501190186,
+      "buy_hold_gain_amount": 2147.5395011901855,
+      "buy_hold_return_pct": 21.475395011901853,
+      "buy_hold_shares": 695,
+      "buy_hold_entry_price": 14.370014190673828,
+      "buy_hold_exit_price": 17.459999084472656,
+      "output": [
+        {
+          "Action": "Buy",
+          "Message": "Bought at 25.54; balance: 2517.04"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 24.98; balance: 9763.37"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Final position: Sold (0 shares, cash R$ 9763.37)"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Buy & hold: R$ 2147.54 (21.48%) \u00b7 Strategy vs buy & hold: -23.84 pp"
+        }
+      ],
+      "graph_path": "static/bi_cache/graphs/43.json"
+    },
+    {
+      "test_id": 44,
+      "algorithm": "20-day breakout",
+      "symbol": "WEGE3.SA",
+      "status": "ok",
+      "vs_ibovespa_pct": -25.53587107880795,
+      "vs_dollar_pct": 7.066079646707557,
+      "name": "WEG S.A.",
+      "period": "1y",
+      "interval": "1d",
+      "period_start": "2025-06-05",
+      "period_end": "2026-06-05",
+      "initial_balance": 10000.0,
+      "total_value": 9852.751892089844,
+      "gain_amount": -147.24810791015625,
+      "return_pct": -1.4724810791015623,
+      "trade_count": 2,
+      "buys": 1,
+      "sells": 1,
+      "final_shares": 0,
+      "final_balance": 9852.751892089844,
+      "final_position": "Sold",
+      "vs_buy_hold_pct": -6.136697158813476,
+      "buy_hold_total_value": 10466.421607971191,
+      "buy_hold_gain_amount": 466.4216079711914,
+      "buy_hold_return_pct": 4.664216079711914,
+      "buy_hold_shares": 246,
+      "buy_hold_entry_price": 40.5639762878418,
+      "buy_hold_exit_price": 42.459999084472656,
+      "output": [
+        {
+          "Action": "Buy",
+          "Message": "Bought at 49.76; balance: 2535.80"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 49.27; balance: 9852.75"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Final position: Sold (0 shares, cash R$ 9852.75)"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Buy & hold: R$ 466.42 (4.66%) \u00b7 Strategy vs buy & hold: -6.14 pp"
+        }
+      ],
+      "graph_path": "static/bi_cache/graphs/44.json"
+    },
+    {
+      "test_id": 45,
+      "algorithm": "20-day breakout",
+      "symbol": "ABEV3.SA",
+      "status": "ok",
+      "vs_ibovespa_pct": -18.276861781627787,
+      "vs_dollar_pct": 14.325088943887721,
+      "name": "Ambev S.A.",
+      "period": "1y",
+      "interval": "1d",
+      "period_start": "2025-06-05",
+      "period_end": "2026-06-05",
+      "initial_balance": 10000.0,
+      "total_value": 10578.65282180786,
+      "gain_amount": 578.6528218078602,
+      "return_pct": 5.786528218078601,
+      "trade_count": 2,
+      "buys": 1,
+      "sells": 1,
+      "final_shares": 0,
+      "final_balance": 10578.65282180786,
+      "final_position": "Sold",
+      "vs_buy_hold_pct": -16.15112427444459,
+      "buy_hold_total_value": 12193.76524925232,
+      "buy_hold_gain_amount": 2193.7652492523193,
+      "buy_hold_return_pct": 21.937652492523192,
+      "buy_hold_shares": 754,
+      "buy_hold_entry_price": 13.260497093200684,
+      "buy_hold_exit_price": 16.170000076293945,
+      "output": [
+        {
+          "Action": "Buy",
+          "Message": "Bought at 14.31; balance: 2501.56"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 15.57; balance: 10578.65"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Final position: Sold (0 shares, cash R$ 10578.65)"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Buy & hold: R$ 2193.77 (21.94%) \u00b7 Strategy vs buy & hold: -16.15 pp"
+        }
+      ],
+      "graph_path": "static/bi_cache/graphs/45.json"
+    },
+    {
+      "test_id": 46,
+      "algorithm": "20-day breakout",
+      "symbol": "BBAS3.SA",
+      "status": "ok",
+      "vs_ibovespa_pct": -15.31282903702938,
+      "vs_dollar_pct": 17.289121688486127,
+      "name": "Banco do Brasil S.A.",
+      "period": "1y",
+      "interval": "1d",
+      "period_start": "2025-06-05",
+      "period_end": "2026-06-05",
+      "initial_balance": 10000.0,
+      "total_value": 10875.056096267701,
+      "gain_amount": 875.0560962677009,
+      "return_pct": 8.750560962677008,
+      "trade_count": 2,
+      "buys": 1,
+      "sells": 1,
+      "final_shares": 0,
+      "final_balance": 10875.056096267701,
+      "final_position": "Sold",
+      "vs_buy_hold_pct": 20.52750607681275,
+      "buy_hold_total_value": 8822.305488586426,
+      "buy_hold_gain_amount": -1177.6945114135742,
+      "buy_hold_return_pct": -11.776945114135742,
+      "buy_hold_shares": 460,
+      "buy_hold_entry_price": 21.730205535888672,
+      "buy_hold_exit_price": 19.170000076293945,
+      "output": [
+        {
+          "Action": "Buy",
+          "Message": "Bought at 22.00; balance: 2519.26"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 24.82; balance: 10875.06"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Final position: Sold (0 shares, cash R$ 10875.06)"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Buy & hold: R$ -1177.69 (-11.78%) \u00b7 Strategy vs buy & hold: +20.53 pp"
+        }
+      ],
+      "graph_path": "static/bi_cache/graphs/46.json"
+    },
+    {
+      "test_id": 47,
+      "algorithm": "20-day breakout",
+      "symbol": "RENT3.SA",
+      "status": "ok",
+      "vs_ibovespa_pct": -28.3121042044946,
+      "vs_dollar_pct": 4.289846521020909,
+      "name": "Localiza Rent a Car S.A.",
+      "period": "1y",
+      "interval": "1d",
+      "period_start": "2025-06-05",
+      "period_end": "2026-06-05",
+      "initial_balance": 10000.0,
+      "total_value": 9575.128579521179,
+      "gain_amount": -424.87142047882116,
+      "return_pct": -4.248714204788211,
+      "trade_count": 4,
+      "buys": 2,
+      "sells": 2,
+      "final_shares": 0,
+      "final_balance": 9575.128579521179,
+      "final_position": "Sold",
+      "vs_buy_hold_pct": -0.6755963764190702,
+      "buy_hold_total_value": 9642.688217163086,
+      "buy_hold_gain_amount": -357.31178283691406,
+      "buy_hold_return_pct": -3.5731178283691407,
+      "buy_hold_shares": 237,
+      "buy_hold_entry_price": 42.087646484375,
+      "buy_hold_exit_price": 40.58000183105469,
+      "output": [
+        {
+          "Action": "Buy",
+          "Message": "Bought at 47.15; balance: 2503.41"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 46.36; balance: 9800.56"
+        },
+        {
+          "Action": "Buy",
+          "Message": "Bought at 49.36; balance: 2495.28"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 48.32; balance: 9575.13"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Final position: Sold (0 shares, cash R$ 9575.13)"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Buy & hold: R$ -357.31 (-3.57%) \u00b7 Strategy vs buy & hold: -0.68 pp"
+        }
+      ],
+      "graph_path": "static/bi_cache/graphs/47.json"
+    },
+    {
+      "test_id": 48,
+      "algorithm": "20-day breakout",
+      "symbol": "LREN3.SA",
+      "status": "ok",
+      "vs_ibovespa_pct": -22.405181352932097,
+      "vs_dollar_pct": 10.196769372583411,
+      "name": "Lojas Renner S.A.",
+      "period": "1y",
+      "interval": "1d",
+      "period_start": "2025-06-05",
+      "period_end": "2026-06-05",
+      "initial_balance": 10000.0,
+      "total_value": 10165.82086467743,
+      "gain_amount": 165.8208646774292,
+      "return_pct": 1.658208646774292,
+      "trade_count": 2,
+      "buys": 1,
+      "sells": 1,
+      "final_shares": 0,
+      "final_balance": 10165.82086467743,
+      "final_position": "Sold",
+      "vs_buy_hold_pct": 16.211239013671875,
+      "buy_hold_total_value": 8544.696963310242,
+      "buy_hold_gain_amount": -1455.3030366897583,
+      "buy_hold_return_pct": -14.553030366897582,
+      "buy_hold_shares": 573,
+      "buy_hold_entry_price": 17.42979621887207,
+      "buy_hold_exit_price": 14.890000343322754,
+      "output": [
+        {
+          "Action": "Buy",
+          "Message": "Bought at 14.28; balance: 2500.79"
+        },
+        {
+          "Action": "Sell",
+          "Message": "Sold at 14.75; balance: 10165.82"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Final position: Sold (0 shares, cash R$ 10165.82)"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Buy & hold: R$ -1455.30 (-14.55%) \u00b7 Strategy vs buy & hold: +16.21 pp"
+        }
+      ],
+      "graph_path": "static/bi_cache/graphs/48.json"
+    },
+    {
+      "test_id": 49,
+      "algorithm": "20-day breakout",
+      "symbol": "CYRE3.SA",
+      "status": "ok",
+      "vs_ibovespa_pct": -24.063389999706388,
+      "vs_dollar_pct": 8.53856072580912,
+      "name": "Cyrela Brazil Realty S.A. Empreendimentos e Participa\u00e7\u00f5es",
+      "period": "1y",
+      "interval": "1d",
+      "period_start": "2025-06-05",
+      "period_end": "2026-06-05",
+      "initial_balance": 10000.0,
+      "total_value": 10000.0,
+      "gain_amount": 0.0,
+      "return_pct": 0.0,
+      "trade_count": 0,
+      "buys": 0,
+      "sells": 0,
+      "final_shares": 0,
+      "final_balance": 10000.0,
+      "final_position": "Neutral",
+      "vs_buy_hold_pct": 15.64932346343994,
+      "buy_hold_total_value": 8435.067653656006,
+      "buy_hold_gain_amount": -1564.9323463439941,
+      "buy_hold_return_pct": -15.64932346343994,
+      "buy_hold_shares": 425,
+      "buy_hold_entry_price": 23.51219367980957,
+      "buy_hold_exit_price": 19.829999923706055,
+      "output": [
+        {
+          "Action": "Summary",
+          "Message": "Final position: Neutral (0 shares, cash R$ 10000.00)"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Buy & hold: R$ -1564.93 (-15.65%) \u00b7 Strategy vs buy & hold: +15.65 pp"
+        }
+      ],
+      "graph_path": "static/bi_cache/graphs/49.json"
+    },
+    {
+      "test_id": 50,
+      "algorithm": "20-day breakout",
+      "symbol": "SUZB3.SA",
+      "status": "ok",
+      "vs_ibovespa_pct": -24.063389999706388,
+      "vs_dollar_pct": 8.53856072580912,
+      "name": "Suzano S.A.",
+      "period": "1y",
+      "interval": "1d",
+      "period_start": "2025-06-05",
+      "period_end": "2026-06-05",
+      "initial_balance": 10000.0,
+      "total_value": 10000.0,
+      "gain_amount": 0.0,
+      "return_pct": 0.0,
+      "trade_count": 0,
+      "buys": 0,
+      "sells": 0,
+      "final_shares": 0,
+      "final_balance": 10000.0,
+      "final_position": "Neutral",
+      "vs_buy_hold_pct": 19.363397331237792,
+      "buy_hold_total_value": 8063.660266876221,
+      "buy_hold_gain_amount": -1936.3397331237793,
+      "buy_hold_return_pct": -19.363397331237792,
+      "buy_hold_shares": 193,
+      "buy_hold_entry_price": 51.772850036621094,
+      "buy_hold_exit_price": 41.7400016784668,
+      "output": [
+        {
+          "Action": "Summary",
+          "Message": "Final position: Neutral (0 shares, cash R$ 10000.00)"
+        },
+        {
+          "Action": "Summary",
+          "Message": "Buy & hold: R$ -1936.34 (-19.36%) \u00b7 Strategy vs buy & hold: +19.36 pp"
+        }
+      ],
+      "graph_path": "static/bi_cache/graphs/50.json"
+    }
+  ]
+}

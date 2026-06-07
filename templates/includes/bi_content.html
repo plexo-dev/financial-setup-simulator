@@ -1,0 +1,457 @@
+{% set expanded = expanded|default(false) %}
+{% set export_mode = export_mode|default(false) %}
+
+{% if not export_mode %}
+    <nav class="backtest-nav mb-4 d-flex flex-wrap align-items-center gap-2">
+        <div class="d-flex flex-wrap align-items-center">
+            <a href="/" class="back-link">← New simulation</a>
+            <span class="text-muted mx-2">·</span>
+            <a href="/bi?refresh=1" class="back-link">Refresh data</a>
+            <span class="text-muted mx-2">·</span>
+            <a href="{{ report_url }}" class="back-link">View markdown</a>
+        </div>
+        <div class="bi-export-actions d-flex flex-wrap gap-2 ms-md-auto">
+            <a href="/bi/export/html" class="btn btn-sm btn-outline-primary" download>Download HTML</a>
+            <button type="button" class="btn btn-sm btn-outline-primary" id="biDownloadPng">Download PNG</button>
+            <a href="/bi/export/markdown" class="btn btn-sm btn-outline-primary" download>Download Markdown</a>
+        </div>
+    </nav>
+{% endif %}
+
+<header class="backtest-header mb-4">
+    <h1 class="fs-2 mb-1">Strategy benchmark</h1>
+    <p class="text-muted mb-0">{{ market }} · {{ scenario }}</p>
+    <p class="text-muted small mb-0">Historical simulation (not live trading) · Last updated {{ generated_at }}</p>
+</header>
+
+<section class="mb-4">
+    <h2 class="fs-5 mb-3">Market context ({{ period }} / {{ interval }})</h2>
+    <div class="summary-grid bi-summary mb-3">
+        <div class="summary-card">
+            <span class="summary-label">Ibovespa</span>
+            <span class="summary-value benchmark-ibov">{{ "%.2f"|format(summary.ibovespa_return_pct) }}%</span>
+        </div>
+        <div class="summary-card">
+            <span class="summary-label">USD/BRL</span>
+            <span class="summary-value benchmark-dollar">{{ "%.2f"|format(summary.dollar_return_pct) }}%</span>
+        </div>
+        <div class="summary-card">
+            <span class="summary-label">Avg buy &amp; hold</span>
+            <span class="summary-value benchmark-buyhold">{{ "%.2f"|format(summary.avg_buy_hold_pct) }}%</span>
+        </div>
+        <div class="summary-card">
+            <span class="summary-label">Avg strategy</span>
+            <span class="summary-value {% if summary.avg_return_pct >= 0 %}gain-positive{% else %}gain-negative{% endif %}">
+                {{ "%.2f"|format(summary.avg_return_pct) }}%
+            </span>
+        </div>
+        <div class="summary-card">
+            <span class="summary-label">Beat buy &amp; hold</span>
+            <span class="summary-value">{{ summary.beat_buy_hold_count }} / {{ test_count }}</span>
+        </div>
+        <div class="summary-card">
+            <span class="summary-label">Beat Ibovespa</span>
+            <span class="summary-value">{{ summary.beat_ibovespa_count }} / {{ test_count }}</span>
+        </div>
+        <div class="summary-card">
+            <span class="summary-label">Beat USD/BRL</span>
+            <span class="summary-value">{{ summary.beat_dollar_count }} / {{ test_count }}</span>
+        </div>
+        <div class="summary-card">
+            <span class="summary-label">Avg vs buy &amp; hold</span>
+            <span class="summary-value {% if summary.avg_vs_buy_hold_pct >= 0 %}gain-positive{% else %}gain-negative{% endif %}">
+                {{ "%+.2f"|format(summary.avg_vs_buy_hold_pct) }} pp
+            </span>
+        </div>
+    </div>
+    <div id="benchmark-chart" class="chart bi-chart mb-3" role="img" aria-label="Benchmark comparison chart"></div>
+    <div id="ibovespa-chart" class="chart bi-chart mb-3" role="img" aria-label="Ibovespa indexed performance"></div>
+    <div id="dollar-chart" class="chart bi-chart mb-3" role="img" aria-label="USD/BRL indexed performance"></div>
+</section>
+
+<div class="summary-grid bi-summary mb-4">
+    <div class="summary-card">
+        <span class="summary-label">Tests run</span>
+        <span class="summary-value">{{ test_count }}</span>
+    </div>
+    <div class="summary-card">
+        <span class="summary-label">Algorithms · Stocks</span>
+        <span class="summary-value">{{ algorithm_count }} · {{ stock_count }}</span>
+    </div>
+    <div class="summary-card">
+        <span class="summary-label">Best run</span>
+        <span class="summary-value gain-positive">{{ "%.2f"|format(summary.best_return_pct) }}%</span>
+    </div>
+    <div class="summary-card">
+        <span class="summary-label">Worst run</span>
+        <span class="summary-value gain-negative">{{ "%.2f"|format(summary.worst_return_pct) }}%</span>
+    </div>
+</div>
+
+<div id="comparison-chart" class="chart bi-chart mb-5" role="img" aria-label="Strategy vs buy and hold by algorithm"></div>
+
+<section class="mb-5">
+    <div class="bi-accordion-toolbar d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+        <h2 class="fs-4 mb-0">Algorithms ({{ algorithm_catalog | length }})</h2>
+        {% if not expanded %}
+            <button
+                type="button"
+                class="btn btn-sm btn-outline-secondary"
+                id="algoAccordionToggle"
+                aria-expanded="false"
+                aria-controls="algoReferenceAccordion"
+            >
+                Expand all
+            </button>
+        {% endif %}
+    </div>
+    <p class="text-muted small mb-3">
+        Performance, theory, and source code for each strategy. All algorithms share the same
+        <code>process_data</code> / <code>check_buying_conditions</code> / <code>check_selling_conditions</code> contract.
+    </p>
+    <div class="accordion" id="algoReferenceAccordion">
+        {% for algo in algorithm_catalog %}
+            <div class="accordion-item">
+                <h3 class="accordion-header" id="algo-heading-{{ loop.index }}">
+                    {% if expanded %}
+                        <div class="accordion-button">
+                            <span class="bi-test-title">{{ algo.name }}</span>
+                            {% if algo.performance %}
+                                <span class="bi-test-return ms-2 {% if algo.performance.avg_return_pct >= 0 %}gain-positive{% else %}gain-negative{% endif %}">
+                                    {{ "%.2f"|format(algo.performance.avg_return_pct) }}% avg
+                                </span>
+                            {% endif %}
+                            <span class="badge bg-secondary ms-auto">{{ algo.theory.style }}</span>
+                        </div>
+                    {% else %}
+                        <button
+                            class="accordion-button collapsed"
+                            type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#algo-collapse-{{ loop.index }}"
+                            aria-expanded="false"
+                            aria-controls="algo-collapse-{{ loop.index }}"
+                        >
+                            <span class="bi-test-title">{{ algo.name }}</span>
+                            {% if algo.performance %}
+                                <span class="bi-test-return ms-2 {% if algo.performance.avg_return_pct >= 0 %}gain-positive{% else %}gain-negative{% endif %}">
+                                    {{ "%.2f"|format(algo.performance.avg_return_pct) }}% avg
+                                </span>
+                            {% endif %}
+                            <span class="badge bg-secondary ms-auto me-2">{{ algo.theory.style }}</span>
+                        </button>
+                    {% endif %}
+                </h3>
+                <div
+                    id="algo-collapse-{{ loop.index }}"
+                    class="accordion-collapse collapse{% if expanded %} show{% endif %}"
+                    aria-labelledby="algo-heading-{{ loop.index }}"
+                    {% if not expanded %}data-bs-parent="#algoReferenceAccordion"{% endif %}
+                >
+                    <div class="accordion-body">
+                        {% if algo.performance %}
+                            <div class="bi-compare-grid mb-3">
+                                <div class="summary-card">
+                                    <span class="summary-label">Avg strategy</span>
+                                    <span class="summary-value {% if algo.performance.avg_return_pct >= 0 %}gain-positive{% else %}gain-negative{% endif %}">
+                                        {{ "%.2f"|format(algo.performance.avg_return_pct) }}%
+                                    </span>
+                                </div>
+                                <div class="summary-card">
+                                    <span class="summary-label">Avg buy &amp; hold</span>
+                                    <span class="summary-value benchmark-buyhold">{{ "%.2f"|format(algo.performance.avg_buy_hold_pct) }}%</span>
+                                </div>
+                                <div class="summary-card">
+                                    <span class="summary-label">Avg vs B&amp;H</span>
+                                    <span class="summary-value {% if algo.performance.avg_vs_buy_hold_pct >= 0 %}gain-positive{% else %}gain-negative{% endif %}">
+                                        {{ "%+.2f"|format(algo.performance.avg_vs_buy_hold_pct) }} pp
+                                    </span>
+                                </div>
+                                <div class="summary-card">
+                                    <span class="summary-label">Beat B&amp;H</span>
+                                    <span class="summary-value">{{ algo.performance.beat_buy_hold_count }} / {{ algo.performance.run_count }}</span>
+                                </div>
+                                <div class="summary-card">
+                                    <span class="summary-label">Beat Ibovespa</span>
+                                    <span class="summary-value">{{ algo.performance.beat_ibovespa_count }} / {{ algo.performance.run_count }}</span>
+                                </div>
+                                <div class="summary-card">
+                                    <span class="summary-label">Beat USD/BRL</span>
+                                    <span class="summary-value">{{ algo.performance.beat_dollar_count }} / {{ algo.performance.run_count }}</span>
+                                </div>
+                                <div class="summary-card">
+                                    <span class="summary-label">Best · Worst</span>
+                                    <span class="summary-value">
+                                        <span class="gain-positive">{{ "%.2f"|format(algo.performance.best_return_pct) }}%</span>
+                                        <span class="text-muted"> · </span>
+                                        <span class="gain-negative">{{ "%.2f"|format(algo.performance.worst_return_pct) }}%</span>
+                                    </span>
+                                </div>
+                                <div class="summary-card">
+                                    <span class="summary-label">Profitable runs</span>
+                                    <span class="summary-value">{{ algo.performance.positive_runs }} / {{ algo.performance.run_count }}</span>
+                                </div>
+                            </div>
+                            <div class="table-responsive mb-4">
+                                <table class="table table-sm table-hover align-middle algo-perf-table mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Symbol</th>
+                                            <th scope="col">Strategy</th>
+                                            <th scope="col">Buy &amp; hold</th>
+                                            <th scope="col">vs B&amp;H</th>
+                                            <th scope="col">vs Ibov</th>
+                                            <th scope="col">vs USD</th>
+                                            <th scope="col">Trades</th>
+                                            <th scope="col">Position</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for run in algo.performance.runs %}
+                                            <tr>
+                                                <td>{{ run.symbol }}</td>
+                                                <td class="{% if run.return_pct >= 0 %}gain-positive{% else %}gain-negative{% endif %}">{{ "%.2f"|format(run.return_pct) }}%</td>
+                                                <td>{{ "%.2f"|format(run.buy_hold_return_pct) }}%</td>
+                                                <td class="{% if run.vs_buy_hold_pct >= 0 %}gain-positive{% else %}gain-negative{% endif %}">{{ "%+.2f"|format(run.vs_buy_hold_pct) }} pp</td>
+                                                <td class="{% if run.vs_ibovespa_pct >= 0 %}gain-positive{% else %}gain-negative{% endif %}">{{ "%+.2f"|format(run.vs_ibovespa_pct) }} pp</td>
+                                                <td class="{% if run.vs_dollar_pct >= 0 %}gain-positive{% else %}gain-negative{% endif %}">{{ "%+.2f"|format(run.vs_dollar_pct) }} pp</td>
+                                                <td>{{ run.trade_count }}</td>
+                                                <td class="position-{{ run.final_position | lower }}">{{ run.final_position }}</td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% endif %}
+                        <div class="algo-theory mb-4">
+                            <p class="mb-3">{{ algo.theory.summary }}</p>
+                            <dl class="algo-theory-grid mb-0">
+                                <div class="algo-theory-item">
+                                    <dt>Indicators</dt>
+                                    <dd>{{ algo.theory.indicators }}</dd>
+                                </div>
+                                <div class="algo-theory-item">
+                                    <dt>Buy logic</dt>
+                                    <dd>{{ algo.theory.buy }}</dd>
+                                </div>
+                                <div class="algo-theory-item">
+                                    <dt>Sell logic</dt>
+                                    <dd>{{ algo.theory.sell }}</dd>
+                                </div>
+                            </dl>
+                        </div>
+                        <div class="algo-code-block">
+                            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
+                                <h4 class="fs-6 mb-0">Source · <code class="small">{{ algo.path }}</code></h4>
+                            </div>
+                            <pre class="algo-code mb-0" tabindex="0"><code>{{ algo.code }}</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</section>
+
+<section class="trade-log">
+    <div class="bi-accordion-toolbar d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+        <h2 class="fs-4 mb-0">Individual tests ({{ test_count }} = {{ algorithm_count }} algos × {{ stock_count }} stocks)</h2>
+        {% if not expanded %}
+            <button
+                type="button"
+                class="btn btn-sm btn-outline-secondary"
+                id="biAccordionToggle"
+                aria-expanded="false"
+                aria-controls="biTestsAccordion"
+            >
+                Expand all
+            </button>
+        {% endif %}
+    </div>
+    <div class="accordion" id="biTestsAccordion">
+        {% for row in results %}
+            <div class="accordion-item">
+                <h3 class="accordion-header" id="test-heading-{{ row.test_id }}">
+                    {% if expanded %}
+                        <div class="accordion-button">
+                            <span class="bi-test-title">
+                                #{{ row.test_id }} · {{ row.algorithm }} · {{ row.symbol }}
+                                {% if row.name %}<span class="text-muted">({{ row.name }})</span>{% endif %}
+                            </span>
+                            {% if row.status != "error" %}
+                                <span class="bi-test-position me-2 position-{{ row.final_position | lower }}">{{ row.final_position }}</span>
+                                <span class="bi-test-return ms-auto me-2 {% if row.return_pct >= 0 %}gain-positive{% else %}gain-negative{% endif %}">
+                                    {{ "%.2f"|format(row.return_pct) }}%
+                                </span>
+                            {% else %}
+                                <span class="bi-test-return ms-auto me-2 gain-negative">Error</span>
+                            {% endif %}
+                        </div>
+                    {% else %}
+                        <button
+                            class="accordion-button {% if not loop.first %}collapsed{% endif %}"
+                            type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#test-collapse-{{ row.test_id }}"
+                            aria-expanded="{% if loop.first %}true{% else %}false{% endif %}"
+                            aria-controls="test-collapse-{{ row.test_id }}"
+                        >
+                            <span class="bi-test-title">
+                                #{{ row.test_id }} · {{ row.algorithm }} · {{ row.symbol }}
+                                {% if row.name %}<span class="text-muted">({{ row.name }})</span>{% endif %}
+                            </span>
+                            <span class="bi-test-position me-2 position-{{ row.final_position | lower }}">{{ row.final_position }}</span>
+                            <span class="bi-test-return ms-auto me-2 {% if row.return_pct >= 0 %}gain-positive{% else %}gain-negative{% endif %}">
+                                {% if row.status == "error" %}
+                                    Error
+                                {% else %}
+                                    {{ "%.2f"|format(row.return_pct) }}%
+                                {% endif %}
+                            </span>
+                        </button>
+                    {% endif %}
+                </h3>
+                <div
+                    id="test-collapse-{{ row.test_id }}"
+                    class="accordion-collapse collapse{% if expanded or loop.first %} show{% endif %}"
+                    aria-labelledby="test-heading-{{ row.test_id }}"
+                    {% if not expanded %}data-bs-parent="#biTestsAccordion"{% endif %}
+                >
+                    <div class="accordion-body">
+                        {% if row.status == "error" %}
+                            <div class="bi-test-setup mb-3">
+                                <dl class="bi-test-setup-grid mb-0">
+                                    <div class="bi-test-setup-item">
+                                        <dt>Symbol</dt>
+                                        <dd>{{ row.symbol }}{% if row.name %} <span class="text-muted">· {{ row.name }}</span>{% endif %}</dd>
+                                    </div>
+                                    <div class="bi-test-setup-item">
+                                        <dt>Algorithm</dt>
+                                        <dd>{{ row.algorithm }}</dd>
+                                    </div>
+                                    <div class="bi-test-setup-item">
+                                        <dt>Timespan</dt>
+                                        <dd>{{ row.period | default(period) }} / {{ row.interval | default(interval) }}</dd>
+                                    </div>
+                                    {% if row.period_start and row.period_end %}
+                                    <div class="bi-test-setup-item">
+                                        <dt>Date range</dt>
+                                        <dd>{{ row.period_start }} → {{ row.period_end }}</dd>
+                                    </div>
+                                    {% endif %}
+                                </dl>
+                            </div>
+                            <div class="alert alert-danger mb-0" role="alert">{{ row.error }}</div>
+                        {% else %}
+                            <div class="bi-test-setup mb-3">
+                                <dl class="bi-test-setup-grid mb-0">
+                                    <div class="bi-test-setup-item">
+                                        <dt>Symbol</dt>
+                                        <dd>{{ row.symbol }}{% if row.name %} <span class="text-muted">· {{ row.name }}</span>{% endif %}</dd>
+                                    </div>
+                                    <div class="bi-test-setup-item">
+                                        <dt>Algorithm</dt>
+                                        <dd>{{ row.algorithm }}</dd>
+                                    </div>
+                                    <div class="bi-test-setup-item">
+                                        <dt>Timespan</dt>
+                                        <dd>{{ row.period }} / {{ row.interval }}</dd>
+                                    </div>
+                                    {% if row.period_start and row.period_end %}
+                                    <div class="bi-test-setup-item">
+                                        <dt>Date range</dt>
+                                        <dd>{{ row.period_start }} → {{ row.period_end }}</dd>
+                                    </div>
+                                    {% endif %}
+                                    <div class="bi-test-setup-item">
+                                        <dt>Starting balance</dt>
+                                        <dd>R$ {{ "%.2f"|format(row.initial_balance) }}</dd>
+                                    </div>
+                                    <div class="bi-test-setup-item">
+                                        <dt>Stock performance</dt>
+                                        <dd>
+                                            <span class="benchmark-buyhold {% if row.buy_hold_return_pct >= 0 %}gain-positive{% else %}gain-negative{% endif %}">
+                                                {{ "%+.2f"|format(row.buy_hold_return_pct) }}%
+                                            </span>
+                                            <span class="text-muted"> buy &amp; hold</span>
+                                            <span class="mx-1 text-muted">·</span>
+                                            R$ {{ "%.2f"|format(row.buy_hold_entry_price) }} → R$ {{ "%.2f"|format(row.buy_hold_exit_price) }}
+                                        </dd>
+                                    </div>
+                                    <div class="bi-test-setup-item">
+                                        <dt>Strategy vs stock</dt>
+                                        <dd>
+                                            {% if row.vs_buy_hold_pct > 0 %}
+                                                <span class="gain-positive">Beat buy &amp; hold by {{ "%.2f"|format(row.vs_buy_hold_pct) }} pp</span>
+                                            {% elif row.vs_buy_hold_pct < 0 %}
+                                                <span class="gain-negative">Missed buy &amp; hold by {{ "%.2f"|format(row.vs_buy_hold_pct | abs) }} pp</span>
+                                            {% else %}
+                                                <span class="text-muted">Matched buy &amp; hold</span>
+                                            {% endif %}
+                                        </dd>
+                                    </div>
+                                </dl>
+                            </div>
+                            <div class="bi-compare-grid mb-3">
+                                <div class="summary-card">
+                                    <span class="summary-label">Strategy</span>
+                                    <span class="summary-value {% if row.return_pct >= 0 %}gain-positive{% else %}gain-negative{% endif %}">{{ "%.2f"|format(row.return_pct) }}%</span>
+                                </div>
+                                <div class="summary-card">
+                                    <span class="summary-label">Buy &amp; hold</span>
+                                    <span class="summary-value benchmark-buyhold">{{ "%.2f"|format(row.buy_hold_return_pct) }}%</span>
+                                </div>
+                                <div class="summary-card">
+                                    <span class="summary-label">vs buy &amp; hold</span>
+                                    <span class="summary-value {% if row.vs_buy_hold_pct >= 0 %}gain-positive{% else %}gain-negative{% endif %}">{{ "%+.2f"|format(row.vs_buy_hold_pct) }} pp</span>
+                                </div>
+                                <div class="summary-card">
+                                    <span class="summary-label">vs Ibovespa</span>
+                                    <span class="summary-value {% if row.vs_ibovespa_pct >= 0 %}gain-positive{% else %}gain-negative{% endif %}">{{ "%+.2f"|format(row.vs_ibovespa_pct) }} pp</span>
+                                </div>
+                                <div class="summary-card">
+                                    <span class="summary-label">vs USD/BRL</span>
+                                    <span class="summary-value {% if row.vs_dollar_pct >= 0 %}gain-positive{% else %}gain-negative{% endif %}">{{ "%+.2f"|format(row.vs_dollar_pct) }} pp</span>
+                                </div>
+                            </div>
+                            <div class="bi-test-meta mb-3">
+                                <span><strong>Trades:</strong> {{ row.trade_count }} ({{ row.buys }}B / {{ row.sells }}S)</span>
+                                <span class="mx-2 text-muted">·</span>
+                                <span><strong>Final:</strong> <span class="position-{{ row.final_position | lower }}">{{ row.final_position }}</span> ({{ row.final_shares }} shares)</span>
+                            </div>
+                            <p class="chart-legend text-muted small mb-2">Red ▲ buy · Green ▼ sell</p>
+                            {% if row.graph %}
+                                <div id="test-chart-{{ row.test_id }}" class="chart bi-test-chart mb-3" role="img" aria-label="Backtest chart for {{ row.symbol }}"></div>
+                                <script type="application/json" id="test-graph-{{ row.test_id }}">{{ row.graph | tojson }}</script>
+                            {% endif %}
+                            {% if row.output %}
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-hover align-middle mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">Action</th>
+                                                <th scope="col">Message</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for entry in row.output %}
+                                                <tr class="{% if entry['Action'] == 'Buy' %}log-buy{% elif entry['Action'] == 'Sell' %}log-sell{% else %}log-summary{% endif %}">
+                                                    <td>{{ entry["Action"] }}</td>
+                                                    <td>{{ entry["Message"] }}</td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <p class="text-muted mb-0">No trades executed in this run.</p>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</section>
+
+<div id="chart-data" style="display:none;">{{ chart_data | safe }}</div>
