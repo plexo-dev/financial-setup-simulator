@@ -19,17 +19,37 @@
     <div class="summary-grid mb-4">
         <div class="summary-card">
             <span class="summary-label">Portfolio value</span>
-            <span class="summary-value">${{ total_value }}</span>
+            <span class="summary-value">R$ {{ total_value }}</span>
         </div>
         <div class="summary-card">
             <span class="summary-label">Starting balance</span>
-            <span class="summary-value">${{ initial_balance }}</span>
+            <span class="summary-value">R$ {{ initial_balance }}</span>
         </div>
         <div class="summary-card">
             <span class="summary-label">Simulated return</span>
             <span class="summary-value {% if gain_positive %}gain-positive{% else %}gain-negative{% endif %}">
-                {% if gain_positive %}+{% endif %}${{ gain_amount }} ({{ return_pct }}%)
+                {% if gain_positive %}+{% endif %}R$ {{ gain_amount }} ({{ return_pct }}%)
             </span>
+        </div>
+        <div class="summary-card">
+            <span class="summary-label">Final position</span>
+            <span class="summary-value position-{{ final_position | lower }}">{{ final_position }}</span>
+            <span class="summary-label mt-1">{{ final_shares }} shares at end</span>
+        </div>
+        <div class="summary-card">
+            <span class="summary-label">Buy &amp; hold</span>
+            <span class="summary-value benchmark-buyhold">{{ buy_hold_return_pct }}%</span>
+            <span class="summary-label mt-1">vs strategy: {{ vs_buy_hold_pct }} pp</span>
+        </div>
+        <div class="summary-card">
+            <span class="summary-label">Ibovespa</span>
+            <span class="summary-value benchmark-ibov">{{ ibovespa_return_pct }}%</span>
+            <span class="summary-label mt-1">vs strategy: {{ vs_ibovespa_pct }} pp</span>
+        </div>
+        <div class="summary-card">
+            <span class="summary-label">USD/BRL</span>
+            <span class="summary-value benchmark-dollar">{{ dollar_return_pct }}%</span>
+            <span class="summary-label mt-1">vs strategy: {{ vs_dollar_pct }} pp</span>
         </div>
     </div>
 
