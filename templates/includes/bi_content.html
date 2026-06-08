@@ -9,7 +9,11 @@
             <span class="text-muted mx-2">·</span>
             <a href="/about" class="back-link">Sobre</a>
             <span class="text-muted mx-2">·</span>
-            <a href="/bi?refresh=1" class="back-link" id="biRefreshData">Atualizar dados</a>
+            {% if refresh_blocked %}
+                <span class="text-muted small" id="biRefreshData" title="{{ refresh_message }}">Atualizar dados (indisponível)</span>
+            {% else %}
+                <a href="/bi?refresh=1" class="back-link" id="biRefreshData">Atualizar dados</a>
+            {% endif %}
             <span class="text-muted mx-2">·</span>
             <button type="button" class="back-link border-0 bg-transparent p-0" id="biCopyMarkdown">Copiar markdown</button>
         </div>
@@ -25,6 +29,9 @@
     <h1 class="fs-2 mb-1">Benchmark de estratégias ajustado ao risco</h1>
     <p class="text-muted mb-0">{{ market }} · {{ scenario }}</p>
     <p class="text-muted small mb-0">Simulação histórica (não é trading ao vivo) · Atualizado em {{ generated_at }}</p>
+    {% if refresh_message %}
+        <p class="text-muted small mb-0">{{ refresh_message }}</p>
+    {% endif %}
     {% if summary.thesis %}
         <p class="bi-thesis mt-3 mb-0">{{ summary.thesis }}</p>
     {% endif %}

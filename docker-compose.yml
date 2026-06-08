@@ -1,0 +1,31 @@
+services:
+  trade_robot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: trade_robot
+    restart: unless-stopped
+    env_file:
+      - .env
+    expose:
+      - "8000"
+    volumes:
+      - ./data/bi_cache:/app/static/bi_cache
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 120s
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 1G
+    networks:
+      plexo:
+        ipv4_address: 172.18.0.3
+
+networks:
+  plexo:
+    external: true

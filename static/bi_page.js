@@ -17,7 +17,7 @@
 
     const refreshLink = document.getElementById('biRefreshData');
     const loadingScreen = document.getElementById('loading-screen');
-    if (refreshLink && loadingScreen) {
+    if (refreshLink && loadingScreen && refreshLink.tagName === 'A') {
         refreshLink.addEventListener('click', function () {
             loadingScreen.style.display = 'flex';
         });
