@@ -1,0 +1,35 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Benchmark de estratégias
+{% endblock %}
+
+{% block main %}
+    <div id="loading-screen" class="loading-screen" style="display: none;" aria-live="polite" aria-busy="true">
+        <p class="loading-label">Atualizando dados do benchmark…</p>
+        <div class="spinner center">
+            <div class="spinner-blade"></div>
+            <div class="spinner-blade"></div>
+            <div class="spinner-blade"></div>
+            <div class="spinner-blade"></div>
+            <div class="spinner-blade"></div>
+            <div class="spinner-blade"></div>
+            <div class="spinner-blade"></div>
+            <div class="spinner-blade"></div>
+            <div class="spinner-blade"></div>
+            <div class="spinner-blade"></div>
+            <div class="spinner-blade"></div>
+            <div class="spinner-blade"></div>
+        </div>
+    </div>
+
+    <div id="bi-page-content">
+        {% include "includes/bi_content.html" %}
+    </div>
+{% endblock %}
+
+{% block script %}
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <script src="/static/bi_page.js"></script>
+{% endblock %}

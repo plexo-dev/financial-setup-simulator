@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Exportação do benchmark de estratégias</title>
+        <style>{{ inline_bootstrap_css | safe }}</style>
+        <style>{{ inline_css | safe }}</style>
+        <style>
+            .accordion-button:not(.collapsed) {
+                box-shadow: none;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="bi-page-content">
+            {% include "includes/bi_content.html" %}
+        </div>
+        <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+        <script>window.BI_RENDER_ALL_CHARTS = true;</script>
+        <script>{{ bi_page_js | safe }}</script>
+    </body>
+</html>

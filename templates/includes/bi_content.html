@@ -1,0 +1,695 @@
+{% from "macros/bi_metric.html" import bi_label, bi_th, bi_section, bi_chart_note, bi_dt, bi_section_info, bi_value, bi_status_legend %}
+{% set expanded = expanded|default(false) %}
+{% set export_mode = export_mode|default(false) %}
+
+{% if not export_mode %}
+    <nav class="backtest-nav mb-4 d-flex flex-wrap align-items-center gap-2">
+        <div class="d-flex flex-wrap align-items-center">
+            <a href="/" class="back-link">← Nova simulação</a>
+            <span class="text-muted mx-2">·</span>
+            <a href="/about" class="back-link">Sobre</a>
+            <span class="text-muted mx-2">·</span>
+            <a href="/bi?refresh=1" class="back-link" id="biRefreshData">Atualizar dados</a>
+            <span class="text-muted mx-2">·</span>
+            <button type="button" class="back-link border-0 bg-transparent p-0" id="biCopyMarkdown">Copiar markdown</button>
+        </div>
+        <div class="bi-export-actions d-flex flex-wrap gap-2 ms-md-auto">
+            <a href="/bi/export/html" class="btn btn-sm btn-outline-primary" download>Baixar HTML</a>
+            <button type="button" class="btn btn-sm btn-outline-primary" id="biDownloadPng">Baixar PNG</button>
+            <a href="/bi/export/markdown" class="btn btn-sm btn-outline-primary" download>Baixar Markdown</a>
+        </div>
+    </nav>
+{% endif %}
+
+<header class="backtest-header mb-4">
+    <h1 class="fs-2 mb-1">Benchmark de estratégias ajustado ao risco</h1>
+    <p class="text-muted mb-0">{{ market }} · {{ scenario }}</p>
+    <p class="text-muted small mb-0">Simulação histórica (não é trading ao vivo) · Atualizado em {{ generated_at }}</p>
+    {% if summary.thesis %}
+        <p class="bi-thesis mt-3 mb-0">{{ summary.thesis }}</p>
+    {% endif %}
+    {% if summary.conclusion %}
+        <p class="bi-conclusion mt-2 mb-0">{{ summary.conclusion }}</p>
+    {% endif %}
+    <p class="text-muted small mt-2 mb-0">
+        Baixa captura de alta/baixa com pouco tempo no mercado costuma significar caixa, não timing seletivo.
+        Faixa alvo: 50–70% captura de alta, 20–40% captura de baixa.
+    </p>
+</header>
+
+<hr class="bi-section-rule" aria-hidden="true">
+
+<section class="bi-section-wrap mb-4">
+    {{ bi_section_info('risk_efficiency') }}
+    {{ bi_section('risk_efficiency', 'Eficiência de risco (' ~ period ~ ' / ' ~ interval ~ ')', tag='h2', class='fs-5 mb-3') }}
+    {{ bi_status_legend() }}
+    <div class="summary-grid bi-summary mb-3">
+        <div class="summary-card">
+            {{ bi_label('sharpe', label='Sharpe médio', extra_class='summary-label') }}
+            <span class="summary-value">{{ bi_value('sharpe', summary.avg_sharpe|default(0), display='%.2f'|format(summary.avg_sharpe|default(0)), context={'buy_hold_sharpe': summary.avg_buy_hold_sharpe|default(0)}) }}</span>
+        </div>
+        <div class="summary-card">
+            {{ bi_label('buy_hold_sharpe', extra_class='summary-label') }}
+            <span class="summary-value benchmark-buyhold">{{ "%.2f"|format(summary.avg_buy_hold_sharpe|default(0)) }}</span>
+        </div>
+        <div class="summary-card">
+            {{ bi_label('max_drawdown', label='Drawdown máx. médio', extra_class='summary-label') }}
+            <span class="summary-value">{{ bi_value('max_drawdown', summary.avg_max_drawdown_pct|default(0), display='%.1f'|format(summary.avg_max_drawdown_pct|default(0)) ~ '%', context={'reference': summary.avg_buy_hold_max_drawdown_pct|default(0)}) }}</span>
+        </div>
+        <div class="summary-card">
+            {{ bi_label('buy_hold_max_drawdown', label='DD máx. C&M', extra_class='summary-label') }}
+            <span class="summary-value benchmark-buyhold">{{ "%.1f"|format(summary.avg_buy_hold_max_drawdown_pct|default(0)) }}%</span>
+        </div>
+        <div class="summary-card">
+            {{ bi_label('downside_capture', extra_class='summary-label') }}
+            <span class="summary-value">
+                {% if summary.avg_downside_capture_pct is not none %}{{ bi_value('downside_capture', summary.avg_downside_capture_pct, display='%.0f'|format(summary.avg_downside_capture_pct) ~ '%') }}{% else %}—{% endif %}
+            </span>
+        </div>
+        <div class="summary-card">
+            {{ bi_label('upside_capture', extra_class='summary-label') }}
+            <span class="summary-value">
+                {% if summary.avg_upside_capture_pct is not none %}{{ bi_value('upside_capture', summary.avg_upside_capture_pct, display='%.0f'|format(summary.avg_upside_capture_pct) ~ '%') }}{% else %}—{% endif %}
+            </span>
+        </div>
+        <div class="summary-card">
+            {{ bi_label('time_in_market', extra_class='summary-label') }}
+            <span class="summary-value">{{ bi_value('time_in_market', summary.avg_exposure_pct|default(0), display='%.0f'|format(summary.avg_exposure_pct|default(0)) ~ '%') }}</span>
+        </div>
+        <div class="summary-card summary-card-muted">
+            {{ bi_label('zero_trade_runs', extra_class='summary-label') }}
+            <span class="summary-value text-muted">{{ bi_value('zero_trade_runs', summary.zero_trade_runs|default(0), display=summary.zero_trade_runs|default(0) ~ ' / ' ~ test_count, context={'total': test_count}) }}</span>
+        </div>
+    </div>
+
+    <div class="table-responsive mb-3">
+        <table class="table table-sm table-bordered bi-risk-table mb-0">
+            <thead>
+                <tr>
+                    <th scope="col">Métrica</th>
+                    <th scope="col" class="text-end">Estratégia (média)</th>
+                    <th scope="col" class="text-end">Comprar e manter (média)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>{{ bi_label('return', show_direction=false) }}</td>
+                    <td class="text-end">{{ "%.2f"|format(summary.avg_return_pct) }}%</td>
+                    <td class="text-end">{{ "%.2f"|format(summary.avg_buy_hold_pct) }}%</td>
+                </tr>
+                <tr>
+                    <td>{{ bi_label('volatility', show_direction=false) }}</td>
+                    <td class="text-end">{{ bi_value('volatility', summary.avg_volatility_pct|default(0), display='%.1f'|format(summary.avg_volatility_pct|default(0)) ~ '%', context={'reference': summary.avg_buy_hold_volatility_pct|default(0)}, align_end=true) }}</td>
+                    <td class="text-end">{{ "%.1f"|format(summary.avg_buy_hold_volatility_pct|default(0)) }}%</td>
+                </tr>
+                <tr>
+                    <td>{{ bi_label('max_drawdown', show_direction=false) }}</td>
+                    <td class="text-end">{{ bi_value('max_drawdown', summary.avg_max_drawdown_pct|default(0), display='%.1f'|format(summary.avg_max_drawdown_pct|default(0)) ~ '%', context={'reference': summary.avg_buy_hold_max_drawdown_pct|default(0)}, align_end=true) }}</td>
+                    <td class="text-end">{{ "%.1f"|format(summary.avg_buy_hold_max_drawdown_pct|default(0)) }}%</td>
+                </tr>
+                <tr>
+                    <td>{{ bi_label('sharpe', show_direction=false) }}</td>
+                    <td class="text-end">{{ bi_value('sharpe', summary.avg_sharpe|default(0), display='%.2f'|format(summary.avg_sharpe|default(0)), context={'buy_hold_sharpe': summary.avg_buy_hold_sharpe|default(0)}, align_end=true) }}</td>
+                    <td class="text-end">{{ "%.2f"|format(summary.avg_buy_hold_sharpe|default(0)) }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <section class="bi-section-wrap mb-4">
+        {{ bi_section_info('exposure_analysis') }}
+        {{ bi_section('exposure_analysis', tag='h3', class='fs-6 mb-2') }}
+        <div class="table-responsive mb-3">
+            <table class="table table-sm table-bordered bi-exposure-table mb-0">
+                <thead>
+                    <tr>
+                        {{ bi_th('strategy_name') }}
+                        {{ bi_th('time_in_market', align='text-end') }}
+                        {{ bi_th('avg_trades', align='text-end') }}
+                        {{ bi_th('zero_trade_runs', align='text-end') }}
+                        {{ bi_th('upside_capture', label='Capt. alta', align='text-end') }}
+                        {{ bi_th('downside_capture', label='Capt. baixa', align='text-end') }}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for algo in algorithm_catalog %}
+                        {% if algo.performance %}
+                            <tr>
+                                <td>{{ algo.name }}</td>
+                                <td class="text-end">{{ bi_value('exposure', algo.performance.avg_exposure_pct|default(0), display='%.1f'|format(algo.performance.avg_exposure_pct|default(0)) ~ '%', align_end=true) }}</td>
+                                <td class="text-end">{{ "%.1f"|format(algo.performance.avg_trades|default(0)) }}</td>
+                                <td class="text-end">{{ bi_value('zero_trade_runs', algo.performance.zero_trade_runs, display=algo.performance.zero_trade_runs ~ ' / ' ~ algo.performance.run_count, context={'total': algo.performance.run_count}, align_end=true) }}</td>
+                                <td class="text-end">{% if algo.performance.avg_upside_capture_pct is not none %}{{ bi_value('upside_capture', algo.performance.avg_upside_capture_pct, display='%.0f'|format(algo.performance.avg_upside_capture_pct) ~ '%', align_end=true) }}{% else %}—{% endif %}</td>
+                                <td class="text-end">{% if algo.performance.avg_downside_capture_pct is not none %}{{ bi_value('downside_capture', algo.performance.avg_downside_capture_pct, display='%.0f'|format(algo.performance.avg_downside_capture_pct) ~ '%', align_end=true) }}{% else %}—{% endif %}</td>
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    {% if summary.decomposition %}
+        <section class="bi-section-wrap mb-4">
+            {{ bi_section_info('decomposition') }}
+            {{ bi_section('decomposition', 'Sinal vs motor de risco (decomposição A/B/C)', tag='h3', class='fs-6 mb-2') }}
+            {% for algo in algorithm_catalog %}
+                {% set decomp = summary.decomposition.get(algo.name) %}
+                {% if decomp %}
+                    <div class="mb-3">
+                        <h4 class="fs-6 mb-2">{{ algo.name }}</h4>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        {{ bi_th('decomposition_version') }}
+                                        {{ bi_th('return', align='text-end') }}
+                                        {{ bi_th('max_drawdown', label='DD máx.', align='text-end') }}
+                                        {{ bi_th('exposure', align='text-end') }}
+                                        {{ bi_th('upside_capture', label='Capt. alta', align='text-end') }}
+                                        {{ bi_th('delta_return_vs_a', align='text-end') }}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for row in decomp %}
+                                        <tr>
+                                            <td>{{ row.label }}</td>
+                                            <td class="text-end">{{ "%.2f"|format(row.avg_return_pct) }}%</td>
+                                            <td class="text-end">{{ "%.1f"|format(row.avg_max_drawdown_pct) }}%</td>
+                                            <td class="text-end">{{ "%.1f"|format(row.avg_exposure_pct) }}%</td>
+                                            <td class="text-end">{% if row.avg_upside_capture_pct is not none %}{{ "%.0f"|format(row.avg_upside_capture_pct) }}%{% else %}—{% endif %}</td>
+                                            <td class="text-end">{{ "%+.2f"|format(row.delta_return_vs_signal_pp) }} pp</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </section>
+    {% endif %}
+
+    {{ bi_chart_note('chart_risk_scatter') }}
+    <div id="risk-scatter-chart" class="chart bi-chart mb-3" role="img" aria-label="Dispersão risco vs retorno"></div>
+    {{ bi_chart_note('chart_risk_score') }}
+    <div id="risk-score-chart" class="chart bi-chart mb-3" role="img" aria-label="Ranking do score de redução de risco"></div>
+    {{ bi_chart_note('chart_drawdown') }}
+    <div id="drawdown-chart" class="chart bi-chart mb-3" role="img" aria-label="Comparação de curvas de drawdown"></div>
+    {{ bi_chart_note('chart_rolling') }}
+    <div id="rolling-chart" class="chart bi-chart mb-3" role="img" aria-label="Sharpe móvel"></div>
+</section>
+
+<hr class="bi-section-rule" aria-hidden="true">
+
+<section class="bi-section-wrap mb-4">
+    {{ bi_section_info('market_context') }}
+    {{ bi_section('market_context', tag='h2', class='fs-5 mb-3') }}
+    <div class="summary-grid bi-summary mb-3">
+        <div class="summary-card">
+            {{ bi_label('ibovespa_return', label='Ibovespa', extra_class='summary-label') }}
+            <span class="summary-value benchmark-ibov">{{ "%.2f"|format(summary.ibovespa_return_pct) }}%</span>
+        </div>
+        <div class="summary-card">
+            {{ bi_label('dollar_return', label='USD/BRL', extra_class='summary-label') }}
+            <span class="summary-value benchmark-dollar">{{ "%.2f"|format(summary.dollar_return_pct) }}%</span>
+        </div>
+        <div class="summary-card">
+            {{ bi_label('tests_run', extra_class='summary-label') }}
+            <span class="summary-value">{{ test_count }}</span>
+        </div>
+        <div class="summary-card summary-card-muted">
+            {{ bi_label('beat_buy_hold', extra_class='summary-label') }}
+            <span class="summary-value text-muted">{{ summary.beat_buy_hold_count }} / {{ test_count }}</span>
+        </div>
+    </div>
+    {{ bi_chart_note('chart_benchmark') }}
+    <div id="benchmark-chart" class="chart bi-chart mb-3" role="img" aria-label="Gráfico de comparação de benchmarks"></div>
+    {{ bi_chart_note('chart_ibovespa') }}
+    <div id="ibovespa-chart" class="chart bi-chart mb-3" role="img" aria-label="Ibovespa indexado"></div>
+    {{ bi_chart_note('chart_dollar') }}
+    <div id="dollar-chart" class="chart bi-chart mb-3" role="img" aria-label="USD/BRL indexado"></div>
+</section>
+
+{{ bi_chart_note('chart_comparison') }}
+<div id="comparison-chart" class="chart bi-chart mb-3" role="img" aria-label="Comparação de retorno bruto por algoritmo"></div>
+
+<hr class="bi-section-rule" aria-hidden="true">
+
+<section class="mb-5 bi-section-wrap">
+    {{ bi_section_info('algorithms_catalog') }}
+    <div class="bi-accordion-toolbar d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+        <h2 class="fs-4 mb-0">Algoritmos ({{ algorithm_catalog | length }})</h2>
+        {% if not expanded %}
+            <button
+                type="button"
+                class="btn btn-sm btn-outline-secondary"
+                id="algoAccordionToggle"
+                aria-expanded="false"
+                aria-controls="algoReferenceAccordion"
+            >
+                Expandir tudo
+            </button>
+        {% endif %}
+    </div>
+    <p class="text-muted small mb-2">
+        Performance, teoria e código-fonte de cada estratégia. Todos os algoritmos compartilham o mesmo
+        contrato <code>process_data</code> / <code>check_buying_conditions</code> / <code>check_selling_conditions</code>.
+    </p>
+    <div class="algo-accordion-head text-muted small d-none d-md-grid px-3 mb-1" aria-hidden="true">
+        <span>Estratégia</span>
+        <span>Estilo</span>
+        <span class="text-end">Sharpe</span>
+        <span class="text-end">Risco</span>
+    </div>
+    <div class="accordion algo-accordion" id="algoReferenceAccordion">
+        {% for algo in algorithm_catalog %}
+            <div class="accordion-item">
+                <h3 class="accordion-header" id="algo-heading-{{ loop.index }}">
+                    {% if expanded %}
+                        <div class="accordion-button algo-accordion-btn">
+                            <span class="algo-row-name">{{ algo.name }}</span>
+                            <span class="algo-row-style d-none d-md-block"><span class="badge bg-secondary">{{ algo.theory.style }}</span></span>
+                            {% if algo.performance %}
+                                <span class="algo-row-metric">{{ "%.2f"|format(algo.performance.avg_sharpe|default(0)) }}</span>
+                                <span class="algo-row-metric">{{ "%.0f"|format(algo.performance.risk_score|default(0)) }}</span>
+                            {% else %}
+                                <span class="algo-row-metric text-muted">—</span>
+                                <span class="algo-row-metric text-muted">—</span>
+                            {% endif %}
+                        </div>
+                    {% else %}
+                        <button
+                            class="accordion-button collapsed algo-accordion-btn"
+                            type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#algo-collapse-{{ loop.index }}"
+                            aria-expanded="false"
+                            aria-controls="algo-collapse-{{ loop.index }}"
+                        >
+                            <span class="algo-row-name">{{ algo.name }}</span>
+                            <span class="algo-row-style d-none d-md-block"><span class="badge bg-secondary">{{ algo.theory.style }}</span></span>
+                            {% if algo.performance %}
+                                <span class="algo-row-metric">{{ "%.2f"|format(algo.performance.avg_sharpe|default(0)) }}</span>
+                                <span class="algo-row-metric">{{ "%.0f"|format(algo.performance.risk_score|default(0)) }}</span>
+                            {% else %}
+                                <span class="algo-row-metric text-muted">—</span>
+                                <span class="algo-row-metric text-muted">—</span>
+                            {% endif %}
+                        </button>
+                    {% endif %}
+                </h3>
+                <div
+                    id="algo-collapse-{{ loop.index }}"
+                    class="accordion-collapse collapse{% if expanded %} show{% endif %}"
+                    aria-labelledby="algo-heading-{{ loop.index }}"
+                    {% if not expanded %}data-bs-parent="#algoReferenceAccordion"{% endif %}
+                >
+                    <div class="accordion-body">
+                        {% if algo.performance %}
+                            <div class="bi-compare-grid mb-3">
+                                <div class="summary-card">
+                                    {{ bi_label('return', label='Estratégia média', extra_class='summary-label') }}
+                                    <span class="summary-value {% if algo.performance.avg_return_pct >= 0 %}gain-positive{% else %}gain-negative{% endif %}">
+                                        {{ "%.2f"|format(algo.performance.avg_return_pct) }}%
+                                    </span>
+                                </div>
+                                <div class="summary-card">
+                                    {{ bi_label('buy_hold_return', label='C&M médio', extra_class='summary-label') }}
+                                    <span class="summary-value benchmark-buyhold">{{ "%.2f"|format(algo.performance.avg_buy_hold_pct) }}%</span>
+                                </div>
+                                <div class="summary-card">
+                                    {{ bi_label('vs_buy_hold', label='Média vs C&M', extra_class='summary-label') }}
+                                    <span class="summary-value {% if algo.performance.avg_vs_buy_hold_pct >= 0 %}gain-positive{% else %}gain-negative{% endif %}">
+                                        {{ "%+.2f"|format(algo.performance.avg_vs_buy_hold_pct) }} pp
+                                    </span>
+                                </div>
+                                <div class="summary-card">
+                                    {{ bi_label('sharpe', extra_class='summary-label') }}
+                                    <span class="summary-value">{{ bi_value('sharpe', algo.performance.avg_sharpe|default(0), display='%.2f'|format(algo.performance.avg_sharpe|default(0)) ~ ' · B&H ' ~ '%.2f'|format(algo.performance.avg_buy_hold_sharpe|default(0)), context={'buy_hold_sharpe': algo.performance.avg_buy_hold_sharpe|default(0)}) }}</span>
+                                </div>
+                                <div class="summary-card">
+                                    {{ bi_label('max_drawdown', extra_class='summary-label') }}
+                                    <span class="summary-value">{{ bi_value('max_drawdown', algo.performance.avg_max_drawdown_pct|default(0), display='%.1f'|format(algo.performance.avg_max_drawdown_pct|default(0)) ~ '% · B&H ' ~ '%.1f'|format(algo.performance.avg_buy_hold_max_drawdown_pct|default(0)) ~ '%', context={'reference': algo.performance.avg_buy_hold_max_drawdown_pct|default(0)}) }}</span>
+                                </div>
+                                <div class="summary-card">
+                                    {{ bi_label('downside_capture', label='Captura (baixa / alta)', extra_class='summary-label') }}
+                                    <span class="summary-value bi-valued-split">
+                                        {% if algo.performance.avg_downside_capture_pct is not none %}{{ bi_value('downside_capture', algo.performance.avg_downside_capture_pct, display='%.0f'|format(algo.performance.avg_downside_capture_pct) ~ '%') }}{% else %}—{% endif %}
+                                        <span class="text-muted">/</span>
+                                        {% if algo.performance.avg_upside_capture_pct is not none %}{{ bi_value('upside_capture', algo.performance.avg_upside_capture_pct, display='%.0f'|format(algo.performance.avg_upside_capture_pct) ~ '%') }}{% else %}—{% endif %}
+                                    </span>
+                                </div>
+                                <div class="summary-card">
+                                    {{ bi_label('time_in_market', extra_class='summary-label') }}
+                                    <span class="summary-value">{{ bi_value('time_in_market', algo.performance.avg_exposure_pct|default(0), display='%.1f'|format(algo.performance.avg_exposure_pct|default(0)) ~ '%') }}</span>
+                                </div>
+                                <div class="summary-card">
+                                    {{ bi_label('protection_value', extra_class='summary-label') }}
+                                    <span class="summary-value">{{ bi_value('protection_value', algo.performance.avg_protection_alpha_pp|default(0), display='%.1f'|format(algo.performance.avg_protection_alpha_pp|default(0)) ~ ' pp') }}</span>
+                                </div>
+                                <div class="summary-card summary-card-muted">
+                                    {{ bi_label('beat_buy_hold', label='Superou C&M', extra_class='summary-label') }}
+                                    <span class="summary-value text-muted">{{ algo.performance.beat_buy_hold_count }} / {{ algo.performance.run_count }}</span>
+                                </div>
+                                <div class="summary-card">
+                                    {{ bi_label('beat_ibovespa', extra_class='summary-label') }}
+                                    <span class="summary-value">{{ algo.performance.beat_ibovespa_count }} / {{ algo.performance.run_count }}</span>
+                                </div>
+                                <div class="summary-card">
+                                    {{ bi_label('beat_dollar', label='Superou USD/BRL', extra_class='summary-label') }}
+                                    <span class="summary-value">{{ algo.performance.beat_dollar_count }} / {{ algo.performance.run_count }}</span>
+                                </div>
+                                <div class="summary-card">
+                                    {{ bi_label('best_worst', extra_class='summary-label') }}
+                                    <span class="summary-value">
+                                        <span class="gain-positive">{{ "%.2f"|format(algo.performance.best_return_pct) }}%</span>
+                                        <span class="text-muted"> · </span>
+                                        <span class="gain-negative">{{ "%.2f"|format(algo.performance.worst_return_pct) }}%</span>
+                                    </span>
+                                </div>
+                                <div class="summary-card">
+                                    {{ bi_label('profitable_runs', extra_class='summary-label') }}
+                                    <span class="summary-value">{{ algo.performance.positive_runs }} / {{ algo.performance.run_count }}</span>
+                                </div>
+                            </div>
+                            <div class="table-responsive mb-4">
+                                <table class="table table-sm table-hover align-middle algo-perf-table mb-0">
+                                    <thead>
+                                        <tr>
+                                            {{ bi_th('symbol') }}
+                                            {{ bi_th('return', label='Estratégia') }}
+                                            {{ bi_th('buy_hold_return') }}
+                                            {{ bi_th('sharpe') }}
+                                            {{ bi_th('max_drawdown', label='DD máx.') }}
+                                            {{ bi_th('vs_buy_hold', label='vs C&M') }}
+                                            {{ bi_th('trades') }}
+                                            {{ bi_th('position') }}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for run in algo.performance.runs %}
+                                            <tr>
+                                                <td>{{ run.symbol }}</td>
+                                                <td class="{% if run.return_pct >= 0 %}gain-positive{% else %}gain-negative{% endif %}">{{ "%.2f"|format(run.return_pct) }}%</td>
+                                                <td>{{ "%.2f"|format(run.buy_hold_return_pct) }}%</td>
+                                                <td>{{ "%.2f"|format(run.sharpe|default(0)) }}</td>
+                                                <td>{{ "%.1f"|format(run.max_drawdown_pct|default(0)) }}%</td>
+                                                <td class="{% if run.vs_buy_hold_pct >= 0 %}gain-positive{% else %}gain-negative{% endif %}">{{ "%+.2f"|format(run.vs_buy_hold_pct) }} pp</td>
+                                                <td>{{ run.trade_count }}</td>
+                                                <td class="position-{{ run.final_position | lower }}">{{ position_label(run.final_position) }}</td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {% if algo.performance.regime_returns %}
+                                <div class="table-responsive mb-4">
+                                    {{ bi_section('regime_performance', 'Performance por regime (retorno anualizado por regime de mercado)', tag='h4', class='fs-6 mb-2') }}
+                                    <table class="table table-sm table-bordered bi-regime-table mb-0">
+                                        <thead>
+                                            <tr>
+                                                {{ bi_th('regime_bull') }}
+                                                {{ bi_th('regime_bear') }}
+                                                {{ bi_th('regime_sideways') }}
+                                                {{ bi_th('regime_high_vol') }}
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>{{ "%.1f"|format(algo.performance.regime_returns.bull|default(0)) }}%</td>
+                                                <td>{{ "%.1f"|format(algo.performance.regime_returns.bear|default(0)) }}%</td>
+                                                <td>{{ "%.1f"|format(algo.performance.regime_returns.sideways|default(0)) }}%</td>
+                                                <td>{{ "%.1f"|format(algo.performance.regime_returns.high_vol|default(0)) }}%</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% endif %}
+                            {% if algo.performance.exit_attribution and algo.performance.exit_attribution.by_reason %}
+                                <div class="table-responsive mb-4">
+                                    {{ bi_section('exit_attribution', 'Atribuição de saídas (PnL % médio por round-trip por razão)', tag='h4', class='fs-6 mb-2') }}
+                                    <table class="table table-sm table-hover mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">Razão de saída</th>
+                                                {{ bi_th('exit_attribution_pnl', align='text-end') }}
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for reason, pnl in algo.performance.exit_attribution.by_reason.items() %}
+                                                <tr>
+                                                    <td>{{ exit_reason_label(reason) }}</td>
+                                                    <td class="text-end {% if pnl >= 0 %}gain-positive{% else %}gain-negative{% endif %}">{{ "%+.2f"|format(pnl) }}%</td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                    {% if algo.performance.exit_attribution.by_engine %}
+                                        <p class="text-muted small mt-2 mb-0">
+                                            {{ bi_label('signal_engine', show_direction=false) }}: {{ "%+.2f"|format(algo.performance.exit_attribution.by_engine.signal|default(0)) }}% ·
+                                            {{ bi_label('risk_engine', show_direction=false) }}: {{ "%+.2f"|format(algo.performance.exit_attribution.by_engine.risk|default(0)) }}%
+                                        </p>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                        {% endif %}
+                        <div class="algo-theory mb-4">
+                            <p class="mb-3">{{ algo.theory.summary }}</p>
+                            <dl class="algo-theory-grid mb-0">
+                                <div class="algo-theory-item">
+                                    <dt>Indicadores</dt>
+                                    <dd>{{ algo.theory.indicators }}</dd>
+                                </div>
+                                <div class="algo-theory-item">
+                                    <dt>Lógica de compra</dt>
+                                    <dd>{{ algo.theory.buy }}</dd>
+                                </div>
+                                <div class="algo-theory-item">
+                                    <dt>Lógica de venda</dt>
+                                    <dd>{{ algo.theory.sell }}</dd>
+                                </div>
+                            </dl>
+                        </div>
+                        <div class="algo-code-block">
+                            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
+                                <h4 class="fs-6 mb-0">Código-fonte · <code class="small">{{ algo.path }}</code></h4>
+                            </div>
+                            <pre class="algo-code mb-0" tabindex="0"><code>{{ algo.code }}</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</section>
+
+<hr class="bi-section-rule" aria-hidden="true">
+
+<section class="trade-log bi-section-wrap">
+    {{ bi_section_info('individual_tests') }}
+    <div class="bi-accordion-toolbar d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+        <h2 class="fs-4 mb-0">Testes individuais ({{ test_count }} = {{ algorithm_count }} algoritmos × {{ stock_count }} papéis)</h2>
+        {% if not expanded %}
+            <button
+                type="button"
+                class="btn btn-sm btn-outline-secondary"
+                id="biAccordionToggle"
+                aria-expanded="false"
+                aria-controls="biTestsAccordion"
+            >
+                Expandir tudo
+            </button>
+        {% endif %}
+    </div>
+    <div class="accordion" id="biTestsAccordion">
+        {% for row in results %}
+            <div class="accordion-item">
+                <h3 class="accordion-header" id="test-heading-{{ row.test_id }}">
+                    {% if expanded %}
+                        <div class="accordion-button">
+                            <span class="bi-test-title">
+                                #{{ row.test_id }} · {{ row.algorithm }} · {{ row.symbol }}
+                                {% if row.name %}<span class="text-muted">({{ row.name }})</span>{% endif %}
+                            </span>
+                            {% if row.status != "error" %}
+                                <span class="bi-test-position me-2 position-{{ row.final_position | lower }}">{{ position_label(row.final_position) }}</span>
+                                <span class="bi-test-return ms-auto me-2 {% if row.return_pct >= 0 %}gain-positive{% else %}gain-negative{% endif %}">
+                                    {{ "%.2f"|format(row.return_pct) }}%
+                                </span>
+                            {% else %}
+                                <span class="bi-test-return ms-auto me-2 gain-negative">Erro</span>
+                            {% endif %}
+                        </div>
+                    {% else %}
+                        <button
+                            class="accordion-button {% if not loop.first %}collapsed{% endif %}"
+                            type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#test-collapse-{{ row.test_id }}"
+                            aria-expanded="{% if loop.first %}true{% else %}false{% endif %}"
+                            aria-controls="test-collapse-{{ row.test_id }}"
+                        >
+                            <span class="bi-test-title">
+                                #{{ row.test_id }} · {{ row.algorithm }} · {{ row.symbol }}
+                                {% if row.name %}<span class="text-muted">({{ row.name }})</span>{% endif %}
+                            </span>
+                            <span class="bi-test-position me-2 position-{{ row.final_position | lower }}">{{ position_label(row.final_position) }}</span>
+                            <span class="bi-test-return ms-auto me-2 {% if row.return_pct >= 0 %}gain-positive{% else %}gain-negative{% endif %}">
+                                {% if row.status == "error" %}
+                                    Erro
+                                {% else %}
+                                    {{ "%.2f"|format(row.return_pct) }}%
+                                {% endif %}
+                            </span>
+                        </button>
+                    {% endif %}
+                </h3>
+                <div
+                    id="test-collapse-{{ row.test_id }}"
+                    class="accordion-collapse collapse{% if expanded or loop.first %} show{% endif %}"
+                    aria-labelledby="test-heading-{{ row.test_id }}"
+                    {% if not expanded %}data-bs-parent="#biTestsAccordion"{% endif %}
+                >
+                    <div class="accordion-body">
+                        {% if row.status == "error" %}
+                            <div class="bi-test-setup mb-3">
+                                <dl class="bi-test-setup-grid mb-0">
+                                    <div class="bi-test-setup-item">
+                                        {{ bi_dt('symbol') }}
+                                        <dd>{{ row.symbol }}{% if row.name %} <span class="text-muted">· {{ row.name }}</span>{% endif %}</dd>
+                                    </div>
+                                    <div class="bi-test-setup-item">
+                                        {{ bi_dt('algorithm') }}
+                                        <dd>{{ row.algorithm }}</dd>
+                                    </div>
+                                    <div class="bi-test-setup-item">
+                                        {{ bi_dt('timespan') }}
+                                        <dd>{{ row.period | default(period) }} / {{ row.interval | default(interval) }}</dd>
+                                    </div>
+                                    {% if row.period_start and row.period_end %}
+                                    <div class="bi-test-setup-item">
+                                        {{ bi_dt('date_range') }}
+                                        <dd>{{ row.period_start }} → {{ row.period_end }}</dd>
+                                    </div>
+                                    {% endif %}
+                                </dl>
+                            </div>
+                            <div class="alert alert-danger mb-0" role="alert">{{ row.error }}</div>
+                        {% else %}
+                            <div class="bi-test-setup mb-3">
+                                <dl class="bi-test-setup-grid mb-0">
+                                    <div class="bi-test-setup-item">
+                                        {{ bi_dt('symbol') }}
+                                        <dd>{{ row.symbol }}{% if row.name %} <span class="text-muted">· {{ row.name }}</span>{% endif %}</dd>
+                                    </div>
+                                    <div class="bi-test-setup-item">
+                                        {{ bi_dt('algorithm') }}
+                                        <dd>{{ row.algorithm }}</dd>
+                                    </div>
+                                    <div class="bi-test-setup-item">
+                                        {{ bi_dt('timespan') }}
+                                        <dd>{{ row.period }} / {{ row.interval }}</dd>
+                                    </div>
+                                    {% if row.period_start and row.period_end %}
+                                    <div class="bi-test-setup-item">
+                                        {{ bi_dt('date_range') }}
+                                        <dd>{{ row.period_start }} → {{ row.period_end }}</dd>
+                                    </div>
+                                    {% endif %}
+                                    <div class="bi-test-setup-item">
+                                        {{ bi_dt('starting_balance') }}
+                                        <dd>R$ {{ "%.2f"|format(row.initial_balance) }}</dd>
+                                    </div>
+                                    <div class="bi-test-setup-item">
+                                        {{ bi_dt('stock_performance') }}
+                                        <dd>
+                                            <span class="benchmark-buyhold {% if row.buy_hold_return_pct >= 0 %}gain-positive{% else %}gain-negative{% endif %}">
+                                                {{ "%+.2f"|format(row.buy_hold_return_pct) }}%
+                                            </span>
+                                            <span class="text-muted"> comprar e manter</span>
+                                            <span class="mx-1 text-muted">·</span>
+                                            R$ {{ "%.2f"|format(row.buy_hold_entry_price) }} → R$ {{ "%.2f"|format(row.buy_hold_exit_price) }}
+                                        </dd>
+                                    </div>
+                                    <div class="bi-test-setup-item">
+                                        {{ bi_dt('risk_profile') }}
+                                        <dd>
+                                            Sharpe {{ "%.2f"|format(row.sharpe|default(0)) }} vs {{ "%.2f"|format(row.buy_hold_sharpe|default(0)) }} C&amp;M ·
+                                            DD máx. {{ "%.1f"|format(row.max_drawdown_pct|default(0)) }}% vs {{ "%.1f"|format(row.buy_hold_max_drawdown_pct|default(0)) }}%
+                                            {% if row.downside_capture_pct is not none %}
+                                                · captura de baixa {{ "%.0f"|format(row.downside_capture_pct) }}%
+                                            {% endif %}
+                                            {% if row.exposure_pct is not none %}
+                                                · tempo no mercado {{ "%.0f"|format(row.exposure_pct) }}%
+                                            {% endif %}
+                                        </dd>
+                                    </div>
+                                </dl>
+                            </div>
+                            <div class="bi-compare-grid mb-3">
+                                <div class="summary-card">
+                                    {{ bi_label('return', label='Estratégia', extra_class='summary-label') }}
+                                    <span class="summary-value {% if row.return_pct >= 0 %}gain-positive{% else %}gain-negative{% endif %}">{{ "%.2f"|format(row.return_pct) }}%</span>
+                                </div>
+                                <div class="summary-card">
+                                    {{ bi_label('buy_hold_return', extra_class='summary-label') }}
+                                    <span class="summary-value benchmark-buyhold">{{ "%.2f"|format(row.buy_hold_return_pct) }}%</span>
+                                </div>
+                                <div class="summary-card">
+                                    {{ bi_label('vs_buy_hold', extra_class='summary-label') }}
+                                    <span class="summary-value {% if row.vs_buy_hold_pct >= 0 %}gain-positive{% else %}gain-negative{% endif %}">{{ "%+.2f"|format(row.vs_buy_hold_pct) }} pp</span>
+                                </div>
+                                <div class="summary-card">
+                                    {{ bi_label('vs_ibovespa', extra_class='summary-label') }}
+                                    <span class="summary-value {% if row.vs_ibovespa_pct >= 0 %}gain-positive{% else %}gain-negative{% endif %}">{{ "%+.2f"|format(row.vs_ibovespa_pct) }} pp</span>
+                                </div>
+                                <div class="summary-card">
+                                    {{ bi_label('protection_value', extra_class='summary-label') }}
+                                    <span class="summary-value {% if (row.protection_alpha_pp|default(0)) >= 0 %}gain-positive{% else %}gain-negative{% endif %}">{{ "%+.1f"|format(row.protection_alpha_pp|default(0)) }} pp</span>
+                                </div>
+                            </div>
+                            <div class="bi-test-meta mb-3">
+                                <span>{{ bi_label('trades', show_direction=false) }}: {{ row.trade_count }} ({{ row.buys }}C / {{ row.sells }}V)</span>
+                                <span class="mx-2 text-muted">·</span>
+                                <span>{{ bi_label('final_position', label='Final', show_direction=false) }}: <span class="position-{{ row.final_position | lower }}">{{ position_label(row.final_position) }}</span> ({{ row.final_shares }} ações)</span>
+                            </div>
+                            <p class="chart-legend text-muted small mb-2">Vermelho ▲ compra · Verde ▼ venda</p>
+                            {% if row.graph %}
+                                <div id="test-chart-{{ row.test_id }}" class="chart bi-test-chart mb-3" role="img" aria-label="Gráfico de backtest para {{ row.symbol }}"></div>
+                                <script type="application/json" id="test-graph-{{ row.test_id }}">{{ row.graph | tojson }}</script>
+                            {% endif %}
+                            {% if row.drawdown_series %}
+                                <div id="test-dd-chart-{{ row.test_id }}" class="chart bi-test-chart mb-3" role="img" aria-label="Gráfico de drawdown para {{ row.symbol }}"></div>
+                            {% endif %}
+                            {% if row.output %}
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-hover align-middle mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">Ação</th>
+                                                <th scope="col">Mensagem</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for entry in row.output %}
+                                                <tr class="{% if entry['Action'] == 'Buy' %}log-buy{% elif entry['Action'] == 'Sell' %}log-sell{% else %}log-summary{% endif %}">
+                                                    <td>{{ action_label(entry["Action"]) }}</td>
+                                                    <td>{{ entry["Message"] }}</td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <p class="text-muted mb-0">Nenhum trade executado neste run.</p>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</section>
+
+<div id="chart-data" style="display:none;">{{ chart_data | safe }}</div>
