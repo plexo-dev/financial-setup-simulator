@@ -2,7 +2,7 @@ import asyncio
 import json
 import copy
 import os
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from benchmarks import dollar_benchmark, ibovespa_benchmark
@@ -665,6 +665,7 @@ def _write_cache(payload):
         "generated_at": payload["generated_at"],
         "test_count": payload["test_count"],
         "report_path": str(REPORT_PATH),
+        "last_refresh_at": datetime.now(timezone.utc).isoformat(),
     }
     with open(META_PATH, "w") as file:
         json.dump(meta, file, indent=2)
@@ -711,6 +712,65 @@ async def save_bi_results_async():
 
 def save_bi_results():
     return asyncio.run(save_bi_results_async())
+
+
+REFRESH_COOLDOWN_SECONDS = 3600
+REFRESH_LOG_PATH = CACHE_DIR / "refresh_log.json"
+
+
+def _read_refresh_log():
+    if REFRESH_LOG_PATH.exists():
+        with open(REFRESH_LOG_PATH) as file:
+            return json.load(file)
+    return {}
+
+
+def _write_refresh_log(log):
+    CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    with open(REFRESH_LOG_PATH, "w") as file:
+        json.dump(log, file, indent=2)
+
+
+def _refresh_status(client_key):
+    log = _read_refresh_log()
+    last_refresh = log.get(client_key)
+    if not last_refresh:
+        return {"refresh_blocked": False, "next_refresh_at": None, "refresh_message": None}
+
+    last_dt = datetime.fromisoformat(last_refresh)
+    elapsed = (datetime.now(timezone.utc) - last_dt).total_seconds()
+    if elapsed >= REFRESH_COOLDOWN_SECONDS:
+        return {"refresh_blocked": False, "next_refresh_at": None, "refresh_message": None}
+
+    remaining = int(REFRESH_COOLDOWN_SECONDS - elapsed)
+    next_at = (last_dt + timedelta(seconds=REFRESH_COOLDOWN_SECONDS)).strftime("%Y-%m-%d %H:%M UTC")
+    minutes = max(1, remaining // 60)
+    return {
+        "refresh_blocked": True,
+        "next_refresh_at": next_at,
+        "refresh_message": f"Próxima atualização disponível em ~{minutes} min (após {next_at}).",
+    }
+
+
+def refresh_bi_results_if_allowed(client_key, force_refresh=False):
+    """Load BI data; rerun suite at most once per hour per client."""
+    status = _refresh_status(client_key)
+    if force_refresh and status["refresh_blocked"]:
+        data = load_bi_results(force_refresh=False)
+        return data, status
+
+    if force_refresh:
+        data = save_bi_results()
+        log = _read_refresh_log()
+        log[client_key] = datetime.now(timezone.utc).isoformat()
+        _write_refresh_log(log)
+        return data, {
+            "refresh_blocked": False,
+            "next_refresh_at": None,
+            "refresh_message": None,
+        }
+
+    return load_bi_results(force_refresh=False), status
 
 
 def load_bi_results(force_refresh=False):

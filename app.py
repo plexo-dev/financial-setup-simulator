@@ -1,29 +1,83 @@
-from flask import Flask, Response, render_template, request, send_file
+import json
+import logging
+import os
+from collections import defaultdict
+from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeoutError
 from pathlib import Path
-from utis import get_stocks, buy, sell, get_amount, get_stock_name
-from algorithm_helpers import exec_user_algorithm, update_time_state
+
+import plotly
+import plotly.graph_objects as go
+from flask import Flask, Response, jsonify, render_template, request, send_file
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+from werkzeug.middleware.proxy_fix import ProxyFix
+
 from bi_metrics import BI_METRICS, action_label, exit_reason_label, position_label, score_metric
 from bi_report import render_markdown
+from bi_suite import (
+    ALGORITHMS,
+    _load_algorithm,
+    load_algorithm_catalog,
+    load_bi_results,
+    refresh_bi_results_if_allowed,
+)
+from benchmarks import dollar_benchmark, ibovespa_benchmark
 from cms import about_page_context, context_path, read_context_raw
-from bi_suite import load_algorithm_catalog, load_bi_results, save_bi_results
-from benchmarks import buy_and_hold_metrics, dollar_benchmark, ibovespa_benchmark
-from simulator import final_position_label
+from simulator import run_backtest
+from validation import validate_simulation_form
 
-import pandas as pd
-import plotly.graph_objects as go
-import plotly
-import subprocess
-import json
-import shlex
-from collections import defaultdict
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
-# Configure application
 app = Flask(__name__)
+app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "change-me-in-production")
+app.config["MAX_CONTENT_LENGTH"] = 64 * 1024
+
+if os.environ.get("TRUSTED_PROXY", "1") == "1":
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
+
 app.jinja_env.globals["bi_metrics"] = BI_METRICS
 app.jinja_env.globals["bi_score"] = score_metric
 app.jinja_env.globals["position_label"] = position_label
 app.jinja_env.globals["action_label"] = action_label
 app.jinja_env.globals["exit_reason_label"] = exit_reason_label
+
+
+def get_client_ip():
+    cf_ip = request.headers.get("CF-Connecting-IP")
+    if cf_ip:
+        return cf_ip
+    xff = request.headers.get("X-Forwarded-For", "")
+    if xff:
+        return xff.split(",")[0].strip()
+    return get_remote_address()
+
+
+limiter = Limiter(
+    get_client_ip,
+    app=app,
+    default_limits=["1 per second"],
+    storage_uri="memory://",
+)
+
+
+@app.after_request
+def set_security_headers(response):
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "SAMEORIGIN"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    return response
+
+
+@app.errorhandler(429)
+def ratelimit_handler(exc):
+    if request.path == "/" and request.method == "POST":
+        message = "Simulation rate limit: one run per minute."
+    else:
+        message = "Too many requests. Please wait a moment."
+    if request.accept_mimetypes.best == "application/json":
+        return jsonify({"error": message}), 429
+    return render_template("error.html", message=message), 429
 
 
 def _avg_metric(rows, key):
@@ -48,7 +102,6 @@ def _build_bi_charts(results, market_benchmark, dollar_benchmark_data, summary, 
     ibov_line = [summary["ibovespa_return_pct"]] * len(algo_names)
     dollar_line = [summary["dollar_return_pct"]] * len(algo_names)
 
-    # Risk vs return scatter
     scatter_fig = go.Figure()
     for algo in algorithm_catalog:
         perf = algo.get("performance") or {}
@@ -100,7 +153,6 @@ def _build_bi_charts(results, market_benchmark, dollar_benchmark_data, summary, 
         ],
     )
 
-    # Risk score ranking
     risk_scores = summary.get("risk_scores") or {}
     score_names = sorted(risk_scores, key=risk_scores.get, reverse=True)
     risk_score_fig = go.Figure(
@@ -121,7 +173,6 @@ def _build_bi_charts(results, market_benchmark, dollar_benchmark_data, summary, 
         margin=dict(t=60, b=60),
     )
 
-    # Drawdown showcase — best risk-score algo vs buy & hold on its best-symbol run
     drawdown_fig = go.Figure()
     best_algo = summary.get("best_risk_score_algo")
     showcase = None
@@ -151,10 +202,8 @@ def _build_bi_charts(results, market_benchmark, dollar_benchmark_data, summary, 
     else:
         drawdown_fig.update_layout(title="Curva de drawdown (sem dados)", height=200)
 
-    # Rolling 90-day Sharpe (avg across algos)
     rolling_fig = go.Figure()
     for algo in algorithm_catalog[:3]:
-        perf = algo.get("performance") or {}
         rows = by_algo.get(algo["name"], [])
         if not rows:
             continue
@@ -265,8 +314,8 @@ def _build_bi_charts(results, market_benchmark, dollar_benchmark_data, summary, 
     )
 
 
-def _bi_page_context(data):
-    return {
+def _bi_page_context(data, refresh_meta=None):
+    context = {
         "generated_at": data["generated_at"],
         "market": data.get("market", "B3 (Bovespa)"),
         "scenario": data["scenario"],
@@ -289,7 +338,19 @@ def _bi_page_context(data):
         ),
         "expanded": False,
         "export_mode": False,
+        "refresh_blocked": False,
+        "next_refresh_at": None,
+        "refresh_message": None,
     }
+    if refresh_meta:
+        context.update(refresh_meta)
+    return context
+
+
+@app.route("/health")
+@limiter.exempt
+def health():
+    return jsonify({"status": "ok"})
 
 
 @app.route("/about")
@@ -309,8 +370,11 @@ def cms_context_source():
 
 @app.route("/bi")
 def bi_dashboard():
-    data = load_bi_results(force_refresh=bool(request.args.get("refresh")))
-    return render_template("bi.html", **_bi_page_context(data))
+    force_refresh = bool(request.args.get("refresh"))
+    data, refresh_meta = refresh_bi_results_if_allowed(get_client_ip(), force_refresh=force_refresh)
+    if force_refresh and refresh_meta.get("refresh_blocked"):
+        logger.info("BI refresh blocked for %s until %s", get_client_ip(), refresh_meta.get("next_refresh_at"))
+    return render_template("bi.html", **_bi_page_context(data, refresh_meta))
 
 
 @app.route("/bi/export/html")
@@ -347,230 +411,98 @@ def bi_export_markdown():
 def bi_report():
     report_path = Path("static/bi_report.md")
     if request.args.get("refresh"):
-        save_bi_results()
+        _, refresh_meta = refresh_bi_results_if_allowed(get_client_ip(), force_refresh=True)
+        if refresh_meta.get("refresh_blocked"):
+            logger.info("BI report refresh blocked for %s", get_client_ip())
     elif not report_path.exists():
         load_bi_results()
     return send_file(report_path, mimetype="text/markdown; charset=utf-8")
 
 
-# Main page
 @app.route("/", methods=["GET", "POST"])
+@limiter.limit("1 per minute", methods=["POST"])
 def index():
     if request.method == "GET":
-        with open("editor_default_values/algorithm.py") as file:
-            algorithm_data = file.read()
+        return render_template(
+            "index.html",
+            algorithms=sorted(ALGORITHMS.keys()),
+        )
 
-        return render_template("index.html", algorithm_data=algorithm_data)
-    else:
-        try:
-            # Read data from POST request
-            symbol = str(request.form.get("symbol")).upper()
-            interval = str(request.form.get("interval"))
-            period = str(request.form.get("period"))
-            lot_size = int(request.form.get("lot_size")) / 100
-            initial_balance = float(request.form.get("initial_balance"))
-            comission = int(request.form.get("comission")) / 100
-            initial_stocks = int(request.form.get("initial_stocks"))
-            algorithm = request.form.get("algorithm")
-            requirements = request.form.get("requirements")
+    try:
+        params = validate_simulation_form(request.form)
+        algorithm_source = _load_algorithm(ALGORITHMS[params["algorithm"]])
 
-            # Setting up user algortithn custom functions
-            user_functions = exec_user_algorithm(algorithm)
-            
-            # Installing requirements for custom functions
-            if requirements != "":
-                cmd = f"pip install {requirements}"
-                subprocess.run(shlex.split(cmd), check=True)
-
-            # Setting up output log
-            output = []
-                        
-            # Initialize portfolio dict, basically a bank account simulation
-            portfolio = {"amount": initial_stocks, "price_bought": 0, "price_sold": float("inf"),
-                        "date_bought": 0, "balance": initial_balance, "symbol": symbol}
-
-            # Fetching data from yfinance
-            raw_df = get_stocks(symbol, period, interval)
-            buy_hold = buy_and_hold_metrics(raw_df, initial_balance)
-            ibov = ibovespa_benchmark(period, interval, initial_balance)
-            dollar = dollar_benchmark(period, interval, initial_balance)
-            full_df = user_functions["process_data"](raw_df)
-            
-            # Dataframe for backtest, empty
-            df = full_df.iloc[:0].copy()
-            
-            # Init graph
-            fig = go.Figure(data=[go.Candlestick(x=full_df.index,
-                                                open=full_df["Open"].tolist(), high=full_df["High"].tolist(),
-                                                low=full_df["Low"].tolist(), close=full_df["Close"].tolist(),
-                                                name="Candlesticks")
-                                ])
-            
-            # Adding custom user function graph lines
-            graph_ignore = ["Open", "Low", "High", "Close", "Dividends", "Stock Splits", "Volume"]
-            colors = ["yellow", "orange", "cyan", "purple", "blue"]
-            for column in full_df:
-                if column not in graph_ignore:
-                    try:
-                        fig.add_trace(go.Scatter(
-                            x=full_df.index,
-                            y=full_df[column].tolist(),
-                            mode="lines",
-                            name=column,
-                            line=dict(color=colors.pop(), width=1)
-                        ))
-                    except:
-                        fig.add_trace(go.Scatter(
-                            x=full_df.index,
-                            y=full_df[column].tolist(),
-                            mode="lines",
-                            name=column,
-                            line=dict(width=2)
-                        ))
-
-            # Main Loop
-            total_bars = len(full_df)
-            for bar_index, (index, row) in enumerate(full_df.iterrows(), start=1):
-                # Increasing backtest
-                df.loc[index] = row
-                update_time_state(portfolio, bar_index, total_bars)
-
-                # Atualizing data
-                price = float(row["Close"])
-                amount = get_amount(lot_size, portfolio["balance"], price)
-
-                # Selling stocks
-                if portfolio["amount"]:
-
-                    # Selling algorithm
-                    if user_functions["check_selling_conditions"](df, price, portfolio, comission):
-
-                        # Sells Stocks
-                        portfolio = sell(portfolio, comission, price)
-
-                        # Update Graph
-                        fig.add_trace(go.Scatter(
-                            x=[df.index[-1]],
-                            y=[df["High"].iloc[-1] * 1.1],
-                            mode="markers",
-                            showlegend=False,
-                            marker=dict(color="green", symbol="triangle-down", size=10),
-                            text=f"Price sold: {'%.2f' % float(price)}",
-                            hoverinfo="text"
-                        ))
-
-                        # For debugging (output log)
-                        output.append(
-                            {"Action": "Sell", "Message": f"Sold at {'%.2f' % float(price)}; balance: {'%.2f' % float(portfolio['balance'])}"})
-
-                # Buying Session
-                else:
-                    if user_functions["check_buying_conditions"](df, price, portfolio):
-
-                        # Buys Stocks
-                        portfolio = buy(portfolio, price, amount)
-
-                        # Update Graph
-                        fig.add_trace(go.Scatter(
-                            x=[df.index[-1]],
-                            y=[df["Low"].iloc[-1] * 0.9],
-                            mode="markers",
-                            showlegend=False,
-                            marker=dict(color="red", symbol="triangle-up", size=10),
-                            text=f"Price bought: {'%.2f' % float(price)}",
-                            hoverinfo="text"
-                        ))
-                        # For debugging (output log)
-                        output.append(
-                            {"Action": "Buy", "Message": f"Bought at {'%.2f' % float(price)}; balance: {'%.2f' % float(portfolio['balance'])}"})
-
-            # Prints results in output log
-            output.append(
-                {"Action": "Summary", "Message": f"Amount: {portfolio["amount"]}, Balance: {'%.2f' % float(portfolio["balance"])} + {'%.2f' % float(portfolio["amount"] * price)}"})
-            output.append(
-                {"Action": "Summary", "Message": f"Total: {'%.2f' % (float(portfolio["balance"]) + float(portfolio["amount"] * price))}"})
-            total_value = float(portfolio["balance"]) + float(portfolio["amount"] * price)
-            gain_amount = total_value - initial_balance
-            return_pct = (gain_amount / initial_balance) * 100 if initial_balance else 0
-            vs_buy_hold = return_pct - buy_hold["buy_hold_return_pct"]
-            vs_ibovespa = return_pct - ibov["buy_hold_return_pct"]
-            vs_dollar = return_pct - dollar["buy_hold_return_pct"]
-
-            output.append(
-                {"Action": "Summary", "Message": f"Simulated return: {'%.2f' % gain_amount} ({'%.2f' % return_pct}%)"})
-
-            buys = sum(1 for row in output if row["Action"] == "Buy")
-            final_position = final_position_label(portfolio, buys)
-            output.append(
-                {
-                    "Action": "Summary",
-                    "Message": (
-                        f"Final position: {final_position} "
-                        f"({portfolio['amount']} shares, cash R$ {portfolio['balance']:.2f})"
-                    ),
-                }
+        with ThreadPoolExecutor(max_workers=1) as pool:
+            future = pool.submit(
+                run_backtest,
+                symbol=params["symbol"],
+                period=params["period"],
+                interval=params["interval"],
+                algorithm_source=algorithm_source,
+                initial_balance=params["initial_balance"],
+                lot_size_pct=params["lot_size_pct"],
+                commission_pct=params["commission_pct"],
+                initial_stocks=params["initial_stocks"],
+                include_graph=True,
             )
-            output.append(
-                {
-                    "Action": "Summary",
-                    "Message": (
-                        f"Buy & hold: R$ {buy_hold['buy_hold_gain_amount']:.2f} "
-                        f"({buy_hold['buy_hold_return_pct']:.2f}%) · "
-                        f"Strategy vs buy & hold: {vs_buy_hold:+.2f} pp"
-                    ),
-                }
-            )
-            output.append(
-                {
-                    "Action": "Summary",
-                    "Message": (
-                        f"Ibovespa: {ibov['buy_hold_return_pct']:.2f}% · "
-                        f"Strategy vs Ibovespa: {vs_ibovespa:+.2f} pp"
-                    ),
-                }
-            )
-            output.append(
-                {
-                    "Action": "Summary",
-                    "Message": (
-                        f"USD/BRL: {dollar['buy_hold_return_pct']:.2f}% · "
-                        f"Strategy vs dollar: {vs_dollar:+.2f} pp"
-                    ),
-                }
-            )
+            result = future.result(timeout=90)
 
-            # Final fixes to graph
-            fig.update_layout(xaxis_rangeslider_visible=False)
-            fig.update_xaxes(type="date")
-            fig = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+        ibov = ibovespa_benchmark(params["period"], params["interval"], params["initial_balance"])
+        dollar = dollar_benchmark(params["period"], params["interval"], params["initial_balance"])
+        vs_ibovespa = result["return_pct"] - ibov["buy_hold_return_pct"]
+        vs_dollar = result["return_pct"] - dollar["buy_hold_return_pct"]
 
-            # Get stock name
-            name = get_stock_name(symbol)
+        output = result["output"]
+        output.append(
+            {
+                "Action": "Summary",
+                "Message": (
+                    f"Ibovespa: {ibov['buy_hold_return_pct']:.2f}% · "
+                    f"Strategy vs Ibovespa: {vs_ibovespa:+.2f} pp"
+                ),
+            }
+        )
+        output.append(
+            {
+                "Action": "Summary",
+                "Message": (
+                    f"USD/BRL: {dollar['buy_hold_return_pct']:.2f}% · "
+                    f"Strategy vs dollar: {vs_dollar:+.2f} pp"
+                ),
+            }
+        )
 
-            # Render backtest page with graph and output log
-            return render_template(
-                "backtest.html",
-                output=output,
-                graph=fig,
-                symbol=symbol,
-                period=period,
-                interval=interval,
-                initial_balance=f"{initial_balance:,.2f}",
-                total_value=f"{total_value:,.2f}",
-                gain_amount=f"{gain_amount:,.2f}",
-                return_pct=f"{return_pct:.2f}",
-                gain_positive=gain_amount >= 0,
-                final_position=final_position,
-                final_shares=int(portfolio["amount"]),
-                buy_hold_return_pct=f"{buy_hold['buy_hold_return_pct']:.2f}",
-                vs_buy_hold_pct=f"{vs_buy_hold:+.2f}",
-                ibovespa_return_pct=f"{ibov['buy_hold_return_pct']:.2f}",
-                vs_ibovespa_pct=f"{vs_ibovespa:+.2f}",
-                dollar_return_pct=f"{dollar['buy_hold_return_pct']:.2f}",
-                vs_dollar_pct=f"{vs_dollar:+.2f}",
-                name=name,
-            )
+        graph = json.dumps(result["graph"]) if result.get("graph") else "{}"
+        gain_amount = result["gain_amount"]
+        return_pct = result["return_pct"]
+        vs_buy_hold = result["vs_buy_hold_pct"]
 
-        # Generic error handling
-        except Exception as e:
-            return render_template("error.html", message=str(e)), 400
+        return render_template(
+            "backtest.html",
+            output=output,
+            graph=graph,
+            symbol=result["symbol"],
+            period=params["period"],
+            interval=params["interval"],
+            initial_balance=f"{params['initial_balance']:,.2f}",
+            total_value=f"{result['total_value']:,.2f}",
+            gain_amount=f"{gain_amount:,.2f}",
+            return_pct=f"{return_pct:.2f}",
+            gain_positive=gain_amount >= 0,
+            final_position=result["final_position"],
+            final_shares=result["final_shares"],
+            buy_hold_return_pct=f"{result['buy_hold_return_pct']:.2f}",
+            vs_buy_hold_pct=f"{vs_buy_hold:+.2f}",
+            ibovespa_return_pct=f"{ibov['buy_hold_return_pct']:.2f}",
+            vs_ibovespa_pct=f"{vs_ibovespa:+.2f}",
+            dollar_return_pct=f"{dollar['buy_hold_return_pct']:.2f}",
+            vs_dollar_pct=f"{vs_dollar:+.2f}",
+            name=result["name"],
+            algorithm_name=params["algorithm"],
+        )
+
+    except FuturesTimeoutError:
+        return render_template("error.html", message="Simulation timed out after 90 seconds."), 504
+    except Exception as exc:
+        logger.exception("Simulation failed")
+        return render_template("error.html", message=str(exc)), 400
