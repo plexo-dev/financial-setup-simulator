@@ -1,5 +1,7 @@
 from pathlib import Path
 
+from bi_metrics import BI_METRICS, exit_reason_label, metric_definitions_markdown, position_label
+
 
 def _md_table(headers, rows):
     lines = [
@@ -15,43 +17,133 @@ def render_markdown(payload, algorithm_catalog=None):
     summary = payload["summary"]
     catalog = algorithm_catalog or payload.get("algorithm_catalog") or []
     lines = [
-        "# B3 Strategy Benchmark Report",
+        "# Benchmark de estratégias B3 ajustado ao risco",
         "",
-        f"**Generated:** {payload['generated_at']}  ",
-        f"**Market:** {payload['market']}  ",
-        f"**Scenario:** {payload['scenario']}  ",
-        f"**Period:** {payload.get('period', '')} / {payload.get('interval', '')}  ",
+        f"**Gerado em:** {payload['generated_at']}  ",
+        f"**Mercado:** {payload['market']}  ",
+        f"**Cenário:** {payload['scenario']}  ",
+        f"**Período:** {payload.get('period', '')} / {payload.get('interval', '')}  ",
         "",
-        "> Historical simulation — not live trading. Past performance does not guarantee future results.",
-        "",
-        "## Market context",
-        "",
-        "Compares strategy runs against buy & hold, Ibovespa, and USD/BRL over the same window.",
+        "> Simulação histórica — não é trading ao vivo. Sharpe usa taxa livre de risco 0%. "
+        "Valor de proteção é um composto narrativo, não alpha de Jensen.",
         "",
     ]
+    if summary.get("thesis"):
+        lines.extend(["## Resumo executivo", "", summary["thesis"], ""])
+    if summary.get("conclusion"):
+        lines.extend(["", summary["conclusion"], ""])
+
+    lines.extend([
+        "",
+        "## Eficiência de risco",
+        "",
+        "_↑ Retorno, Sharpe, captura de alta · ↓ Volatilidade, drawdown máx., captura de baixa (seletiva), runs sem trades_",
+        "",
+    ])
     lines.extend(_md_table(
-        ["Benchmark", "Return"],
+        ["Métrica", "Estratégia (média)", "Comprar e manter (média)"],
         [
-            ["Avg strategy", f"{summary['avg_return_pct']:.2f}%"],
-            ["Avg buy & hold", f"{summary['avg_buy_hold_pct']:.2f}%"],
+            ["Retorno", f"{summary.get('avg_return_pct', 0):.2f}%", f"{summary.get('avg_buy_hold_pct', 0):.2f}%"],
+            ["Volatilidade (an.)", f"{summary.get('avg_volatility_pct', 0):.1f}%", f"{summary.get('avg_buy_hold_volatility_pct', 0):.1f}%"],
+            ["Drawdown máximo", f"{summary.get('avg_max_drawdown_pct', 0):.1f}%", f"{summary.get('avg_buy_hold_max_drawdown_pct', 0):.1f}%"],
+            ["Sharpe", f"{summary.get('avg_sharpe', 0):.2f}", f"{summary.get('avg_buy_hold_sharpe', 0):.2f}"],
+            ["Captura de baixa", f"{summary.get('avg_downside_capture_pct'):.0f}%" if summary.get('avg_downside_capture_pct') is not None else "—", "100% (ref)"],
+            ["Captura de alta", f"{summary.get('avg_upside_capture_pct'):.0f}%" if summary.get('avg_upside_capture_pct') is not None else "—", "100% (ref)"],
+            ["Tempo no mercado", f"{summary.get('avg_exposure_pct', 0):.0f}%", "100% (ref)"],
+        ],
+    ))
+
+    if catalog:
+        lines.extend([
+            "",
+            "## Análise de exposição",
+            "",
+            "_Baixa exposição = muito em caixa. ↑ Captura de alta · ↓ Captura de baixa (seletiva), runs sem trades_",
+            "",
+        ])
+        lines.extend(_md_table(
+            ["Estratégia", "Tempo no mercado", "Média de trades", "Runs sem trades", "Capt. alta", "Capt. baixa"],
+            [
+                [
+                    algo["name"],
+                    f"{perf.get('avg_exposure_pct', 0):.1f}%",
+                    f"{perf.get('avg_trades', 0):.1f}",
+                    f"{perf.get('zero_trade_runs', 0)} / {perf.get('run_count', 0)}",
+                    f"{perf.get('avg_upside_capture_pct'):.0f}%" if perf.get("avg_upside_capture_pct") is not None else "—",
+                    f"{perf.get('avg_downside_capture_pct'):.0f}%" if perf.get("avg_downside_capture_pct") is not None else "—",
+                ]
+                for algo in catalog
+                for perf in [algo.get("performance") or {}]
+                if perf
+            ],
+        ))
+
+    decomp = summary.get("decomposition") or {}
+    if decomp:
+        lines.extend([
+            "",
+            "## Sinal vs motor de risco (A/B/C)",
+            "",
+            "_↑ Retorno, captura de alta · ↓ DD máx. · Δ retorno vs A: sinalado_",
+            "",
+        ])
+        for algo, rows in decomp.items():
+            lines.extend([f"### {algo}", ""])
+            lines.extend(_md_table(
+                ["Versão", "Retorno", "DD máx.", "Exposição", "Capt. alta", "Δ retorno vs A"],
+                [
+                    [
+                        row["label"],
+                        f"{row['avg_return_pct']:.2f}%",
+                        f"{row['avg_max_drawdown_pct']:.1f}%",
+                        f"{row['avg_exposure_pct']:.1f}%",
+                        f"{row.get('avg_upside_capture_pct') or '—'}",
+                        f"{row['delta_return_vs_signal_pp']:+.2f} pp",
+                    ]
+                    for row in rows
+                ],
+            ))
+            lines.append("")
+
+    risk_scores = summary.get("risk_scores") or {}
+    if risk_scores:
+        lines.extend([
+            "",
+            "### Score de redução de risco",
+            "",
+            "_↑ Score maior é melhor_",
+            "",
+        ])
+        lines.extend(_md_table(
+            ["Estratégia", "Score"],
+            [[name, f"{score:.0f}"] for name, score in sorted(risk_scores.items(), key=lambda x: -x[1])],
+        ))
+
+    lines.extend([
+        "",
+        "## Contexto de mercado",
+        "",
+        "_↑ Retorno do benchmark · Superar comprar e manter: contagem maior é melhor_",
+        "",
+    ])
+    lines.extend(_md_table(
+        ["Benchmark", "Retorno"],
+        [
+            ["Estratégias (média)", f"{summary['avg_return_pct']:.2f}%"],
+            ["Comprar e manter (média)", f"{summary['avg_buy_hold_pct']:.2f}%"],
             ["Ibovespa (^BVSP)", f"{summary['ibovespa_return_pct']:.2f}%"],
             ["USD/BRL (USDBRL=X)", f"{summary['dollar_return_pct']:.2f}%"],
         ],
     ))
     lines.extend([
         "",
-        "## Summary",
+        "## Resumo (secundário)",
         "",
-        f"- **Tests:** {payload['test_count']} ({payload['algorithm_count']} algorithms × {payload['stock_count']} stocks)",
-        f"- **Best run:** {summary['best_return_pct']:.2f}%",
-        f"- **Worst run:** {summary['worst_return_pct']:.2f}%",
-        f"- **Profitable runs:** {summary['positive_runs']} / {payload['test_count']}",
-        f"- **Beat buy & hold:** {summary['beat_buy_hold_count']} / {payload['test_count']}",
-        f"- **Beat Ibovespa:** {summary['beat_ibovespa_count']} / {payload['test_count']}",
-        f"- **Beat USD/BRL:** {summary['beat_dollar_count']} / {payload['test_count']}",
-        f"- **Avg vs buy & hold:** {summary['avg_vs_buy_hold_pct']:+.2f} pp",
+        f"- **Testes:** {payload['test_count']} ({payload['algorithm_count']} algoritmos × {payload['stock_count']} papéis)",
+        f"- **Superou comprar e manter:** {summary['beat_buy_hold_count']} / {payload['test_count']}",
+        f"- **Média vs comprar e manter:** {summary['avg_vs_buy_hold_pct']:+.2f} pp",
         "",
-        "## Algorithms",
+        "## Algoritmos",
         "",
     ])
 
@@ -63,56 +155,62 @@ def render_markdown(payload, algorithm_catalog=None):
             "",
             theory["summary"],
             "",
-            f"- **Indicators:** {theory['indicators']}",
-            f"- **Buy logic:** {theory['buy']}",
-            f"- **Sell logic:** {theory['sell']}",
+            f"- **Indicadores:** {theory['indicators']}",
+            f"- **Lógica de compra:** {theory['buy']}",
+            f"- **Lógica de venda:** {theory['sell']}",
             "",
         ])
         if perf:
-            lines.extend([
-                "#### Performance",
-                "",
-            ])
+            lines.extend(["#### Performance ajustada ao risco", ""])
             lines.extend(_md_table(
-                ["Metric", "Value"],
+                ["Métrica", "Valor"],
                 [
-                    ["Avg strategy return", f"{perf['avg_return_pct']:.2f}%"],
-                    ["Avg buy & hold", f"{perf['avg_buy_hold_pct']:.2f}%"],
-                    ["Avg vs buy & hold", f"{perf['avg_vs_buy_hold_pct']:+.2f} pp"],
-                    ["Avg vs Ibovespa", f"{perf['avg_vs_ibovespa_pct']:+.2f} pp"],
-                    ["Avg vs USD/BRL", f"{perf['avg_vs_dollar_pct']:+.2f} pp"],
-                    ["Best run", f"{perf['best_return_pct']:.2f}% ({perf['best_symbol']})"],
-                    ["Worst run", f"{perf['worst_return_pct']:.2f}% ({perf['worst_symbol']})"],
-                    ["Beat buy & hold", f"{perf['beat_buy_hold_count']} / {perf['run_count']}"],
-                    ["Beat Ibovespa", f"{perf['beat_ibovespa_count']} / {perf['run_count']}"],
-                    ["Beat USD/BRL", f"{perf['beat_dollar_count']} / {perf['run_count']}"],
-                    ["Profitable runs", f"{perf['positive_runs']} / {perf['run_count']}"],
+                    ["Score de risco", f"{perf.get('risk_score', 0):.0f}"],
+                    ["Retorno médio", f"{perf['avg_return_pct']:.2f}%"],
+                    ["C&M médio", f"{perf['avg_buy_hold_pct']:.2f}%"],
+                    ["Sharpe", f"{perf.get('avg_sharpe', 0):.2f} (C&M {perf.get('avg_buy_hold_sharpe', 0):.2f})"],
+                    ["Drawdown máximo", f"{perf.get('avg_max_drawdown_pct', 0):.1f}% (C&M {perf.get('avg_buy_hold_max_drawdown_pct', 0):.1f}%)"],
+                    ["Captura de baixa", f"{perf.get('avg_downside_capture_pct') or '—'}"],
+                    ["Tempo no mercado", f"{perf.get('avg_exposure_pct', 0):.1f}%"],
+                    ["Runs sem trades", f"{perf.get('zero_trade_runs', 0)} / {perf['run_count']}"],
+                    ["Superou C&M", f"{perf['beat_buy_hold_count']} / {perf['run_count']}"],
                 ],
             ))
-            lines.extend([
-                "",
-                "#### Per-stock results",
-                "",
-            ])
+            if perf.get("regime_returns"):
+                lines.extend(["", "#### Performance por regime", ""])
+                rr = perf["regime_returns"]
+                lines.extend(_md_table(
+                    ["Alta", "Baixa", "Lateral", "Alta vol."],
+                    [[f"{rr.get('bull', 0):.1f}%", f"{rr.get('bear', 0):.1f}%", f"{rr.get('sideways', 0):.1f}%", f"{rr.get('high_vol', 0):.1f}%"]],
+                ))
+            exit_attr = perf.get("exit_attribution") or {}
+            if exit_attr.get("by_reason"):
+                lines.extend(["", "#### Atribuição de saídas", ""])
+                lines.extend(_md_table(
+                    ["Razão", "PnL médio %"],
+                    [[exit_reason_label(k), f"{v:+.2f}%"] for k, v in exit_attr["by_reason"].items()],
+                ))
+                if exit_attr.get("by_engine"):
+                    eng = exit_attr["by_engine"]
+                    lines.append(f"\nMotor de sinal: {eng.get('signal', 0):+.2f}% · Motor de risco: {eng.get('risk', 0):+.2f}%")
+            lines.extend(["", "#### Resultados por papel", ""])
             lines.extend(_md_table(
-                ["Symbol", "Strategy", "Buy & hold", "vs B&H", "vs Ibov", "vs USD", "Trades", "Position"],
+                ["Papel", "Retorno", "Sharpe", "DD máx.", "vs C&M", "Trades"],
                 [
                     [
                         run["symbol"],
                         f"{run['return_pct']:.2f}%",
-                        f"{run['buy_hold_return_pct']:.2f}%",
+                        f"{run.get('sharpe', 0):.2f}",
+                        f"{run.get('max_drawdown_pct', 0):.1f}%",
                         f"{run['vs_buy_hold_pct']:+.2f} pp",
-                        f"{run['vs_ibovespa_pct']:+.2f} pp",
-                        f"{run['vs_dollar_pct']:+.2f} pp",
                         run["trade_count"],
-                        run["final_position"],
                     ]
                     for run in perf.get("runs", [])
                 ],
             ))
             lines.extend(["", ""])
         lines.extend([
-            f"#### Source (`{algo['path']}`)",
+            f"#### Código-fonte (`{algo['path']}`)",
             "",
             "```python",
             algo["code"].rstrip(),
@@ -120,82 +218,29 @@ def render_markdown(payload, algorithm_catalog=None):
             "",
         ])
 
-    lines.extend([
-        "## All test results",
-        "",
-    ])
+    lines.extend(["## Todos os resultados dos testes", ""])
     lines.extend(_md_table(
-        ["#", "Algorithm", "Symbol", "Strategy", "Buy & hold", "vs B&H", "vs Ibov", "vs USD", "Position", "Trades"],
+        ["#", "Algoritmo", "Papel", "Retorno", "Sharpe", "DD máx.", "vs C&M", "Posição"],
         [
             (
-                [
-                    row["test_id"],
-                    row["algorithm"],
-                    row["symbol"],
-                    "—",
-                    "—",
-                    "—",
-                    "—",
-                    "—",
-                    "—",
-                    f"**Error:** {row.get('error', '')}",
-                ]
+                [row["test_id"], row["algorithm"], row["symbol"], "—", "—", "—", "—", f"**Erro:** {row.get('error', '')}"]
                 if row.get("status") != "ok"
                 else [
                     row["test_id"],
                     row["algorithm"],
                     row["symbol"],
                     f"{row['return_pct']:.2f}%",
-                    f"{row['buy_hold_return_pct']:.2f}%",
+                    f"{row.get('sharpe', 0):.2f}",
+                    f"{row.get('max_drawdown_pct', 0):.1f}%",
                     f"{row['vs_buy_hold_pct']:+.2f} pp",
-                    f"{row['vs_ibovespa_pct']:+.2f} pp",
-                    f"{row['vs_dollar_pct']:+.2f} pp",
-                    row["final_position"],
-                    row["trade_count"],
+                    position_label(row["final_position"]),
                 ]
             )
             for row in payload["results"]
         ],
     ))
 
-    lines.extend(["", "## Individual test details", ""])
-    for row in payload["results"]:
-        lines.extend([
-            f"### Test #{row['test_id']} · {row['algorithm']} · {row['symbol']}",
-            "",
-        ])
-        if row.get("status") != "ok":
-            lines.append(f"**Error:** {row.get('error', 'Unknown error')}")
-            lines.extend(["", ""])
-            continue
-
-        lines.extend([
-            f"- **Company:** {row.get('name') or '—'}",
-            f"- **Period:** {row.get('period', payload.get('period', ''))} / {row.get('interval', payload.get('interval', ''))}",
-            f"- **Date range:** {row.get('period_start', '—')} → {row.get('period_end', '—')}",
-            f"- **Starting balance:** R$ {row['initial_balance']:.2f}",
-            f"- **Strategy return:** {row['return_pct']:.2f}%",
-            f"- **Buy & hold return:** {row['buy_hold_return_pct']:.2f}%",
-            f"- **vs buy & hold:** {row['vs_buy_hold_pct']:+.2f} pp",
-            f"- **vs Ibovespa:** {row['vs_ibovespa_pct']:+.2f} pp",
-            f"- **vs USD/BRL:** {row['vs_dollar_pct']:+.2f} pp",
-            f"- **Trades:** {row['trade_count']} ({row['buys']}B / {row['sells']}S)",
-            f"- **Final position:** {row['final_position']} ({row['final_shares']} shares)",
-            "",
-        ])
-        if row.get("output"):
-            lines.extend([
-                "| Action | Message |",
-                "| --- | --- |",
-            ])
-            for entry in row["output"]:
-                message = str(entry.get("Message", "")).replace("|", "\\|")
-                lines.append(f"| {entry.get('Action', '')} | {message} |")
-        else:
-            lines.append("_No trades executed in this run._")
-        lines.extend(["", ""])
-
-    lines.append("")
+    lines.extend(["", metric_definitions_markdown()])
     return "\n".join(lines)
 
 

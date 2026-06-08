@@ -1,0 +1,105 @@
+
+{% macro _direction_text(m) -%}
+{%- if m.direction == 'higher' -%}↑ melhor
+{%- elif m.direction == 'lower' -%}↓ melhor
+{%- elif m.direction == 'context' and m.direction_note -%}{{ m.direction_note }}
+{%- elif m.direction == 'neutral' -%}Somente contexto
+{%- endif -%}
+{%- endmacro %}
+
+{% macro _tooltip_body(m, include_legend=false) -%}
+{%- if include_legend and m.get('legend') -%}{{ m.legend }}
+
+{% endif -%}
+{%- set dir = _direction_text(m) -%}
+{%- if dir -%}{{ dir }}.
+
+{% endif -%}
+{{- m.calc -}}
+{%- endmacro %}
+
+{% macro bi_info_btn(m, label, variant='inline', include_legend=false) %}
+{% set tip = _tooltip_body(m, include_legend) %}
+<button
+    type="button"
+    class="bi-metric-info bi-metric-info--{{ variant }}"
+    data-bs-toggle="tooltip"
+    data-bs-placement="top"
+    data-bs-custom-class="bi-metric-tooltip"
+    title="{{ tip | trim | e }}"
+    aria-label="{{ label }}: {{ tip | trim | e }}"
+><span class="bi-info-letter" aria-hidden="true">i</span></button>
+{% endmacro %}
+
+{% macro bi_status_legend() %}
+<p class="bi-status-legend text-muted small mb-3" aria-label="Legenda dos indicadores de status">
+    <span class="bi-status-legend-item"><span class="bi-status-ball bi-status-green" aria-hidden="true"></span> Na meta</span>
+    <span class="bi-status-legend-item"><span class="bi-status-ball bi-status-yellow" aria-hidden="true"></span> Atenção</span>
+    <span class="bi-status-legend-item"><span class="bi-status-ball bi-status-red" aria-hidden="true"></span> Fora da meta</span>
+    <span class="bi-status-legend-item"><span class="bi-status-ball bi-status-gray" aria-hidden="true"></span> N/A ou muito em caixa</span>
+</p>
+{% endmacro %}
+
+{% macro bi_section_info(metric_id) %}
+{% set m = bi_metrics.get(metric_id) %}
+{% if m %}{{ bi_info_btn(m, m.label, variant='section', include_legend=true) }}{% endif %}
+{% endmacro %}
+
+{% macro bi_label(metric_id, label=none, show_direction=false, extra_class='') %}
+{% set m = bi_metrics.get(metric_id) %}
+{% if m %}
+{% set text = label if label is not none else m.label %}
+<span class="bi-metric-label {{ extra_class }}">
+    <span class="bi-metric-label-text">{{ text }}</span>
+    {{ bi_info_btn(m, text) }}
+</span>
+{% else %}
+<span class="{{ extra_class }}">{{ label or metric_id }}</span>
+{% endif %}
+{% endmacro %}
+
+{% macro bi_th(metric_id, label=none, align='') %}
+{% set m = bi_metrics.get(metric_id) %}
+<th scope="col"{% if align %} class="{{ align }}"{% endif %}>
+    {% if m %}
+        {{ bi_label(metric_id, label, extra_class='bi-metric-th') }}
+    {% else %}
+        {{ label or metric_id }}
+    {% endif %}
+</th>
+{% endmacro %}
+
+{% macro bi_section(metric_id, title=none, tag='h2', class='fs-5 mb-3') %}
+{% set m = bi_metrics.get(metric_id) %}
+{% set text = title if title is not none else (m.label if m else metric_id) %}
+<{{ tag }} class="{{ class }} bi-section-heading">{{ text }}</{{ tag }}>
+{% endmacro %}
+
+{% macro bi_chart_note(metric_id) %}{% endmacro %}
+
+{% macro bi_dt(metric_id, label=none) %}
+{% set m = bi_metrics.get(metric_id) %}
+<dt>{% if m %}{{ bi_label(metric_id, label, extra_class='bi-metric-dt') }}{% else %}{{ label or metric_id }}{% endif %}</dt>
+{% endmacro %}
+
+{% macro bi_value(metric_id, value, display=none, context=none, align_end=false) %}
+{% if display is none and value is none %}—
+{% else %}
+{% set scored = bi_score(metric_id, value, context or {}) %}
+{% set text = display if display is not none else value %}
+<span class="bi-valued{% if align_end %} bi-valued--end{% endif %}">
+    {% if scored %}
+    <span
+        class="bi-status-ball bi-status-{{ scored.color }}"
+        tabindex="0"
+        data-bs-toggle="tooltip"
+        data-bs-placement="top"
+        data-bs-custom-class="bi-metric-tooltip"
+        title="Meta: {{ scored.target }} — {{ scored.label }}"
+        aria-label="{{ scored.label }}. Meta: {{ scored.target }}"
+    ></span>
+    {% endif %}
+    <span class="bi-valued-num">{{ text }}</span>
+</span>
+{% endif %}
+{% endmacro %}

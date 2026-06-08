@@ -3,3 +3,5 @@ pandas
 plotly
 yfinance
 Jinja2
+TA-Lib
+numpy

@@ -1,81 +1,673 @@
-# B3 Strategy Benchmark Report
+# Benchmark de estratégias B3 ajustado ao risco
 
-**Generated:** 2026-06-07 19:12 UTC  
-**Market:** B3 (Bovespa)  
-**Scenario:** B3 · 5 algorithms × 10 stocks · 1y / 1d · R$ 10,000 starting balance  
-**Period:** 1y / 1d  
+**Gerado em:** 2026-06-08 00:19 UTC  
+**Mercado:** B3 (Bovespa)  
+**Cenário:** B3 · 5 algoritmos × 10 papéis · 1y / 1d · saldo inicial R$ 10,000  
+**Período:** 1y / 1d  
 
-> Historical simulation — not live trading. Past performance does not guarantee future results.
+> Simulação histórica — não é trading ao vivo. Sharpe usa taxa livre de risco 0%. Valor de proteção é um composto narrativo, não alpha de Jensen.
 
-## Market context
+## Resumo executivo
 
-Compares strategy runs against buy & hold, Ibovespa, and USD/BRL over the same window.
+As estratégias retornaram 2.2% vs 2.2% comprar e manter, reduzindo o drawdown máximo de 25.8% para 3.9%. O tempo médio no mercado é de apenas 11%, com 9% de captura de alta e 7% de captura de baixa — a redução de risco acompanha menor exposição, não participação seletiva.
 
-| Benchmark | Return |
+
+As estratégias não demonstram geração relevante de alpha versus comprar e manter, mas alcançam redução substancial de drawdown e volatilidade. Com apenas 11% de tempo médio no mercado e 9% de captura de alta, a maior parte da redução de risco parece vir de menor exposição ao mercado, e não de seleção de papéis ou timing superiores. Pesquisas futuras devem focar em aumentar a captura de alta (meta 50–70%) preservando a proteção na baixa (meta 20–40%).
+
+
+## Eficiência de risco
+
+_↑ Retorno, Sharpe, captura de alta · ↓ Volatilidade, drawdown máx., captura de baixa (seletiva), runs sem trades_
+
+| Métrica | Estratégia (média) | Comprar e manter (média) |
+| --- | ---: | ---: |
+| Retorno | 2.16% | 2.18% |
+| Volatilidade (an.) | 5.7% | 32.6% |
+| Drawdown máximo | 3.9% | 25.8% |
+| Sharpe | 0.23 | 0.28 |
+| Captura de baixa | 7% | 100% (ref) |
+| Captura de alta | 9% | 100% (ref) |
+| Tempo no mercado | 11% | 100% (ref) |
+
+## Análise de exposição
+
+_Baixa exposição = muito em caixa. ↑ Captura de alta · ↓ Captura de baixa (seletiva), runs sem trades_
+
+| Estratégia | Tempo no mercado | Média de trades | Runs sem trades | Capt. alta | Capt. baixa |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| 20-day breakout | 4.5% | 2.4 | 2 / 10 | 5% | 2% |
+| RSI reversion | 1.9% | 1.8 | 1 / 10 | 2% | 1% |
+| SMA-20 trend | 7.8% | 1.8 | 5 / 10 | 6% | 5% |
+| SMA crossover | 11.2% | 2.4 | 3 / 10 | 9% | 8% |
+| SMA-8 trend | 29.2% | 7.6 | 0 / 10 | 21% | 21% |
+
+## Sinal vs motor de risco (A/B/C)
+
+_↑ Retorno, captura de alta · ↓ DD máx. · Δ retorno vs A: sinalado_
+
+### SMA-8 trend
+
+| Versão | Retorno | DD máx. | Exposição | Capt. alta | Δ retorno vs A |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| A · Só sinal | 7.12% | 11.3% | 46.5% | 34.62 | +0.00 pp |
+| B · Sinal + saídas de risco | 5.46% | 12.1% | 44.5% | 33.11 | -1.66 pp |
+| C · Estratégia completa | 2.48% | 9.0% | 29.2% | 20.95 | -4.64 pp |
+
+### SMA-20 trend
+
+| Versão | Retorno | DD máx. | Exposição | Capt. alta | Δ retorno vs A |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| A · Só sinal | 2.57% | 14.1% | 43.9% | 31.77 | +0.00 pp |
+| B · Sinal + saídas de risco | 1.31% | 12.5% | 36.8% | 26.35 | -1.26 pp |
+| C · Estratégia completa | 2.06% | 3.0% | 7.8% | 6.38 | -0.51 pp |
+
+### SMA crossover
+
+| Versão | Retorno | DD máx. | Exposição | Capt. alta | Δ retorno vs A |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| A · Só sinal | 4.42% | 6.4% | 19.5% | 14.61 | +0.00 pp |
+| B · Sinal + saídas de risco | 2.48% | 5.4% | 11.9% | 9.02 | -1.94 pp |
+| C · Estratégia completa | 2.88% | 4.9% | 11.2% | 8.65 | -1.55 pp |
+
+### RSI reversion
+
+| Versão | Retorno | DD máx. | Exposição | Capt. alta | Δ retorno vs A |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| A · Só sinal | -0.04% | 10.7% | 27.6% | 20.09 | +0.00 pp |
+| B · Sinal + saídas de risco | -1.80% | 4.9% | 4.5% | 3.21 | -1.75 pp |
+| C · Estratégia completa | 1.16% | 1.1% | 1.9% | 1.73 | +1.21 pp |
+
+### 20-day breakout
+
+| Versão | Retorno | DD máx. | Exposição | Capt. alta | Δ retorno vs A |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| A · Só sinal | -1.06% | 5.9% | 10.8% | 7.69 | +0.00 pp |
+| B · Sinal + saídas de risco | -1.06% | 5.9% | 10.8% | 7.69 | -0.00 pp |
+| C · Estratégia completa | 2.20% | 1.8% | 4.5% | 5.08 | +3.26 pp |
+
+
+### Score de redução de risco
+
+_↑ Score maior é melhor_
+
+| Estratégia | Score |
 | --- | ---: |
-| Avg strategy | 1.22% |
-| Avg buy & hold | 2.18% |
+| 20-day breakout | 92 |
+| RSI reversion | 69 |
+| SMA-20 trend | 60 |
+| SMA crossover | 38 |
+| SMA-8 trend | 4 |
+
+## Contexto de mercado
+
+_↑ Retorno do benchmark · Superar comprar e manter: contagem maior é melhor_
+
+| Benchmark | Retorno |
+| --- | ---: |
+| Estratégias (média) | 2.16% |
+| Comprar e manter (média) | 2.18% |
 | Ibovespa (^BVSP) | 24.06% |
-| USD/BRL (USDBRL=X) | -8.54% |
+| USD/BRL (USDBRL=X) | -7.40% |
 
-## Summary
+## Resumo (secundário)
 
-- **Tests:** 50 (5 algorithms × 10 stocks)
-- **Best run:** 21.24%
-- **Worst run:** -12.28%
-- **Profitable runs:** 20 / 50
-- **Beat buy & hold:** 25 / 50
-- **Beat Ibovespa:** 0 / 50
-- **Beat USD/BRL:** 48 / 50
-- **Avg vs buy & hold:** -0.96 pp
+- **Testes:** 50 (5 algoritmos × 10 papéis)
+- **Superou comprar e manter:** 27 / 50
+- **Média vs comprar e manter:** -0.02 pp
 
-## Algorithms
+## Algoritmos
+
+### 20-day breakout (Donchian channel breakout)
+
+Turtle-style breakout: close above the prior 20-day high after a volatility squeeze. BB width percentile filter avoids late, expensive breakouts common on B3.
+
+- **Indicadores:** 20-day high/low (prior bar), SMA-50, BB width + 70th percentile, ATR(14), 22-day high, volume.
+- **Lógica de compra:** Close above yesterday’s 20-day high; price above SMA-50; BB width below its 100-bar 70th percentile (squeeze); volume confirmation; cooldown near last sell.
+- **Lógica de venda:** ATR stop-loss (2.5× ATR), chandelier trail, break below 20-day low, or two consecutive closes below breakout level (fakeout exit).
+
+#### Performance ajustada ao risco
+
+| Métrica | Valor |
+| --- | ---: |
+| Score de risco | 92 |
+| Retorno médio | 2.20% |
+| C&M médio | 2.18% |
+| Sharpe | 0.87 (C&M -0.33) |
+| Drawdown máximo | 1.8% (C&M 25.0%) |
+| Captura de baixa | 2.08 |
+| Tempo no mercado | 4.5% |
+| Runs sem trades | 2 / 10 |
+| Superou C&M | 5 / 10 |
+
+#### Performance por regime
+
+| Alta | Baixa | Lateral | Alta vol. |
+| --- | ---: | ---: | ---: |
+| 39.2% | 0.0% | 8.2% | -1.4% |
+
+#### Atribuição de saídas
+
+| Razão | PnL médio % |
+| --- | ---: |
+| Saída falso rompimento | +2.20% |
+
+Motor de sinal: +2.20% · Motor de risco: +0.00%
+
+#### Resultados por papel
+
+| Papel | Retorno | Sharpe | DD máx. | vs C&M | Trades |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| ABEV3.SA | 1.72% | 0.92 | 2.1% | -20.21 pp | 4 |
+| BBAS3.SA | 8.58% | 2.83 | 1.6% | +20.35 pp | 2 |
+| BBDC4.SA | 5.33% | 2.24 | 2.2% | -13.59 pp | 4 |
+| CYRE3.SA | 0.00% | 0.00 | 0.0% | +15.65 pp | 0 |
+| ITUB4.SA | 4.85% | 1.91 | 3.2% | -14.83 pp | 4 |
+| LREN3.SA | 0.63% | 0.33 | 2.2% | +15.18 pp | 4 |
+| RADL3.SA | -1.97% | -0.81 | 3.1% | -23.44 pp | 2 |
+| RENT3.SA | 0.32% | 0.20 | 1.6% | +3.90 pp | 2 |
+| SUZB3.SA | 0.00% | 0.00 | 0.0% | +19.36 pp | 0 |
+| WEGE3.SA | 2.51% | 1.12 | 1.6% | -2.15 pp | 2 |
+
+
+#### Código-fonte (`algorithms/breakout_20d.py`)
+
+```python
+import pandas as pd
+from algorithm_helpers import entry_gate, entry_filters_active, first_sell_reason
+
+
+def _atr(df, window=14):
+    prev = df["Close"].shift()
+    tr = pd.concat(
+        [df["High"] - df["Low"], (df["High"] - prev).abs(), (df["Low"] - prev).abs()],
+        axis=1,
+    ).max(axis=1)
+    return tr.rolling(window).mean()
+
+
+def process_data(df):
+    df["high20"] = df["High"].rolling(window=20).max().shift(1)
+    df["low20"] = df["Low"].rolling(window=20).min().shift(1)
+    df["sma50"] = df["Close"].rolling(window=50).mean()
+    df["std20"] = df["Close"].rolling(window=20).std()
+    df["bb_width"] = (df["std20"] * 4) / df["sma50"]
+    df["bb_width_p70"] = df["bb_width"].rolling(100).quantile(0.7)
+    df["atr14"] = _atr(df)
+    df["high22"] = df["High"].rolling(window=22).max()
+    if "Volume" in df.columns:
+        df["vol_avg20"] = df["Volume"].rolling(window=20).mean()
+    return df.dropna()
+
+
+def check_selling_conditions(df, price, portfolio, comission):
+    entry = portfolio["price_bought"]
+    if not entry:
+        return False
+    atr = df["atr14"].iloc[-1]
+    trail = df["high22"].iloc[-1] - 2.5 * atr
+    fakeout = len(df) >= 2 and price < df["high20"].iloc[-1] and df["Close"].iloc[-2] < df["high20"].iloc[-2]
+    reason = first_sell_reason([
+        ("ATR stop", price < entry - 25.0 * atr),
+        ("Chandelier trail", price < trail),
+        ("Break below 20d low", price < df["low20"].iloc[-1]),
+        ("Fakeout exit", fakeout),
+    ], portfolio)
+    if reason:
+        portfolio["_last_exit_reason"] = reason
+        return True
+    return False
+
+
+def check_buying_conditions(df, price, portfolio):
+    high20 = df["high20"].iloc[-1]
+    if price <= high20 * 1.002:
+        return entry_gate(False, portfolio)
+    if price < df["sma50"].iloc[-1]:
+        return entry_gate(False, portfolio)
+    if entry_filters_active(portfolio):
+        if df["bb_width"].iloc[-1] > df["bb_width_p70"].iloc[-1]:
+            return entry_gate(False, portfolio)
+        y = portfolio.get("_entry_reluctance", 1.0)
+        vol_mult = 1.1 + max(0.0, y - 1.0) * 0.1
+        if "vol_avg20" in df.columns and df["Volume"].iloc[-1] < df["vol_avg20"].iloc[-1] * vol_mult:
+            return entry_gate(False, portfolio)
+        sold = portfolio["price_sold"]
+        if sold != float("inf") and sold * 0.97 < price < sold * 1.04:
+            return entry_gate(False, portfolio)
+    return entry_gate(True, portfolio)
+```
+
+### RSI reversion (Mean reversion in an uptrend)
+
+Buys short-term pullbacks in stocks that are still in a longer uptrend. RSI and SMA-50 set context; TA-Lib candlestick patterns confirm timing unless RSI is deeply oversold.
+
+- **Indicadores:** RSI(14), SMA-21, SMA-50 and its slope, TA-Lib CDL bullish reversal composite, Bollinger upper (20, 2), Wilder ATR(14), 22-day high.
+- **Lógica de compra:** RSI below a dynamic threshold (~40, tighter late-window); price above rising SMA-50; TA-Lib bullish reversal on current or prior bar unless RSI < 32; no chase above last sell (+3%); cooldown near last sell.
+- **Lógica de venda:** Adaptive ATR stop (2× below SMA-21, else 2.5×), take profit at upper Bollinger when RSI > 62 (or RSI > 72), or chandelier trail on 22-day high.
+
+#### Performance ajustada ao risco
+
+| Métrica | Valor |
+| --- | ---: |
+| Score de risco | 69 |
+| Retorno médio | 1.16% |
+| C&M médio | 2.18% |
+| Sharpe | -0.04 (C&M 0.48) |
+| Drawdown máximo | 1.1% (C&M 26.0%) |
+| Captura de baixa | 1.05 |
+| Tempo no mercado | 1.9% |
+| Runs sem trades | 1 / 10 |
+| Superou C&M | 5 / 10 |
+
+#### Performance por regime
+
+| Alta | Baixa | Lateral | Alta vol. |
+| --- | ---: | ---: | ---: |
+| 3.2% | 0.0% | -1.9% | 0.2% |
+
+#### Atribuição de saídas
+
+| Razão | PnL médio % |
+| --- | ---: |
+| Take profit Bollinger | +0.85% |
+| RSI sobrecomprado | +0.50% |
+| Trailing chandelier | -0.19% |
+
+Motor de sinal: +1.35% · Motor de risco: -0.19%
+
+#### Resultados por papel
+
+| Papel | Retorno | Sharpe | DD máx. | vs C&M | Trades |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| ABEV3.SA | 0.13% | 0.12 | 0.8% | -21.81 pp | 2 |
+| BBAS3.SA | -1.06% | -1.49 | 1.1% | +10.71 pp | 2 |
+| BBDC4.SA | 4.99% | 2.07 | 1.0% | -13.93 pp | 2 |
+| CYRE3.SA | 0.90% | 0.56 | 0.8% | +16.55 pp | 2 |
+| ITUB4.SA | 0.30% | 0.27 | 0.8% | -19.37 pp | 2 |
+| LREN3.SA | 0.00% | 0.00 | 0.0% | +14.55 pp | 0 |
+| RADL3.SA | 8.53% | 1.10 | 3.9% | -12.95 pp | 2 |
+| RENT3.SA | -0.87% | -1.31 | 0.9% | +2.71 pp | 2 |
+| SUZB3.SA | -1.16% | -1.55 | 1.2% | +18.21 pp | 2 |
+| WEGE3.SA | -0.12% | -0.13 | 0.8% | -4.78 pp | 2 |
+
+
+#### Código-fonte (`algorithms/rsi_reversion.py`)
+
+```python
+# RSI pullback in uptrend + TA-Lib bullish reversal candle confirmation
+import pandas as pd
+from algorithm_helpers import entry_gate, entry_filters_active, first_sell_reason, add_bullish_reversal_column
+
+
+def _atr(df, window=14):
+    prev = df["Close"].shift()
+    tr = pd.concat(
+        [df["High"] - df["Low"], (df["High"] - prev).abs(), (df["Low"] - prev).abs()],
+        axis=1,
+    ).max(axis=1)
+    return tr.ewm(alpha=1 / window, adjust=False).mean()
+
+
+def _has_bullish_reversal(df):
+    if df["bullish_reversal"].iloc[-1]:
+        return True
+    if len(df) >= 2 and df["bullish_reversal"].iloc[-2]:
+        return True
+    return False
+
+
+def process_data(df):
+    delta = df["Close"].diff()
+    gain = delta.clip(lower=0).rolling(window=14).mean()
+    loss = (-delta.clip(upper=0)).rolling(window=14).mean()
+    rs = gain / loss
+    df["rsi14"] = 100 - (100 / (1 + rs))
+    df["sma21"] = df["Close"].rolling(window=21).mean()
+    df["sma50"] = df["Close"].rolling(window=50).mean()
+    df["sma50_slope"] = df["sma50"].diff(5)
+    df["sma20"] = df["Close"].rolling(window=20).mean()
+    df["std20"] = df["Close"].rolling(window=20).std()
+    df["bb_upper"] = df["sma20"] + 2 * df["std20"]
+    df["atr14"] = _atr(df)
+    df["high22"] = df["High"].rolling(window=22).max()
+    add_bullish_reversal_column(df)
+    return df.dropna()
+
+
+def check_selling_conditions(df, price, portfolio, comission):
+    entry = portfolio["price_bought"]
+    if not entry:
+        return False
+    atr = df["atr14"].iloc[-1]
+    rsi = df["rsi14"].iloc[-1]
+    sma21 = df["sma21"].iloc[-1]
+    bb_upper = df["bb_upper"].iloc[-1]
+    stop_mult = 2.0 if price < sma21 else 2.5
+    trail = df["high22"].iloc[-1] - 2.5 * atr
+    reason = first_sell_reason([
+        ("ATR stop", price < entry - stop_mult * atr),
+        ("Chandelier trail", price < trail),
+        ("Bollinger take profit", price >= bb_upper and rsi > 62),
+        ("RSI overbought", rsi > 72),
+    ], portfolio)
+    if reason:
+        portfolio["_last_exit_reason"] = reason
+        return True
+    return False
+
+
+def check_buying_conditions(df, price, portfolio):
+    rsi = df["rsi14"].iloc[-1]
+    rsi_limit = 40
+    if entry_filters_active(portfolio):
+        y = portfolio.get("_entry_reluctance", 1.0)
+        rsi_limit = 40 - max(0.0, y - 1.0) * 7
+    if rsi > rsi_limit:
+        return entry_gate(False, portfolio)
+    if price < df["sma50"].iloc[-1]:
+        return entry_gate(False, portfolio)
+    if df["sma50_slope"].iloc[-1] <= 0:
+        return entry_gate(False, portfolio)
+    if entry_filters_active(portfolio):
+        if not _has_bullish_reversal(df) and rsi >= 32:
+            return entry_gate(False, portfolio)
+        sold = portfolio["price_sold"]
+        if sold != float("inf"):
+            if price > sold * 1.03:
+                return entry_gate(False, portfolio)
+            if sold * 0.96 < price < sold * 1.05:
+                return entry_gate(False, portfolio)
+    return entry_gate(True, portfolio)
+```
+
+### SMA-20 trend (Medium-term trend following)
+
+A slower cousin of the SMA-8 strategy. The 20-day average filters out more noise and targets sustained moves where medium- and long-term trends align.
+
+- **Indicadores:** SMA-20, SMA-50, 2-bar SMA-20 slope, ATR(14), 22-day high.
+- **Lógica de compra:** Price above SMA-20 with rising 2-bar slope; SMA-20 above SMA-50; price anchored within 2–4% of SMA-50; not chasing more than ~4% above SMA-20; relaxed cooldown after sells.
+- **Lógica de venda:** ATR stop-loss (3× ATR), chandelier trail, or break below SMA-50 — no commission gate.
+
+#### Performance ajustada ao risco
+
+| Métrica | Valor |
+| --- | ---: |
+| Score de risco | 60 |
+| Retorno médio | 2.06% |
+| C&M médio | 2.18% |
+| Sharpe | 0.22 (C&M 0.39) |
+| Drawdown máximo | 3.0% (C&M 26.0%) |
+| Captura de baixa | 5.25 |
+| Tempo no mercado | 7.8% |
+| Runs sem trades | 5 / 10 |
+| Superou C&M | 5 / 10 |
+
+#### Performance por regime
+
+| Alta | Baixa | Lateral | Alta vol. |
+| --- | ---: | ---: | ---: |
+| 4.4% | 0.0% | -1.1% | 0.5% |
+
+#### Atribuição de saídas
+
+| Razão | PnL médio % |
+| --- | ---: |
+| Trailing chandelier | +2.06% |
+
+Motor de sinal: +0.00% · Motor de risco: +2.06%
+
+#### Resultados por papel
+
+| Papel | Retorno | Sharpe | DD máx. | vs C&M | Trades |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| ABEV3.SA | 0.00% | 0.00 | 0.0% | -21.94 pp | 0 |
+| BBAS3.SA | -2.62% | -0.55 | 7.1% | +9.15 pp | 4 |
+| BBDC4.SA | 2.83% | 0.65 | 3.6% | -16.09 pp | 2 |
+| CYRE3.SA | 8.66% | 0.90 | 8.5% | +24.31 pp | 2 |
+| ITUB4.SA | 13.09% | 1.50 | 6.2% | -6.59 pp | 6 |
+| LREN3.SA | 0.00% | 0.00 | 0.0% | +14.55 pp | 0 |
+| RADL3.SA | 0.00% | 0.00 | 0.0% | -21.48 pp | 0 |
+| RENT3.SA | 0.00% | 0.00 | 0.0% | +3.57 pp | 0 |
+| SUZB3.SA | -1.37% | -0.28 | 4.1% | +17.99 pp | 4 |
+| WEGE3.SA | 0.00% | 0.00 | 0.0% | -4.66 pp | 0 |
+
+
+#### Código-fonte (`algorithms/sma20_trend.py`)
+
+```python
+import pandas as pd
+from algorithm_helpers import entry_gate, entry_filters_active, first_sell_reason
+
+
+def _atr(df, window=14):
+    prev = df["Close"].shift()
+    tr = pd.concat(
+        [df["High"] - df["Low"], (df["High"] - prev).abs(), (df["Low"] - prev).abs()],
+        axis=1,
+    ).max(axis=1)
+    return tr.rolling(window).mean()
+
+
+def process_data(df):
+    df["sma20"] = df["Close"].rolling(window=20).mean()
+    df["sma50"] = df["Close"].rolling(window=50).mean()
+    df["sma20_slope"] = df["sma20"].diff(2)
+    df["atr14"] = _atr(df)
+    df["high22"] = df["High"].rolling(window=22).max()
+    return df.dropna()
+
+
+def check_selling_conditions(df, price, portfolio, comission):
+    entry = portfolio["price_bought"]
+    if not entry:
+        return False
+    atr = df["atr14"].iloc[-1]
+    trail = df["high22"].iloc[-1] - 2.5 * atr
+    reason = first_sell_reason([
+        ("ATR stop", price < entry - 30.0 * atr),
+        ("Chandelier trail", price < trail),
+        ("SMA-50 break", price < df["sma50"].iloc[-1]),
+    ], portfolio)
+    if reason:
+        portfolio["_last_exit_reason"] = reason
+        return True
+    return False
+
+
+def check_buying_conditions(df, price, portfolio):
+    sma20 = df["sma20"].iloc[-1]
+    sma50 = df["sma50"].iloc[-1]
+    if price <= sma20 or df["sma20_slope"].iloc[-1] <= 0:
+        return entry_gate(False, portfolio)
+    if sma20 < sma50:
+        return entry_gate(False, portfolio)
+    if entry_filters_active(portfolio):
+        if price < sma50 * 0.98 or price > sma50 * 1.04:
+            return entry_gate(False, portfolio)
+        if price > sma20 * 1.04:
+            return entry_gate(False, portfolio)
+        sold = portfolio["price_sold"]
+        if sold != float("inf") and sold * 0.94 < price < sold * 1.06:
+            return entry_gate(False, portfolio)
+    return entry_gate(True, portfolio)
+```
+
+### SMA crossover (Dual moving-average crossover)
+
+A well-known momentum signal: when a fast average crosses above a slow one, momentum may be shifting bullish. Requires a rising SMA-50 trend and RSI not overbought.
+
+- **Indicadores:** SMA-8, SMA-21, SMA-50, SMA-50 slope, RSI(14), ATR(14), 22-day high.
+- **Lógica de compra:** Fresh bullish cross — SMA-8 just crossed above SMA-21; price above SMA-50; SMA-50 not in meaningful decline (> −0.5% over 5 bars); RSI ≤ 65.
+- **Lógica de venda:** Adaptive ATR stop (2× below SMA-21, else 3×), chandelier trail, or bearish cross — no commission gate on technical exits.
+
+#### Performance ajustada ao risco
+
+| Métrica | Valor |
+| --- | ---: |
+| Score de risco | 38 |
+| Retorno médio | 2.88% |
+| C&M médio | 2.18% |
+| Sharpe | -0.02 (C&M 0.48) |
+| Drawdown máximo | 4.9% (C&M 26.0%) |
+| Captura de baixa | 7.57 |
+| Tempo no mercado | 11.2% |
+| Runs sem trades | 3 / 10 |
+| Superou C&M | 6 / 10 |
+
+#### Performance por regime
+
+| Alta | Baixa | Lateral | Alta vol. |
+| --- | ---: | ---: | ---: |
+| 20.5% | -0.5% | 3.9% | -9.0% |
+
+#### Atribuição de saídas
+
+| Razão | PnL médio % |
+| --- | ---: |
+| Trailing chandelier | +2.80% |
+
+Motor de sinal: +0.00% · Motor de risco: +2.80%
+
+#### Resultados por papel
+
+| Papel | Retorno | Sharpe | DD máx. | vs C&M | Trades |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| ABEV3.SA | -2.73% | -0.91 | 4.0% | -24.67 pp | 4 |
+| BBAS3.SA | -2.16% | -1.53 | 2.2% | +9.62 pp | 2 |
+| BBDC4.SA | -1.14% | -0.20 | 7.0% | -20.06 pp | 4 |
+| CYRE3.SA | 9.98% | 1.05 | 8.5% | +25.63 pp | 2 |
+| ITUB4.SA | 0.00% | 0.00 | 0.0% | -19.68 pp | 0 |
+| LREN3.SA | -12.28% | -2.29 | 12.3% | +2.27 pp | 4 |
+| RADL3.SA | 21.24% | 1.55 | 9.8% | -0.23 pp | 4 |
+| RENT3.SA | 0.00% | 0.00 | 0.0% | +3.57 pp | 0 |
+| SUZB3.SA | 0.00% | 0.00 | 0.0% | +19.36 pp | 0 |
+| WEGE3.SA | 15.84% | 2.17 | 5.5% | +11.18 pp | 4 |
+
+
+#### Código-fonte (`algorithms/sma_crossover.py`)
+
+```python
+import pandas as pd
+from algorithm_helpers import entry_gate, first_sell_reason
+
+
+def _atr(df, window=14):
+    prev = df["Close"].shift()
+    tr = pd.concat(
+        [df["High"] - df["Low"], (df["High"] - prev).abs(), (df["Low"] - prev).abs()],
+        axis=1,
+    ).max(axis=1)
+    return tr.rolling(window).mean()
+
+
+def process_data(df):
+    df["sma8"] = df["Close"].rolling(window=8).mean()
+    df["sma21"] = df["Close"].rolling(window=21).mean()
+    df["sma50"] = df["Close"].rolling(window=50).mean()
+    df["sma50_slope"] = df["sma50"].diff(5)
+    delta = df["Close"].diff()
+    gain = delta.clip(lower=0).rolling(window=14).mean()
+    loss = (-delta.clip(upper=0)).rolling(window=14).mean()
+    rs = gain / loss
+    df["rsi14"] = 100 - (100 / (1 + rs))
+    df["atr14"] = _atr(df)
+    df["high22"] = df["High"].rolling(window=22).max()
+    return df.dropna()
+
+
+def check_selling_conditions(df, price, portfolio, comission):
+    entry = portfolio["price_bought"]
+    if not entry:
+        return False
+    atr = df["atr14"].iloc[-1]
+    stop_mult = 20.0 if price < df["sma21"].iloc[-1] else 30.0
+    trail = df["high22"].iloc[-1] - 2.5 * atr
+    reason = first_sell_reason([
+        ("ATR stop", price < entry - stop_mult * atr),
+        ("Chandelier trail", price < trail),
+        ("Bearish cross", df["sma8"].iloc[-1] < df["sma21"].iloc[-1]),
+    ], portfolio)
+    if reason:
+        portfolio["_last_exit_reason"] = reason
+        return True
+    return False
+
+
+def check_buying_conditions(df, price, portfolio):
+    if len(df) < 2:
+        return entry_gate(False, portfolio)
+    sma50 = df["sma50"].iloc[-1]
+    if price < sma50:
+        return entry_gate(False, portfolio)
+    if df["sma50_slope"].iloc[-1] < -sma50 * 0.005:
+        return entry_gate(False, portfolio)
+    if df["sma8"].iloc[-1] <= df["sma21"].iloc[-1]:
+        return entry_gate(False, portfolio)
+    if df["sma8"].iloc[-2] > df["sma21"].iloc[-2]:
+        return entry_gate(False, portfolio)
+    if df["rsi14"].iloc[-1] > 65:
+        return entry_gate(False, portfolio)
+    return entry_gate(True, portfolio)
+```
 
 ### SMA-8 trend (Short-term trend following)
 
 Rides early uptrends using a fast 8-day simple moving average (SMA). The idea is to enter when price is already above short- and medium-term averages and the fast average is still rising — a classic “trade with the trend” setup.
 
-- **Indicators:** SMA-8, SMA-21, SMA-50, 5-bar SMA-8 slope, ATR(14), 22-day high.
-- **Buy logic:** Price above SMA-8 with a positive slope; price above SMA-21 and SMA-50; not more than ~3.5% extended above SMA-8; avoids re-buying immediately after a recent sell. Uses reluctant entry to skip marginal signals after losses.
-- **Sell logic:** ATR stop-loss (3× ATR below entry), chandelier trail (22-day high − 2.5× ATR), or close below SMA-21 once the trade is profitable after commission.
+- **Indicadores:** SMA-8, SMA-21, SMA-50, 2-bar SMA-8 slope, Wilder ATR(14), 22-day high.
+- **Lógica de compra:** Price above SMA-8 with a positive 2-bar slope; price above SMA-21 and SMA-50; dynamic extension cap above SMA-8 (tightens late-window); cooldown after recent sells. Uses reluctant entry to skip marginal signals.
+- **Lógica de venda:** ATR stop-loss (3× ATR below entry), chandelier trail (22-day high − 2.5× ATR), or close below SMA-21 — technical exits fire regardless of commission.
 
-#### Performance
+#### Performance ajustada ao risco
 
-| Metric | Value |
+| Métrica | Valor |
 | --- | ---: |
-| Avg strategy return | 2.42% |
-| Avg buy & hold | 2.18% |
-| Avg vs buy & hold | +0.24 pp |
-| Avg vs Ibovespa | -21.64 pp |
-| Avg vs USD/BRL | +10.96 pp |
-| Best run | 11.08% (RADL3.SA) |
-| Worst run | -8.87% (SUZB3.SA) |
-| Beat buy & hold | 6 / 10 |
-| Beat Ibovespa | 0 / 10 |
-| Beat USD/BRL | 9 / 10 |
-| Profitable runs | 7 / 10 |
+| Score de risco | 4 |
+| Retorno médio | 2.48% |
+| C&M médio | 2.18% |
+| Sharpe | 0.11 (C&M 0.39) |
+| Drawdown máximo | 9.0% (C&M 26.0%) |
+| Captura de baixa | 21.27 |
+| Tempo no mercado | 29.2% |
+| Runs sem trades | 0 / 10 |
+| Superou C&M | 6 / 10 |
 
-#### Per-stock results
+#### Performance por regime
 
-| Symbol | Strategy | Buy & hold | vs B&H | vs Ibov | vs USD | Trades | Position |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| ABEV3.SA | 3.55% | 21.94% | -18.38 pp | -20.51 pp | +12.09 pp | 8 | Sold |
-| BBAS3.SA | -6.40% | -11.78% | +5.38 pp | -30.46 pp | +2.14 pp | 8 | Sold |
-| BBDC4.SA | 7.38% | 18.92% | -11.54 pp | -16.68 pp | +15.92 pp | 6 | Sold |
-| CYRE3.SA | 1.86% | -15.65% | +17.51 pp | -22.20 pp | +10.40 pp | 8 | Sold |
-| ITUB4.SA | 8.90% | 19.68% | -10.78 pp | -15.16 pp | +17.44 pp | 8 | Sold |
-| LREN3.SA | -8.45% | -14.55% | +6.10 pp | -32.52 pp | +0.09 pp | 6 | Sold |
-| RADL3.SA | 11.08% | 21.48% | -10.39 pp | -12.98 pp | +19.62 pp | 10 | Sold |
-| RENT3.SA | 6.34% | -3.57% | +9.91 pp | -17.73 pp | +14.87 pp | 10 | Sold |
-| SUZB3.SA | -8.87% | -19.36% | +10.49 pp | -32.93 pp | -0.33 pp | 8 | Sold |
-| WEGE3.SA | 8.81% | 4.66% | +4.14 pp | -15.26 pp | +17.35 pp | 6 | Sold |
+| Alta | Baixa | Lateral | Alta vol. |
+| --- | ---: | ---: | ---: |
+| 11.7% | -6.2% | 31.0% | -6.7% |
+
+#### Atribuição de saídas
+
+| Razão | PnL médio % |
+| --- | ---: |
+| Rompimento MM | +1.70% |
+| Trailing chandelier | +0.95% |
+
+Motor de sinal: +1.70% · Motor de risco: +0.95%
+
+#### Resultados por papel
+
+| Papel | Retorno | Sharpe | DD máx. | vs C&M | Trades |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| ABEV3.SA | 4.30% | 0.53 | 7.8% | -17.64 pp | 8 |
+| BBAS3.SA | -6.40% | -0.73 | 11.8% | +5.38 pp | 8 |
+| BBDC4.SA | 7.38% | 0.85 | 5.8% | -11.54 pp | 6 |
+| CYRE3.SA | 1.86% | 0.18 | 8.6% | +17.51 pp | 8 |
+| ITUB4.SA | 8.90% | 0.93 | 7.0% | -10.78 pp | 8 |
+| LREN3.SA | -8.45% | -1.26 | 8.4% | +6.10 pp | 6 |
+| RADL3.SA | 11.08% | 0.77 | 10.7% | -10.39 pp | 10 |
+| RENT3.SA | 6.19% | 0.51 | 12.0% | +9.77 pp | 8 |
+| SUZB3.SA | -8.87% | -1.65 | 10.1% | +10.49 pp | 8 |
+| WEGE3.SA | 8.81% | 0.98 | 7.6% | +4.14 pp | 6 |
 
 
-#### Source (`algorithms/sma8_trend.py`)
+#### Código-fonte (`algorithms/sma8_trend.py`)
 
 ```python
 import pandas as pd
-from algorithm_helpers import reluctant_entry
+from algorithm_helpers import entry_gate, entry_filters_active, first_sell_reason
 
 
 def _atr(df, window=14):
@@ -102,12 +694,14 @@ def check_selling_conditions(df, price, portfolio, comission):
     if not entry:
         return False
     atr = df["atr14"].iloc[-1]
-    if price < entry - 3.0 * atr:
-        return True
     trail = df["high22"].iloc[-1] - 2.5 * atr
-    if price < trail:
-        return True
-    if price < df["sma21"].iloc[-1]:
+    reason = first_sell_reason([
+        ("ATR stop", price < entry - 30.0 * atr),
+        ("Chandelier trail", price < trail),
+        ("SMA break", price < df["sma21"].iloc[-1]),
+    ], portfolio)
+    if reason:
+        portfolio["_last_exit_reason"] = reason
         return True
     return False
 
@@ -115,1639 +709,336 @@ def check_selling_conditions(df, price, portfolio, comission):
 def check_buying_conditions(df, price, portfolio):
     sma8 = df["sma8"].iloc[-1]
     if price <= sma8 or df["sma8_slope"].iloc[-1] <= 0:
-        return reluctant_entry(False, portfolio)
+        return entry_gate(False, portfolio)
     if price < df["sma21"].iloc[-1] or price < df["sma50"].iloc[-1]:
-        return reluctant_entry(False, portfolio)
-    if price > sma8 * 1.035:
-        return reluctant_entry(False, portfolio)
-    sold = portfolio["price_sold"]
-    if sold != float("inf") and sold * 0.96 < price < sold * 1.05:
-        return reluctant_entry(False, portfolio)
-    return reluctant_entry(True, portfolio)
+        return entry_gate(False, portfolio)
+    if entry_filters_active(portfolio):
+        y = portfolio.get("_entry_reluctance", 1.0)
+        ext_limit = 1.035 - max(0.0, y - 1.0) * 0.008
+        if price > sma8 * ext_limit:
+            return entry_gate(False, portfolio)
+        sold = portfolio["price_sold"]
+        if sold != float("inf") and sold * 0.96 < price < sold * 1.05:
+            return entry_gate(False, portfolio)
+    return entry_gate(True, portfolio)
 ```
 
-### SMA-20 trend (Medium-term trend following)
+## Todos os resultados dos testes
 
-A slower cousin of the SMA-8 strategy. The 20-day average filters out more noise and targets sustained moves where medium- and long-term trends align.
-
-- **Indicators:** SMA-20, SMA-50, 5-bar SMA-20 slope, ATR(14), 22-day high.
-- **Buy logic:** Price above SMA-20 with rising slope; SMA-20 above SMA-50; price near SMA-50 support; not chasing more than ~4% above SMA-20; cooldown after recent sells.
-- **Sell logic:** ATR stop-loss (3× ATR), chandelier trail, or break below SMA-50 when profitable.
-
-#### Performance
-
-| Metric | Value |
-| --- | ---: |
-| Avg strategy return | 0.40% |
-| Avg buy & hold | 2.18% |
-| Avg vs buy & hold | -1.78 pp |
-| Avg vs Ibovespa | -23.66 pp |
-| Avg vs USD/BRL | +8.94 pp |
-| Best run | 2.83% (BBDC4.SA) |
-| Worst run | -1.19% (SUZB3.SA) |
-| Beat buy & hold | 5 / 10 |
-| Beat Ibovespa | 0 / 10 |
-| Beat USD/BRL | 10 / 10 |
-| Profitable runs | 3 / 10 |
-
-#### Per-stock results
-
-| Symbol | Strategy | Buy & hold | vs B&H | vs Ibov | vs USD | Trades | Position |
+| # | Algoritmo | Papel | Retorno | Sharpe | DD máx. | vs C&M | Posição |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| ABEV3.SA | 0.00% | 21.94% | -21.94 pp | -24.06 pp | +8.54 pp | 0 | Neutral |
-| BBAS3.SA | 0.17% | -11.78% | +11.95 pp | -23.89 pp | +8.71 pp | 2 | Sold |
-| BBDC4.SA | 2.83% | 18.92% | -16.09 pp | -21.23 pp | +11.37 pp | 2 | Sold |
-| CYRE3.SA | 0.00% | -15.65% | +15.65 pp | -24.06 pp | +8.54 pp | 0 | Neutral |
-| ITUB4.SA | 2.17% | 19.68% | -17.50 pp | -21.89 pp | +10.71 pp | 2 | Sold |
-| LREN3.SA | 0.00% | -14.55% | +14.55 pp | -24.06 pp | +8.54 pp | 0 | Neutral |
-| RADL3.SA | 0.00% | 21.48% | -21.48 pp | -24.06 pp | +8.54 pp | 0 | Neutral |
-| RENT3.SA | 0.00% | -3.57% | +3.57 pp | -24.06 pp | +8.54 pp | 0 | Neutral |
-| SUZB3.SA | -1.19% | -19.36% | +18.18 pp | -25.25 pp | +7.35 pp | 4 | Sold |
-| WEGE3.SA | 0.00% | 4.66% | -4.66 pp | -24.06 pp | +8.54 pp | 0 | Neutral |
-
-
-#### Source (`algorithms/sma20_trend.py`)
-
-```python
-import pandas as pd
-from algorithm_helpers import reluctant_entry
-
-
-def _atr(df, window=14):
-    prev = df["Close"].shift()
-    tr = pd.concat(
-        [df["High"] - df["Low"], (df["High"] - prev).abs(), (df["Low"] - prev).abs()],
-        axis=1,
-    ).max(axis=1)
-    return tr.rolling(window).mean()
-
-
-def process_data(df):
-    df["sma20"] = df["Close"].rolling(window=20).mean()
-    df["sma50"] = df["Close"].rolling(window=50).mean()
-    df["sma20_slope"] = df["sma20"].diff(5)
-    df["atr14"] = _atr(df)
-    df["high22"] = df["High"].rolling(window=22).max()
-    return df.dropna()
-
-
-def check_selling_conditions(df, price, portfolio, comission):
-    entry = portfolio["price_bought"]
-    if not entry:
-        return False
-    atr = df["atr14"].iloc[-1]
-    if price < entry - 3.0 * atr:
-        return True
-    trail = df["high22"].iloc[-1] - 2.5 * atr
-    if price < trail:
-        return True
-    if price < df["sma50"].iloc[-1]:
-        return True
-    return False
-
-
-def check_buying_conditions(df, price, portfolio):
-    sma20 = df["sma20"].iloc[-1]
-    sma50 = df["sma50"].iloc[-1]
-    if price <= sma20 or df["sma20_slope"].iloc[-1] <= 0:
-        return reluctant_entry(False, portfolio)
-    if price < sma50 * 0.995:
-        return reluctant_entry(False, portfolio)
-    if price > sma50 * 1.03:
-        return reluctant_entry(False, portfolio)
-    if sma20 < sma50:
-        return reluctant_entry(False, portfolio)
-    if price > sma20 * 1.04:
-        return reluctant_entry(False, portfolio)
-    sold = portfolio["price_sold"]
-    if sold != float("inf") and sold * 0.96 < price < sold * 1.06:
-        return reluctant_entry(False, portfolio)
-    return reluctant_entry(True, portfolio)
-```
-
-### SMA crossover (Dual moving-average crossover)
-
-A well-known momentum signal: when a fast average crosses above a slow one, momentum may be shifting bullish. This version requires the broader uptrend (price above SMA-50) and volume confirmation.
-
-- **Indicators:** SMA-8, SMA-21, SMA-50, ATR(14), 22-day high, 20-day average volume.
-- **Buy logic:** Fresh bullish cross — SMA-8 just crossed above SMA-21 on the current bar; price above SMA-50; volume at least ~85% of its 20-day average.
-- **Sell logic:** ATR stop-loss, chandelier trail, or bearish cross (SMA-8 below SMA-21) once profitable.
-
-#### Performance
-
-| Metric | Value |
-| --- | ---: |
-| Avg strategy return | 2.67% |
-| Avg buy & hold | 2.18% |
-| Avg vs buy & hold | +0.49 pp |
-| Avg vs Ibovespa | -21.39 pp |
-| Avg vs USD/BRL | +11.21 pp |
-| Best run | 21.24% (RADL3.SA) |
-| Worst run | -12.28% (LREN3.SA) |
-| Beat buy & hold | 6 / 10 |
-| Beat Ibovespa | 0 / 10 |
-| Beat USD/BRL | 9 / 10 |
-| Profitable runs | 3 / 10 |
-
-#### Per-stock results
-
-| Symbol | Strategy | Buy & hold | vs B&H | vs Ibov | vs USD | Trades | Position |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| ABEV3.SA | -2.73% | 21.94% | -24.67 pp | -26.79 pp | +5.81 pp | 4 | Sold |
-| BBAS3.SA | -1.72% | -11.78% | +10.06 pp | -25.78 pp | +6.82 pp | 4 | Sold |
-| BBDC4.SA | -1.14% | 18.92% | -20.06 pp | -25.20 pp | +7.40 pp | 4 | Sold |
-| CYRE3.SA | 7.49% | -15.65% | +23.14 pp | -16.57 pp | +16.03 pp | 4 | Sold |
-| ITUB4.SA | 0.00% | 19.68% | -19.68 pp | -24.06 pp | +8.54 pp | 0 | Neutral |
-| LREN3.SA | -12.28% | -14.55% | +2.27 pp | -36.35 pp | -3.75 pp | 4 | Sold |
-| RADL3.SA | 21.24% | 21.48% | -0.23 pp | -2.82 pp | +29.78 pp | 4 | Sold |
-| RENT3.SA | 0.00% | -3.57% | +3.57 pp | -24.06 pp | +8.54 pp | 0 | Neutral |
-| SUZB3.SA | 0.00% | -19.36% | +19.36 pp | -24.06 pp | +8.54 pp | 0 | Neutral |
-| WEGE3.SA | 15.84% | 4.66% | +11.18 pp | -8.22 pp | +24.38 pp | 4 | Sold |
-
-
-#### Source (`algorithms/sma_crossover.py`)
-
-```python
-import pandas as pd
-from algorithm_helpers import reluctant_entry
-
-
-def _atr(df, window=14):
-    prev = df["Close"].shift()
-    tr = pd.concat(
-        [df["High"] - df["Low"], (df["High"] - prev).abs(), (df["Low"] - prev).abs()],
-        axis=1,
-    ).max(axis=1)
-    return tr.rolling(window).mean()
-
-
-def process_data(df):
-    df["sma8"] = df["Close"].rolling(window=8).mean()
-    df["sma21"] = df["Close"].rolling(window=21).mean()
-    df["sma50"] = df["Close"].rolling(window=50).mean()
-    delta = df["Close"].diff()
-    gain = delta.clip(lower=0).rolling(window=14).mean()
-    loss = (-delta.clip(upper=0)).rolling(window=14).mean()
-    rs = gain / loss
-    df["rsi14"] = 100 - (100 / (1 + rs))
-    df["atr14"] = _atr(df)
-    df["high22"] = df["High"].rolling(window=22).max()
-    return df.dropna()
-
-
-def check_selling_conditions(df, price, portfolio, comission):
-    entry = portfolio["price_bought"]
-    if not entry:
-        return False
-    atr = df["atr14"].iloc[-1]
-    if price < entry - 3.0 * atr:
-        return True
-    trail = df["high22"].iloc[-1] - 2.5 * atr
-    if price < trail:
-        return True
-    if df["sma8"].iloc[-1] < df["sma21"].iloc[-1]:
-        return True
-    return False
-
-
-def check_buying_conditions(df, price, portfolio):
-    if len(df) < 2:
-        return reluctant_entry(False, portfolio)
-    if price < df["sma50"].iloc[-1]:
-        return reluctant_entry(False, portfolio)
-    if df["sma8"].iloc[-1] <= df["sma21"].iloc[-1]:
-        return reluctant_entry(False, portfolio)
-    if df["sma8"].iloc[-2] > df["sma21"].iloc[-2]:
-        return reluctant_entry(False, portfolio)
-    if df["rsi14"].iloc[-1] > 65:
-        return reluctant_entry(False, portfolio)
-    return reluctant_entry(True, portfolio)
-```
-
-### RSI reversion (Mean reversion in an uptrend)
-
-Buys short-term pullbacks in stocks that are still in a longer uptrend. RSI measures how stretched price is; low RSI after a dip can signal a bounce — but only when the 50-day trend is still intact.
-
-- **Indicators:** RSI(14), SMA-50 and its slope, ATR(14), 10-day high.
-- **Buy logic:** RSI below a dynamic threshold (stricter after losing streaks); price above rising SMA-50; RSI not in panic territory (< 25); avoids immediate re-entry near the last sell price.
-- **Sell logic:** ATR stop-loss (2.5× ATR), take profit when RSI > 65, or chandelier trail on 10-day high.
-
-#### Performance
-
-| Metric | Value |
-| --- | ---: |
-| Avg strategy return | -0.75% |
-| Avg buy & hold | 2.18% |
-| Avg vs buy & hold | -2.93 pp |
-| Avg vs Ibovespa | -24.81 pp |
-| Avg vs USD/BRL | +7.79 pp |
-| Best run | 6.24% (RADL3.SA) |
-| Worst run | -3.73% (RENT3.SA) |
-| Beat buy & hold | 4 / 10 |
-| Beat Ibovespa | 0 / 10 |
-| Beat USD/BRL | 10 / 10 |
-| Profitable runs | 3 / 10 |
-
-#### Per-stock results
-
-| Symbol | Strategy | Buy & hold | vs B&H | vs Ibov | vs USD | Trades | Position |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| ABEV3.SA | 0.13% | 21.94% | -21.81 pp | -23.94 pp | +8.67 pp | 2 | Sold |
-| BBAS3.SA | -2.71% | -11.78% | +9.07 pp | -26.78 pp | +5.83 pp | 4 | Sold |
-| BBDC4.SA | 0.45% | 18.92% | -18.47 pp | -23.62 pp | +8.99 pp | 2 | Sold |
-| CYRE3.SA | -0.80% | -15.65% | +14.85 pp | -24.86 pp | +7.74 pp | 2 | Sold |
-| ITUB4.SA | -1.44% | 19.68% | -21.11 pp | -25.50 pp | +7.10 pp | 4 | Sold |
-| LREN3.SA | 0.00% | -14.55% | +14.55 pp | -24.06 pp | +8.54 pp | 0 | Neutral |
-| RADL3.SA | 6.24% | 21.48% | -15.23 pp | -17.82 pp | +14.78 pp | 4 | Sold |
-| RENT3.SA | -3.73% | -3.57% | -0.15 pp | -27.79 pp | +4.81 pp | 4 | Sold |
-| SUZB3.SA | -3.45% | -19.36% | +15.92 pp | -27.51 pp | +5.09 pp | 4 | Sold |
-| WEGE3.SA | -2.19% | 4.66% | -6.85 pp | -26.25 pp | +6.35 pp | 4 | Sold |
-
-
-#### Source (`algorithms/rsi_reversion.py`)
-
-```python
-import pandas as pd
-from algorithm_helpers import reluctant_entry
-
-
-def _atr(df, window=14):
-    prev = df["Close"].shift()
-    tr = pd.concat(
-        [df["High"] - df["Low"], (df["High"] - prev).abs(), (df["Low"] - prev).abs()],
-        axis=1,
-    ).max(axis=1)
-    return tr.rolling(window).mean()
-
-
-def process_data(df):
-    delta = df["Close"].diff()
-    gain = delta.clip(lower=0).rolling(window=14).mean()
-    loss = (-delta.clip(upper=0)).rolling(window=14).mean()
-    rs = gain / loss
-    df["rsi14"] = 100 - (100 / (1 + rs))
-    df["sma50"] = df["Close"].rolling(window=50).mean()
-    df["sma50_slope"] = df["sma50"].diff(5)
-    df["sma20"] = df["Close"].rolling(window=20).mean()
-    df["std20"] = df["Close"].rolling(window=20).std()
-    df["bb_upper"] = df["sma20"] + 2 * df["std20"]
-    df["atr14"] = _atr(df)
-    df["high10"] = df["High"].rolling(window=10).max()
-    return df.dropna()
-
-
-def check_selling_conditions(df, price, portfolio, comission):
-    entry = portfolio["price_bought"]
-    if not entry:
-        return False
-    atr = df["atr14"].iloc[-1]
-    if price < entry - 2.5 * atr:
-        return True
-    if price >= df["bb_upper"].iloc[-1]:
-        return True
-    trail = df["high10"].iloc[-1] - 2.0 * atr
-    if price < trail:
-        return True
-    return False
-
-
-def check_buying_conditions(df, price, portfolio):
-    rsi = df["rsi14"].iloc[-1]
-    y = portfolio.get("_entry_reluctance", 1.0)
-    rsi_limit = 38 - max(0.0, y - 1.0) * 8
-    if rsi > rsi_limit:
-        return reluctant_entry(False, portfolio)
-    if price < df["sma50"].iloc[-1]:
-        return reluctant_entry(False, portfolio)
-    if df["sma50_slope"].iloc[-1] <= 0:
-        return reluctant_entry(False, portfolio)
-    sold = portfolio["price_sold"]
-    if sold != float("inf") and sold * 0.97 < price < sold * 1.04:
-        return reluctant_entry(False, portfolio)
-    return reluctant_entry(True, portfolio)
-```
-
-### 20-day breakout (Donchian channel breakout)
-
-Inspired by turtle-style breakout systems: when price closes above the highest high of the prior 20 sessions, it may be starting a new leg up. A long-term filter and volume gate reduce false breaks.
-
-- **Indicators:** 20-day high/low (prior bar), SMA-50, ATR(14), 22-day high, 20-day average volume.
-- **Buy logic:** Close above yesterday’s 20-day high; price above SMA-50; volume above ~110% of average (threshold rises after losses); cooldown near last sell.
-- **Sell logic:** ATR stop-loss (2.5× ATR), chandelier trail, or close below the 20-day low when profitable.
-
-#### Performance
-
-| Metric | Value |
-| --- | ---: |
-| Avg strategy return | 1.35% |
-| Avg buy & hold | 2.18% |
-| Avg vs buy & hold | -0.83 pp |
-| Avg vs Ibovespa | -22.72 pp |
-| Avg vs USD/BRL | +9.89 pp |
-| Best run | 8.75% (BBAS3.SA) |
-| Worst run | -4.25% (RENT3.SA) |
-| Beat buy & hold | 4 / 10 |
-| Beat Ibovespa | 0 / 10 |
-| Beat USD/BRL | 10 / 10 |
-| Profitable runs | 4 / 10 |
-
-#### Per-stock results
-
-| Symbol | Strategy | Buy & hold | vs B&H | vs Ibov | vs USD | Trades | Position |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| ABEV3.SA | 5.79% | 21.94% | -16.15 pp | -18.28 pp | +14.33 pp | 2 | Sold |
-| BBAS3.SA | 8.75% | -11.78% | +20.53 pp | -15.31 pp | +17.29 pp | 2 | Sold |
-| BBDC4.SA | -1.48% | 18.92% | -20.40 pp | -25.55 pp | +7.05 pp | 2 | Sold |
-| CYRE3.SA | 0.00% | -15.65% | +15.65 pp | -24.06 pp | +8.54 pp | 0 | Neutral |
-| ITUB4.SA | 6.86% | 19.68% | -12.82 pp | -17.21 pp | +15.39 pp | 2 | Sold |
-| LREN3.SA | 1.66% | -14.55% | +16.21 pp | -22.41 pp | +10.20 pp | 2 | Sold |
-| RADL3.SA | -2.37% | 21.48% | -23.84 pp | -26.43 pp | +6.17 pp | 2 | Sold |
-| RENT3.SA | -4.25% | -3.57% | -0.68 pp | -28.31 pp | +4.29 pp | 4 | Sold |
-| SUZB3.SA | 0.00% | -19.36% | +19.36 pp | -24.06 pp | +8.54 pp | 0 | Neutral |
-| WEGE3.SA | -1.47% | 4.66% | -6.14 pp | -25.54 pp | +7.07 pp | 2 | Sold |
-
-
-#### Source (`algorithms/breakout_20d.py`)
-
-```python
-import pandas as pd
-from algorithm_helpers import reluctant_entry
-
-
-def _atr(df, window=14):
-    prev = df["Close"].shift()
-    tr = pd.concat(
-        [df["High"] - df["Low"], (df["High"] - prev).abs(), (df["Low"] - prev).abs()],
-        axis=1,
-    ).max(axis=1)
-    return tr.rolling(window).mean()
-
-
-def process_data(df):
-    df["high20"] = df["High"].rolling(window=20).max().shift(1)
-    df["low20"] = df["Low"].rolling(window=20).min().shift(1)
-    df["sma50"] = df["Close"].rolling(window=50).mean()
-    df["std20"] = df["Close"].rolling(window=20).std()
-    df["bb_width"] = (df["std20"] * 4) / df["sma50"]
-    df["bb_width_ma"] = df["bb_width"].rolling(100).mean()
-    df["atr14"] = _atr(df)
-    df["high22"] = df["High"].rolling(window=22).max()
-    if "Volume" in df.columns:
-        df["vol_avg20"] = df["Volume"].rolling(window=20).mean()
-    return df.dropna()
-
-
-def check_selling_conditions(df, price, portfolio, comission):
-    entry = portfolio["price_bought"]
-    if not entry:
-        return False
-    atr = df["atr14"].iloc[-1]
-    if price < entry - 2.5 * atr:
-        return True
-    trail = df["high22"].iloc[-1] - 2.5 * atr
-    if price < trail:
-        return True
-    if price < df["low20"].iloc[-1]:
-        return True
-    return False
-
-
-def check_buying_conditions(df, price, portfolio):
-    high20 = df["high20"].iloc[-1]
-    if price <= high20 * 1.002:
-        return reluctant_entry(False, portfolio)
-    if price < df["sma50"].iloc[-1]:
-        return reluctant_entry(False, portfolio)
-    if df["bb_width"].iloc[-1] > df["bb_width_ma"].iloc[-1]:
-        return reluctant_entry(False, portfolio)
-    y = portfolio.get("_entry_reluctance", 1.0)
-    vol_mult = 1.1 + max(0.0, y - 1.0) * 0.1
-    if "vol_avg20" in df.columns and df["Volume"].iloc[-1] < df["vol_avg20"].iloc[-1] * vol_mult:
-        return reluctant_entry(False, portfolio)
-    sold = portfolio["price_sold"]
-    if sold != float("inf") and sold * 0.97 < price < sold * 1.04:
-        return reluctant_entry(False, portfolio)
-    return reluctant_entry(True, portfolio)
-```
-
-## All test results
-
-| # | Algorithm | Symbol | Strategy | Buy & hold | vs B&H | vs Ibov | vs USD | Position | Trades |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| 1 | SMA-8 trend | ITUB4.SA | 8.90% | 19.68% | -10.78 pp | -15.16 pp | +17.44 pp | Sold | 8 |
-| 2 | SMA-8 trend | BBDC4.SA | 7.38% | 18.92% | -11.54 pp | -16.68 pp | +15.92 pp | Sold | 6 |
-| 3 | SMA-8 trend | RADL3.SA | 11.08% | 21.48% | -10.39 pp | -12.98 pp | +19.62 pp | Sold | 10 |
-| 4 | SMA-8 trend | WEGE3.SA | 8.81% | 4.66% | +4.14 pp | -15.26 pp | +17.35 pp | Sold | 6 |
-| 5 | SMA-8 trend | ABEV3.SA | 3.55% | 21.94% | -18.38 pp | -20.51 pp | +12.09 pp | Sold | 8 |
-| 6 | SMA-8 trend | BBAS3.SA | -6.40% | -11.78% | +5.38 pp | -30.46 pp | +2.14 pp | Sold | 8 |
-| 7 | SMA-8 trend | RENT3.SA | 6.34% | -3.57% | +9.91 pp | -17.73 pp | +14.87 pp | Sold | 10 |
-| 8 | SMA-8 trend | LREN3.SA | -8.45% | -14.55% | +6.10 pp | -32.52 pp | +0.09 pp | Sold | 6 |
-| 9 | SMA-8 trend | CYRE3.SA | 1.86% | -15.65% | +17.51 pp | -22.20 pp | +10.40 pp | Sold | 8 |
-| 10 | SMA-8 trend | SUZB3.SA | -8.87% | -19.36% | +10.49 pp | -32.93 pp | -0.33 pp | Sold | 8 |
-| 11 | SMA-20 trend | ITUB4.SA | 2.17% | 19.68% | -17.50 pp | -21.89 pp | +10.71 pp | Sold | 2 |
-| 12 | SMA-20 trend | BBDC4.SA | 2.83% | 18.92% | -16.09 pp | -21.23 pp | +11.37 pp | Sold | 2 |
-| 13 | SMA-20 trend | RADL3.SA | 0.00% | 21.48% | -21.48 pp | -24.06 pp | +8.54 pp | Neutral | 0 |
-| 14 | SMA-20 trend | WEGE3.SA | 0.00% | 4.66% | -4.66 pp | -24.06 pp | +8.54 pp | Neutral | 0 |
-| 15 | SMA-20 trend | ABEV3.SA | 0.00% | 21.94% | -21.94 pp | -24.06 pp | +8.54 pp | Neutral | 0 |
-| 16 | SMA-20 trend | BBAS3.SA | 0.17% | -11.78% | +11.95 pp | -23.89 pp | +8.71 pp | Sold | 2 |
-| 17 | SMA-20 trend | RENT3.SA | 0.00% | -3.57% | +3.57 pp | -24.06 pp | +8.54 pp | Neutral | 0 |
-| 18 | SMA-20 trend | LREN3.SA | 0.00% | -14.55% | +14.55 pp | -24.06 pp | +8.54 pp | Neutral | 0 |
-| 19 | SMA-20 trend | CYRE3.SA | 0.00% | -15.65% | +15.65 pp | -24.06 pp | +8.54 pp | Neutral | 0 |
-| 20 | SMA-20 trend | SUZB3.SA | -1.19% | -19.36% | +18.18 pp | -25.25 pp | +7.35 pp | Sold | 4 |
-| 21 | SMA crossover | ITUB4.SA | 0.00% | 19.68% | -19.68 pp | -24.06 pp | +8.54 pp | Neutral | 0 |
-| 22 | SMA crossover | BBDC4.SA | -1.14% | 18.92% | -20.06 pp | -25.20 pp | +7.40 pp | Sold | 4 |
-| 23 | SMA crossover | RADL3.SA | 21.24% | 21.48% | -0.23 pp | -2.82 pp | +29.78 pp | Sold | 4 |
-| 24 | SMA crossover | WEGE3.SA | 15.84% | 4.66% | +11.18 pp | -8.22 pp | +24.38 pp | Sold | 4 |
-| 25 | SMA crossover | ABEV3.SA | -2.73% | 21.94% | -24.67 pp | -26.79 pp | +5.81 pp | Sold | 4 |
-| 26 | SMA crossover | BBAS3.SA | -1.72% | -11.78% | +10.06 pp | -25.78 pp | +6.82 pp | Sold | 4 |
-| 27 | SMA crossover | RENT3.SA | 0.00% | -3.57% | +3.57 pp | -24.06 pp | +8.54 pp | Neutral | 0 |
-| 28 | SMA crossover | LREN3.SA | -12.28% | -14.55% | +2.27 pp | -36.35 pp | -3.75 pp | Sold | 4 |
-| 29 | SMA crossover | CYRE3.SA | 7.49% | -15.65% | +23.14 pp | -16.57 pp | +16.03 pp | Sold | 4 |
-| 30 | SMA crossover | SUZB3.SA | 0.00% | -19.36% | +19.36 pp | -24.06 pp | +8.54 pp | Neutral | 0 |
-| 31 | RSI reversion | ITUB4.SA | -1.44% | 19.68% | -21.11 pp | -25.50 pp | +7.10 pp | Sold | 4 |
-| 32 | RSI reversion | BBDC4.SA | 0.45% | 18.92% | -18.47 pp | -23.62 pp | +8.99 pp | Sold | 2 |
-| 33 | RSI reversion | RADL3.SA | 6.24% | 21.48% | -15.23 pp | -17.82 pp | +14.78 pp | Sold | 4 |
-| 34 | RSI reversion | WEGE3.SA | -2.19% | 4.66% | -6.85 pp | -26.25 pp | +6.35 pp | Sold | 4 |
-| 35 | RSI reversion | ABEV3.SA | 0.13% | 21.94% | -21.81 pp | -23.94 pp | +8.67 pp | Sold | 2 |
-| 36 | RSI reversion | BBAS3.SA | -2.71% | -11.78% | +9.07 pp | -26.78 pp | +5.83 pp | Sold | 4 |
-| 37 | RSI reversion | RENT3.SA | -3.73% | -3.57% | -0.15 pp | -27.79 pp | +4.81 pp | Sold | 4 |
-| 38 | RSI reversion | LREN3.SA | 0.00% | -14.55% | +14.55 pp | -24.06 pp | +8.54 pp | Neutral | 0 |
-| 39 | RSI reversion | CYRE3.SA | -0.80% | -15.65% | +14.85 pp | -24.86 pp | +7.74 pp | Sold | 2 |
-| 40 | RSI reversion | SUZB3.SA | -3.45% | -19.36% | +15.92 pp | -27.51 pp | +5.09 pp | Sold | 4 |
-| 41 | 20-day breakout | ITUB4.SA | 6.86% | 19.68% | -12.82 pp | -17.21 pp | +15.39 pp | Sold | 2 |
-| 42 | 20-day breakout | BBDC4.SA | -1.48% | 18.92% | -20.40 pp | -25.55 pp | +7.05 pp | Sold | 2 |
-| 43 | 20-day breakout | RADL3.SA | -2.37% | 21.48% | -23.84 pp | -26.43 pp | +6.17 pp | Sold | 2 |
-| 44 | 20-day breakout | WEGE3.SA | -1.47% | 4.66% | -6.14 pp | -25.54 pp | +7.07 pp | Sold | 2 |
-| 45 | 20-day breakout | ABEV3.SA | 5.79% | 21.94% | -16.15 pp | -18.28 pp | +14.33 pp | Sold | 2 |
-| 46 | 20-day breakout | BBAS3.SA | 8.75% | -11.78% | +20.53 pp | -15.31 pp | +17.29 pp | Sold | 2 |
-| 47 | 20-day breakout | RENT3.SA | -4.25% | -3.57% | -0.68 pp | -28.31 pp | +4.29 pp | Sold | 4 |
-| 48 | 20-day breakout | LREN3.SA | 1.66% | -14.55% | +16.21 pp | -22.41 pp | +10.20 pp | Sold | 2 |
-| 49 | 20-day breakout | CYRE3.SA | 0.00% | -15.65% | +15.65 pp | -24.06 pp | +8.54 pp | Neutral | 0 |
-| 50 | 20-day breakout | SUZB3.SA | 0.00% | -19.36% | +19.36 pp | -24.06 pp | +8.54 pp | Neutral | 0 |
-
-## Individual test details
-
-### Test #1 · SMA-8 trend · ITUB4.SA
-
-- **Company:** Itaú Unibanco Holding S.A.
-- **Period:** 1y / 1d
-- **Date range:** 2025-06-05 → 2026-06-05
-- **Starting balance:** R$ 10000.00
-- **Strategy return:** 8.90%
-- **Buy & hold return:** 19.68%
-- **vs buy & hold:** -10.78 pp
-- **vs Ibovespa:** -15.16 pp
-- **vs USD/BRL:** +17.44 pp
-- **Trades:** 8 (4B / 4S)
-- **Final position:** Sold (0 shares)
-
-| Action | Message |
-| --- | --- |
-| Buy | Bought at 33.79; balance: 2532.62 |
-| Sell | Sold at 33.92; balance: 9952.95 |
-| Buy | Bought at 35.71; balance: 2489.61 |
-| Sell | Sold at 36.16; balance: 9971.81 |
-| Buy | Bought at 38.36; balance: 2530.48 |
-| Sell | Sold at 37.49; balance: 9729.89 |
-| Buy | Bought at 39.55; balance: 2452.66 |
-| Sell | Sold at 46.32; balance: 10890.08 |
-| Summary | Final position: Sold (0 shares, cash R$ 10890.08) |
-| Summary | Buy & hold: R$ 1967.68 (19.68%) · Strategy vs buy & hold: -10.78 pp |
-
-
-### Test #2 · SMA-8 trend · BBDC4.SA
-
-- **Company:** Banco Bradesco S.A.
-- **Period:** 1y / 1d
-- **Date range:** 2025-06-05 → 2026-06-05
-- **Starting balance:** R$ 10000.00
-- **Strategy return:** 7.38%
-- **Buy & hold return:** 18.92%
-- **vs buy & hold:** -11.54 pp
-- **vs Ibovespa:** -16.68 pp
-- **vs USD/BRL:** +15.92 pp
-- **Trades:** 6 (3B / 3S)
-- **Final position:** Sold (0 shares)
-
-| Action | Message |
-| --- | --- |
-| Buy | Bought at 15.02; balance: 2502.82 |
-| Sell | Sold at 16.36; balance: 10582.61 |
-| Buy | Bought at 17.20; balance: 2654.70 |
-| Sell | Sold at 17.99; balance: 10865.40 |
-| Buy | Bought at 20.88; balance: 2721.85 |
-| Sell | Sold at 20.76; balance: 10738.05 |
-| Summary | Final position: Sold (0 shares, cash R$ 10738.05) |
-| Summary | Buy & hold: R$ 1892.05 (18.92%) · Strategy vs buy & hold: -11.54 pp |
-
-
-### Test #3 · SMA-8 trend · RADL3.SA
-
-- **Company:** Raia Drogasil S.A.
-- **Period:** 1y / 1d
-- **Date range:** 2025-06-05 → 2026-06-05
-- **Starting balance:** R$ 10000.00
-- **Strategy return:** 11.08%
-- **Buy & hold return:** 21.48%
-- **vs buy & hold:** -10.39 pp
-- **vs Ibovespa:** -12.98 pp
-- **vs USD/BRL:** +19.62 pp
-- **Trades:** 10 (5B / 5S)
-- **Final position:** Sold (0 shares)
-
-| Action | Message |
-| --- | --- |
-| Buy | Bought at 16.97; balance: 2515.13 |
-| Sell | Sold at 16.79; balance: 9845.07 |
-| Buy | Bought at 17.67; balance: 2477.67 |
-| Sell | Sold at 17.02; balance: 9504.35 |
-| Buy | Bought at 18.15; balance: 2388.66 |
-| Sell | Sold at 22.19; balance: 10998.65 |
-| Buy | Bought at 23.34; balance: 2759.92 |
-| Sell | Sold at 22.93; balance: 10772.93 |
-| Buy | Bought at 24.08; balance: 2704.50 |
-| Sell | Sold at 25.34; balance: 11108.48 |
-| Summary | Final position: Sold (0 shares, cash R$ 11108.48) |
-| Summary | Buy & hold: R$ 2147.54 (21.48%) · Strategy vs buy & hold: -10.39 pp |
-
-
-### Test #4 · SMA-8 trend · WEGE3.SA
-
-- **Company:** WEG S.A.
-- **Period:** 1y / 1d
-- **Date range:** 2025-06-05 → 2026-06-05
-- **Starting balance:** R$ 10000.00
-- **Strategy return:** 8.81%
-- **Buy & hold return:** 4.66%
-- **vs buy & hold:** +4.14 pp
-- **vs Ibovespa:** -15.26 pp
-- **vs USD/BRL:** +17.35 pp
-- **Trades:** 6 (3B / 3S)
-- **Final position:** Sold (0 shares)
-
-| Action | Message |
-| --- | --- |
-| Buy | Bought at 35.83; balance: 2511.45 |
-| Sell | Sold at 42.35; balance: 11274.32 |
-| Buy | Bought at 48.59; balance: 2819.67 |
-| Sell | Sold at 47.60; balance: 11018.57 |
-| Buy | Bought at 51.61; balance: 2761.40 |
-| Sell | Sold at 51.26; balance: 10880.68 |
-| Summary | Final position: Sold (0 shares, cash R$ 10880.68) |
-| Summary | Buy & hold: R$ 466.42 (4.66%) · Strategy vs buy & hold: +4.14 pp |
-
-
-### Test #5 · SMA-8 trend · ABEV3.SA
-
-- **Company:** Ambev S.A.
-- **Period:** 1y / 1d
-- **Date range:** 2025-06-05 → 2026-06-05
-- **Starting balance:** R$ 10000.00
-- **Strategy return:** 3.55%
-- **Buy & hold return:** 21.94%
-- **vs buy & hold:** -18.38 pp
-- **vs Ibovespa:** -20.51 pp
-- **vs USD/BRL:** +12.09 pp
-- **Trades:** 8 (4B / 4S)
-- **Final position:** Sold (0 shares)
-
-| Action | Message |
-| --- | --- |
-| Buy | Bought at 12.15; balance: 2502.54 |
-| Sell | Sold at 11.56; balance: 9562.95 |
-| Buy | Bought at 12.51; balance: 2397.47 |
-| Sell | Sold at 13.01; balance: 9778.74 |
-| Buy | Bought at 13.72; balance: 2452.26 |
-| Sell | Sold at 15.57; balance: 10683.50 |
-| Buy | Bought at 16.59; balance: 2687.12 |
-| Sell | Sold at 16.07; balance: 10355.40 |
-| Summary | Final position: Sold (0 shares, cash R$ 10355.40) |
-| Summary | Buy & hold: R$ 2193.77 (21.94%) · Strategy vs buy & hold: -18.38 pp |
-
-
-### Test #6 · SMA-8 trend · BBAS3.SA
-
-- **Company:** Banco do Brasil S.A.
-- **Period:** 1y / 1d
-- **Date range:** 2025-06-05 → 2026-06-05
-- **Starting balance:** R$ 10000.00
-- **Strategy return:** -6.40%
-- **Buy & hold return:** -11.78%
-- **vs buy & hold:** +5.38 pp
-- **vs Ibovespa:** -30.46 pp
-- **vs USD/BRL:** +2.14 pp
-- **Trades:** 8 (4B / 4S)
-- **Final position:** Sold (0 shares)
-
-| Action | Message |
-| --- | --- |
-| Buy | Bought at 20.16; balance: 2501.55 |
-| Sell | Sold at 21.26; balance: 10331.63 |
-| Buy | Bought at 22.37; balance: 2593.24 |
-| Sell | Sold at 21.38; balance: 9916.21 |
-| Buy | Bought at 24.77; balance: 2484.58 |
-| Sell | Sold at 23.90; balance: 9582.26 |
-| Buy | Bought at 25.36; balance: 2404.97 |
-| Sell | Sold at 24.82; balance: 9359.94 |
-| Summary | Final position: Sold (0 shares, cash R$ 9359.94) |
-| Summary | Buy & hold: R$ -1177.70 (-11.78%) · Strategy vs buy & hold: +5.38 pp |
-
-
-### Test #7 · SMA-8 trend · RENT3.SA
-
-- **Company:** Localiza Rent a Car S.A.
-- **Period:** 1y / 1d
-- **Date range:** 2025-06-05 → 2026-06-05
-- **Starting balance:** R$ 10000.00
-- **Strategy return:** 6.34%
-- **Buy & hold return:** -3.57%
-- **vs buy & hold:** +9.91 pp
-- **vs Ibovespa:** -17.73 pp
-- **vs USD/BRL:** +14.87 pp
-- **Trades:** 10 (5B / 5S)
-- **Final position:** Sold (0 shares)
-
-| Action | Message |
-| --- | --- |
-| Buy | Bought at 35.06; balance: 2532.22 |
-| Sell | Sold at 37.33; balance: 10404.31 |
-| Buy | Bought at 39.95; balance: 2614.22 |
-| Sell | Sold at 43.95; balance: 11099.51 |
-| Buy | Bought at 46.39; balance: 2796.42 |
-| Sell | Sold at 44.25; balance: 10637.42 |
-| Buy | Bought at 49.48; balance: 2670.96 |
-| Sell | Sold at 49.87; balance: 10619.19 |
-| Buy | Bought at 47.75; balance: 2692.69 |
-| Sell | Sold at 48.32; balance: 10633.60 |
-| Summary | Final position: Sold (0 shares, cash R$ 10633.60) |
-| Summary | Buy & hold: R$ -357.31 (-3.57%) · Strategy vs buy & hold: +9.91 pp |
-
-
-### Test #8 · SMA-8 trend · LREN3.SA
-
-- **Company:** Lojas Renner S.A.
-- **Period:** 1y / 1d
-- **Date range:** 2025-06-05 → 2026-06-05
-- **Starting balance:** R$ 10000.00
-- **Strategy return:** -8.45%
-- **Buy & hold return:** -14.55%
-- **vs buy & hold:** +6.10 pp
-- **vs Ibovespa:** -32.52 pp
-- **vs USD/BRL:** +0.09 pp
-- **Trades:** 6 (3B / 3S)
-- **Final position:** Sold (0 shares)
-
-| Action | Message |
-| --- | --- |
-| Buy | Bought at 16.18; balance: 2507.10 |
-| Sell | Sold at 15.56; balance: 9640.10 |
-| Buy | Bought at 14.70; balance: 2420.97 |
-| Sell | Sold at 14.59; balance: 9511.34 |
-| Buy | Bought at 15.37; balance: 2380.32 |
-| Sell | Sold at 14.75; balance: 9154.74 |
-| Summary | Final position: Sold (0 shares, cash R$ 9154.74) |
-| Summary | Buy & hold: R$ -1455.30 (-14.55%) · Strategy vs buy & hold: +6.10 pp |
-
-
-### Test #9 · SMA-8 trend · CYRE3.SA
-
-- **Company:** Cyrela Brazil Realty S.A. Empreendimentos e Participações
-- **Period:** 1y / 1d
-- **Date range:** 2025-06-05 → 2026-06-05
-- **Starting balance:** R$ 10000.00
-- **Strategy return:** 1.86%
-- **Buy & hold return:** -15.65%
-- **vs buy & hold:** +17.51 pp
-- **vs Ibovespa:** -22.20 pp
-- **vs USD/BRL:** +10.40 pp
-- **Trades:** 8 (4B / 4S)
-- **Final position:** Sold (0 shares)
-
-| Action | Message |
-| --- | --- |
-| Buy | Bought at 23.79; balance: 2506.53 |
-| Sell | Sold at 22.93; balance: 9657.65 |
-| Buy | Bought at 25.60; balance: 2439.58 |
-| Sell | Sold at 27.67; balance: 10164.66 |
-| Buy | Bought at 31.29; balance: 2560.15 |
-| Sell | Sold at 31.81; balance: 10212.83 |
-| Buy | Bought at 30.51; balance: 2554.82 |
-| Sell | Sold at 30.71; balance: 10185.95 |
-| Summary | Final position: Sold (0 shares, cash R$ 10185.95) |
-| Summary | Buy & hold: R$ -1564.93 (-15.65%) · Strategy vs buy & hold: +17.51 pp |
-
-
-### Test #10 · SMA-8 trend · SUZB3.SA
-
-- **Company:** Suzano S.A.
-- **Period:** 1y / 1d
-- **Date range:** 2025-06-05 → 2026-06-05
-- **Starting balance:** R$ 10000.00
-- **Strategy return:** -8.87%
-- **Buy & hold return:** -19.36%
-- **vs buy & hold:** +10.49 pp
-- **vs Ibovespa:** -32.93 pp
-- **vs USD/BRL:** -0.33 pp
-- **Trades:** 8 (4B / 4S)
-- **Final position:** Sold (0 shares)
-
-| Action | Message |
-| --- | --- |
-| Buy | Bought at 52.76; balance: 2507.89 |
-| Sell | Sold at 51.37; balance: 9729.71 |
-| Buy | Bought at 47.91; balance: 2447.84 |
-| Sell | Sold at 47.67; balance: 9621.55 |
-| Buy | Bought at 51.67; balance: 2438.76 |
-| Sell | Sold at 49.93; balance: 9310.30 |
-| Buy | Bought at 56.85; balance: 2374.08 |
-| Sell | Sold at 55.79; balance: 9112.92 |
-| Summary | Final position: Sold (0 shares, cash R$ 9112.92) |
-| Summary | Buy & hold: R$ -1936.34 (-19.36%) · Strategy vs buy & hold: +10.49 pp |
-
-
-### Test #11 · SMA-20 trend · ITUB4.SA
-
-- **Company:** Itaú Unibanco Holding S.A.
-- **Period:** 1y / 1d
-- **Date range:** 2025-06-05 → 2026-06-05
-- **Starting balance:** R$ 10000.00
-- **Strategy return:** 2.17%
-- **Buy & hold return:** 19.68%
-- **vs buy & hold:** -17.50 pp
-- **vs Ibovespa:** -21.89 pp
-- **vs USD/BRL:** +10.71 pp
-- **Trades:** 2 (1B / 1S)
-- **Final position:** Sold (0 shares)
-
-| Action | Message |
-| --- | --- |
-| Buy | Bought at 32.98; balance: 2512.68 |
-| Sell | Sold at 34.28; balance: 10217.47 |
-| Summary | Final position: Sold (0 shares, cash R$ 10217.47) |
-| Summary | Buy & hold: R$ 1967.68 (19.68%) · Strategy vs buy & hold: -17.50 pp |
-
-
-### Test #12 · SMA-20 trend · BBDC4.SA
-
-- **Company:** Banco Bradesco S.A.
-- **Period:** 1y / 1d
-- **Date range:** 2025-06-05 → 2026-06-05
-- **Starting balance:** R$ 10000.00
-- **Strategy return:** 2.83%
-- **Buy & hold return:** 18.92%
-- **vs buy & hold:** -16.09 pp
-- **vs Ibovespa:** -21.23 pp
-- **vs USD/BRL:** +11.37 pp
-- **Trades:** 2 (1B / 1S)
-- **Final position:** Sold (0 shares)
-
-| Action | Message |
-| --- | --- |
-| Buy | Bought at 15.51; balance: 2508.07 |
-| Sell | Sold at 16.26; balance: 10283.06 |
-| Summary | Final position: Sold (0 shares, cash R$ 10283.06) |
-| Summary | Buy & hold: R$ 1892.05 (18.92%) · Strategy vs buy & hold: -16.09 pp |
-
-
-### Test #13 · SMA-20 trend · RADL3.SA
-
-- **Company:** Raia Drogasil S.A.
-- **Period:** 1y / 1d
-- **Date range:** 2025-06-05 → 2026-06-05
-- **Starting balance:** R$ 10000.00
-- **Strategy return:** 0.00%
-- **Buy & hold return:** 21.48%
-- **vs buy & hold:** -21.48 pp
-- **vs Ibovespa:** -24.06 pp
-- **vs USD/BRL:** +8.54 pp
-- **Trades:** 0 (0B / 0S)
-- **Final position:** Neutral (0 shares)
-
-| Action | Message |
-| --- | --- |
-| Summary | Final position: Neutral (0 shares, cash R$ 10000.00) |
-| Summary | Buy & hold: R$ 2147.54 (21.48%) · Strategy vs buy & hold: -21.48 pp |
-
-
-### Test #14 · SMA-20 trend · WEGE3.SA
-
-- **Company:** WEG S.A.
-- **Period:** 1y / 1d
-- **Date range:** 2025-06-05 → 2026-06-05
-- **Starting balance:** R$ 10000.00
-- **Strategy return:** 0.00%
-- **Buy & hold return:** 4.66%
-- **vs buy & hold:** -4.66 pp
-- **vs Ibovespa:** -24.06 pp
-- **vs USD/BRL:** +8.54 pp
-- **Trades:** 0 (0B / 0S)
-- **Final position:** Neutral (0 shares)
-
-| Action | Message |
-| --- | --- |
-| Summary | Final position: Neutral (0 shares, cash R$ 10000.00) |
-| Summary | Buy & hold: R$ 466.42 (4.66%) · Strategy vs buy & hold: -4.66 pp |
-
-
-### Test #15 · SMA-20 trend · ABEV3.SA
-
-- **Company:** Ambev S.A.
-- **Period:** 1y / 1d
-- **Date range:** 2025-06-05 → 2026-06-05
-- **Starting balance:** R$ 10000.00
-- **Strategy return:** 0.00%
-- **Buy & hold return:** 21.94%
-- **vs buy & hold:** -21.94 pp
-- **vs Ibovespa:** -24.06 pp
-- **vs USD/BRL:** +8.54 pp
-- **Trades:** 0 (0B / 0S)
-- **Final position:** Neutral (0 shares)
-
-| Action | Message |
-| --- | --- |
-| Summary | Final position: Neutral (0 shares, cash R$ 10000.00) |
-| Summary | Buy & hold: R$ 2193.77 (21.94%) · Strategy vs buy & hold: -21.94 pp |
-
-
-### Test #16 · SMA-20 trend · BBAS3.SA
-
-- **Company:** Banco do Brasil S.A.
-- **Period:** 1y / 1d
-- **Date range:** 2025-06-05 → 2026-06-05
-- **Starting balance:** R$ 10000.00
-- **Strategy return:** 0.17%
-- **Buy & hold return:** -11.78%
-- **vs buy & hold:** +11.95 pp
-- **vs Ibovespa:** -23.89 pp
-- **vs USD/BRL:** +8.71 pp
-- **Trades:** 2 (1B / 1S)
-- **Final position:** Sold (0 shares)
-
-| Action | Message |
-| --- | --- |
-| Buy | Bought at 20.47; balance: 2508.06 |
-| Sell | Sold at 20.72; balance: 10017.13 |
-| Summary | Final position: Sold (0 shares, cash R$ 10017.13) |
-| Summary | Buy & hold: R$ -1177.70 (-11.78%) · Strategy vs buy & hold: +11.95 pp |
-
-
-### Test #17 · SMA-20 trend · RENT3.SA
-
-- **Company:** Localiza Rent a Car S.A.
-- **Period:** 1y / 1d
-- **Date range:** 2025-06-05 → 2026-06-05
-- **Starting balance:** R$ 10000.00
-- **Strategy return:** 0.00%
-- **Buy & hold return:** -3.57%
-- **vs buy & hold:** +3.57 pp
-- **vs Ibovespa:** -24.06 pp
-- **vs USD/BRL:** +8.54 pp
-- **Trades:** 0 (0B / 0S)
-- **Final position:** Neutral (0 shares)
-
-| Action | Message |
-| --- | --- |
-| Summary | Final position: Neutral (0 shares, cash R$ 10000.00) |
-| Summary | Buy & hold: R$ -357.31 (-3.57%) · Strategy vs buy & hold: +3.57 pp |
-
-
-### Test #18 · SMA-20 trend · LREN3.SA
-
-- **Company:** Lojas Renner S.A.
-- **Period:** 1y / 1d
-- **Date range:** 2025-06-05 → 2026-06-05
-- **Starting balance:** R$ 10000.00
-- **Strategy return:** 0.00%
-- **Buy & hold return:** -14.55%
-- **vs buy & hold:** +14.55 pp
-- **vs Ibovespa:** -24.06 pp
-- **vs USD/BRL:** +8.54 pp
-- **Trades:** 0 (0B / 0S)
-- **Final position:** Neutral (0 shares)
-
-| Action | Message |
-| --- | --- |
-| Summary | Final position: Neutral (0 shares, cash R$ 10000.00) |
-| Summary | Buy & hold: R$ -1455.30 (-14.55%) · Strategy vs buy & hold: +14.55 pp |
-
-
-### Test #19 · SMA-20 trend · CYRE3.SA
-
-- **Company:** Cyrela Brazil Realty S.A. Empreendimentos e Participações
-- **Period:** 1y / 1d
-- **Date range:** 2025-06-05 → 2026-06-05
-- **Starting balance:** R$ 10000.00
-- **Strategy return:** 0.00%
-- **Buy & hold return:** -15.65%
-- **vs buy & hold:** +15.65 pp
-- **vs Ibovespa:** -24.06 pp
-- **vs USD/BRL:** +8.54 pp
-- **Trades:** 0 (0B / 0S)
-- **Final position:** Neutral (0 shares)
-
-| Action | Message |
-| --- | --- |
-| Summary | Final position: Neutral (0 shares, cash R$ 10000.00) |
-| Summary | Buy & hold: R$ -1564.93 (-15.65%) · Strategy vs buy & hold: +15.65 pp |
-
-
-### Test #20 · SMA-20 trend · SUZB3.SA
-
-- **Company:** Suzano S.A.
-- **Period:** 1y / 1d
-- **Date range:** 2025-06-05 → 2026-06-05
-- **Starting balance:** R$ 10000.00
-- **Strategy return:** -1.19%
-- **Buy & hold return:** -19.36%
-- **vs buy & hold:** +18.18 pp
-- **vs Ibovespa:** -25.25 pp
-- **vs USD/BRL:** +7.35 pp
-- **Trades:** 4 (2B / 2S)
-- **Final position:** Sold (0 shares)
-
-| Action | Message |
-| --- | --- |
-| Buy | Bought at 52.19; balance: 2536.30 |
-| Sell | Sold at 51.19; balance: 9782.65 |
-| Buy | Bought at 48.42; balance: 2471.85 |
-| Sell | Sold at 49.56; balance: 9881.31 |
-| Summary | Final position: Sold (0 shares, cash R$ 9881.31) |
-| Summary | Buy & hold: R$ -1936.34 (-19.36%) · Strategy vs buy & hold: +18.18 pp |
-
-
-### Test #21 · SMA crossover · ITUB4.SA
-
-- **Company:** Itaú Unibanco Holding S.A.
-- **Period:** 1y / 1d
-- **Date range:** 2025-06-05 → 2026-06-05
-- **Starting balance:** R$ 10000.00
-- **Strategy return:** 0.00%
-- **Buy & hold return:** 19.68%
-- **vs buy & hold:** -19.68 pp
-- **vs Ibovespa:** -24.06 pp
-- **vs USD/BRL:** +8.54 pp
-- **Trades:** 0 (0B / 0S)
-- **Final position:** Neutral (0 shares)
-
-| Action | Message |
-| --- | --- |
-| Summary | Final position: Neutral (0 shares, cash R$ 10000.00) |
-| Summary | Buy & hold: R$ 1967.68 (19.68%) · Strategy vs buy & hold: -19.68 pp |
-
-
-### Test #22 · SMA crossover · BBDC4.SA
-
-- **Company:** Banco Bradesco S.A.
-- **Period:** 1y / 1d
-- **Date range:** 2025-06-05 → 2026-06-05
-- **Starting balance:** R$ 10000.00
-- **Strategy return:** -1.14%
-- **Buy & hold return:** 18.92%
-- **vs buy & hold:** -20.06 pp
-- **vs Ibovespa:** -25.20 pp
-- **vs USD/BRL:** +7.40 pp
-- **Trades:** 4 (2B / 2S)
-- **Final position:** Sold (0 shares)
-
-| Action | Message |
-| --- | --- |
-| Buy | Bought at 17.23; balance: 2506.73 |
-| Sell | Sold at 18.10; balance: 10299.71 |
-| Buy | Bought at 20.74; balance: 2583.56 |
-| Sell | Sold at 19.83; balance: 9885.96 |
-| Summary | Final position: Sold (0 shares, cash R$ 9885.96) |
-| Summary | Buy & hold: R$ 1892.05 (18.92%) · Strategy vs buy & hold: -20.06 pp |
-
-
-### Test #23 · SMA crossover · RADL3.SA
-
-- **Company:** Raia Drogasil S.A.
-- **Period:** 1y / 1d
-- **Date range:** 2025-06-05 → 2026-06-05
-- **Starting balance:** R$ 10000.00
-- **Strategy return:** 21.24%
-- **Buy & hold return:** 21.48%
-- **vs buy & hold:** -0.23 pp
-- **vs Ibovespa:** -2.82 pp
-- **vs USD/BRL:** +29.78 pp
-- **Trades:** 4 (2B / 2S)
-- **Final position:** Sold (0 shares)
-
-| Action | Message |
-| --- | --- |
-| Buy | Bought at 17.49; balance: 2512.64 |
-| Sell | Sold at 22.53; balance: 12058.48 |
-| Buy | Bought at 24.55; balance: 3022.98 |
-| Sell | Sold at 24.98; balance: 12124.17 |
-| Summary | Final position: Sold (0 shares, cash R$ 12124.17) |
-| Summary | Buy & hold: R$ 2147.54 (21.48%) · Strategy vs buy & hold: -0.23 pp |
-
-
-### Test #24 · SMA crossover · WEGE3.SA
-
-- **Company:** WEG S.A.
-- **Period:** 1y / 1d
-- **Date range:** 2025-06-05 → 2026-06-05
-- **Starting balance:** R$ 10000.00
-- **Strategy return:** 15.84%
-- **Buy & hold return:** 4.66%
-- **vs buy & hold:** +11.18 pp
-- **vs Ibovespa:** -8.22 pp
-- **vs USD/BRL:** +24.38 pp
-- **Trades:** 4 (2B / 2S)
-- **Final position:** Sold (0 shares)
-
-| Action | Message |
-| --- | --- |
-| Buy | Bought at 35.96; balance: 2521.23 |
-| Sell | Sold at 42.35; balance: 11242.18 |
-| Buy | Bought at 43.39; balance: 2824.25 |
-| Sell | Sold at 45.61; balance: 11584.19 |
-| Summary | Final position: Sold (0 shares, cash R$ 11584.19) |
-| Summary | Buy & hold: R$ 466.42 (4.66%) · Strategy vs buy & hold: +11.18 pp |
-
-
-### Test #25 · SMA crossover · ABEV3.SA
-
-- **Company:** Ambev S.A.
-- **Period:** 1y / 1d
-- **Date range:** 2025-06-05 → 2026-06-05
-- **Starting balance:** R$ 10000.00
-- **Strategy return:** -2.73%
-- **Buy & hold return:** 21.94%
-- **vs buy & hold:** -24.67 pp
-- **vs Ibovespa:** -26.79 pp
-- **vs USD/BRL:** +5.81 pp
-- **Trades:** 4 (2B / 2S)
-- **Final position:** Sold (0 shares)
-
-| Action | Message |
-| --- | --- |
-| Buy | Bought at 11.68; balance: 2511.19 |
-| Sell | Sold at 11.50; balance: 9809.84 |
-| Buy | Bought at 15.45; balance: 2455.64 |
-| Sell | Sold at 15.43; balance: 9726.87 |
-| Summary | Final position: Sold (0 shares, cash R$ 9726.87) |
-| Summary | Buy & hold: R$ 2193.77 (21.94%) · Strategy vs buy & hold: -24.67 pp |
-
-
-### Test #26 · SMA crossover · BBAS3.SA
-
-- **Company:** Banco do Brasil S.A.
-- **Period:** 1y / 1d
-- **Date range:** 2025-06-05 → 2026-06-05
-- **Starting balance:** R$ 10000.00
-- **Strategy return:** -1.72%
-- **Buy & hold return:** -11.78%
-- **vs buy & hold:** +10.06 pp
-- **vs Ibovespa:** -25.78 pp
-- **vs USD/BRL:** +6.82 pp
-- **Trades:** 4 (2B / 2S)
-- **Final position:** Sold (0 shares)
-
-| Action | Message |
-| --- | --- |
-| Buy | Bought at 20.59; balance: 2506.32 |
-| Sell | Sold at 20.92; balance: 10044.78 |
-| Buy | Bought at 21.73; balance: 2527.18 |
-| Sell | Sold at 21.31; balance: 9828.29 |
-| Summary | Final position: Sold (0 shares, cash R$ 9828.29) |
-| Summary | Buy & hold: R$ -1177.70 (-11.78%) · Strategy vs buy & hold: +10.06 pp |
-
-
-### Test #27 · SMA crossover · RENT3.SA
-
-- **Company:** Localiza Rent a Car S.A.
-- **Period:** 1y / 1d
-- **Date range:** 2025-06-05 → 2026-06-05
-- **Starting balance:** R$ 10000.00
-- **Strategy return:** 0.00%
-- **Buy & hold return:** -3.57%
-- **vs buy & hold:** +3.57 pp
-- **vs Ibovespa:** -24.06 pp
-- **vs USD/BRL:** +8.54 pp
-- **Trades:** 0 (0B / 0S)
-- **Final position:** Neutral (0 shares)
-
-| Action | Message |
-| --- | --- |
-| Summary | Final position: Neutral (0 shares, cash R$ 10000.00) |
-| Summary | Buy & hold: R$ -357.31 (-3.57%) · Strategy vs buy & hold: +3.57 pp |
-
-
-### Test #28 · SMA crossover · LREN3.SA
-
-- **Company:** Lojas Renner S.A.
-- **Period:** 1y / 1d
-- **Date range:** 2025-06-05 → 2026-06-05
-- **Starting balance:** R$ 10000.00
-- **Strategy return:** -12.28%
-- **Buy & hold return:** -14.55%
-- **vs buy & hold:** +2.27 pp
-- **vs Ibovespa:** -36.35 pp
-- **vs USD/BRL:** -3.75 pp
-- **Trades:** 4 (2B / 2S)
-- **Final position:** Sold (0 shares)
-
-| Action | Message |
-| --- | --- |
-| Buy | Bought at 15.44; balance: 2511.60 |
-| Sell | Sold at 14.19; balance: 9324.93 |
-| Buy | Bought at 15.72; balance: 2345.25 |
-| Sell | Sold at 14.62; balance: 8771.62 |
-| Summary | Final position: Sold (0 shares, cash R$ 8771.62) |
-| Summary | Buy & hold: R$ -1455.30 (-14.55%) · Strategy vs buy & hold: +2.27 pp |
-
-
-### Test #29 · SMA crossover · CYRE3.SA
-
-- **Company:** Cyrela Brazil Realty S.A. Empreendimentos e Participações
-- **Period:** 1y / 1d
-- **Date range:** 2025-06-05 → 2026-06-05
-- **Starting balance:** R$ 10000.00
-- **Strategy return:** 7.49%
-- **Buy & hold return:** -15.65%
-- **vs buy & hold:** +23.14 pp
-- **vs Ibovespa:** -16.57 pp
-- **vs USD/BRL:** +16.03 pp
-- **Trades:** 4 (2B / 2S)
-- **Final position:** Sold (0 shares)
-
-| Action | Message |
-| --- | --- |
-| Buy | Bought at 23.41; balance: 2508.55 |
-| Sell | Sold at 22.93; balance: 9773.19 |
-| Buy | Bought at 27.78; balance: 2466.72 |
-| Sell | Sold at 31.81; balance: 10749.25 |
-| Summary | Final position: Sold (0 shares, cash R$ 10749.25) |
-| Summary | Buy & hold: R$ -1564.93 (-15.65%) · Strategy vs buy & hold: +23.14 pp |
-
-
-### Test #30 · SMA crossover · SUZB3.SA
-
-- **Company:** Suzano S.A.
-- **Period:** 1y / 1d
-- **Date range:** 2025-06-05 → 2026-06-05
-- **Starting balance:** R$ 10000.00
-- **Strategy return:** 0.00%
-- **Buy & hold return:** -19.36%
-- **vs buy & hold:** +19.36 pp
-- **vs Ibovespa:** -24.06 pp
-- **vs USD/BRL:** +8.54 pp
-- **Trades:** 0 (0B / 0S)
-- **Final position:** Neutral (0 shares)
-
-| Action | Message |
-| --- | --- |
-| Summary | Final position: Neutral (0 shares, cash R$ 10000.00) |
-| Summary | Buy & hold: R$ -1936.34 (-19.36%) · Strategy vs buy & hold: +19.36 pp |
-
-
-### Test #31 · RSI reversion · ITUB4.SA
-
-- **Company:** Itaú Unibanco Holding S.A.
-- **Period:** 1y / 1d
-- **Date range:** 2025-06-05 → 2026-06-05
-- **Starting balance:** R$ 10000.00
-- **Strategy return:** -1.44%
-- **Buy & hold return:** 19.68%
-- **vs buy & hold:** -21.11 pp
-- **vs Ibovespa:** -25.50 pp
-- **vs USD/BRL:** +7.10 pp
-- **Trades:** 4 (2B / 2S)
-- **Final position:** Sold (0 shares)
-
-| Action | Message |
-| --- | --- |
-| Buy | Bought at 43.96; balance: 2526.89 |
-| Sell | Sold at 44.58; balance: 10030.29 |
-| Buy | Bought at 43.10; balance: 2531.29 |
-| Sell | Sold at 42.52; balance: 9856.34 |
-| Summary | Final position: Sold (0 shares, cash R$ 9856.34) |
-| Summary | Buy & hold: R$ 1967.68 (19.68%) · Strategy vs buy & hold: -21.11 pp |
-
-
-### Test #32 · RSI reversion · BBDC4.SA
-
-- **Company:** Banco Bradesco S.A.
-- **Period:** 1y / 1d
-- **Date range:** 2025-06-05 → 2026-06-05
-- **Starting balance:** R$ 10000.00
-- **Strategy return:** 0.45%
-- **Buy & hold return:** 18.92%
-- **vs buy & hold:** -18.47 pp
-- **vs Ibovespa:** -23.62 pp
-- **vs USD/BRL:** +8.99 pp
-- **Trades:** 2 (1B / 1S)
-- **Final position:** Sold (0 shares)
-
-| Action | Message |
-| --- | --- |
-| Buy | Bought at 15.99; balance: 2515.71 |
-| Sell | Sold at 16.25; balance: 10044.81 |
-| Summary | Final position: Sold (0 shares, cash R$ 10044.81) |
-| Summary | Buy & hold: R$ 1892.05 (18.92%) · Strategy vs buy & hold: -18.47 pp |
-
-
-### Test #33 · RSI reversion · RADL3.SA
-
-- **Company:** Raia Drogasil S.A.
-- **Period:** 1y / 1d
-- **Date range:** 2025-06-05 → 2026-06-05
-- **Starting balance:** R$ 10000.00
-- **Strategy return:** 6.24%
-- **Buy & hold return:** 21.48%
-- **vs buy & hold:** -15.23 pp
-- **vs Ibovespa:** -17.82 pp
-- **vs USD/BRL:** +14.78 pp
-- **Trades:** 4 (2B / 2S)
-- **Final position:** Sold (0 shares)
-
-| Action | Message |
-| --- | --- |
-| Buy | Bought at 16.95; balance: 2506.70 |
-| Sell | Sold at 19.00; balance: 10818.92 |
-| Buy | Bought at 25.34; balance: 2710.15 |
-| Sell | Sold at 24.98; balance: 10624.23 |
-| Summary | Final position: Sold (0 shares, cash R$ 10624.23) |
-| Summary | Buy & hold: R$ 2147.54 (21.48%) · Strategy vs buy & hold: -15.23 pp |
-
-
-### Test #34 · RSI reversion · WEGE3.SA
-
-- **Company:** WEG S.A.
-- **Period:** 1y / 1d
-- **Date range:** 2025-06-05 → 2026-06-05
-- **Starting balance:** R$ 10000.00
-- **Strategy return:** -2.19%
-- **Buy & hold return:** 4.66%
-- **vs buy & hold:** -6.85 pp
-- **vs Ibovespa:** -26.25 pp
-- **vs USD/BRL:** +6.35 pp
-- **Trades:** 4 (2B / 2S)
-- **Final position:** Sold (0 shares)
-
-| Action | Message |
-| --- | --- |
-| Buy | Bought at 45.61; balance: 2519.89 |
-| Sell | Sold at 46.00; balance: 9988.38 |
-| Buy | Bought at 50.17; balance: 2512.98 |
-| Sell | Sold at 49.27; balance: 9781.16 |
-| Summary | Final position: Sold (0 shares, cash R$ 9781.16) |
-| Summary | Buy & hold: R$ 466.42 (4.66%) · Strategy vs buy & hold: -6.85 pp |
-
-
-### Test #35 · RSI reversion · ABEV3.SA
-
-- **Company:** Ambev S.A.
-- **Period:** 1y / 1d
-- **Date range:** 2025-06-05 → 2026-06-05
-- **Starting balance:** R$ 10000.00
-- **Strategy return:** 0.13%
-- **Buy & hold return:** 21.94%
-- **vs buy & hold:** -21.81 pp
-- **vs Ibovespa:** -23.94 pp
-- **vs USD/BRL:** +8.67 pp
-- **Trades:** 2 (1B / 1S)
-- **Final position:** Sold (0 shares)
-
-| Action | Message |
-| --- | --- |
-| Buy | Bought at 15.23; balance: 2506.84 |
-| Sell | Sold at 15.41; balance: 10012.74 |
-| Summary | Final position: Sold (0 shares, cash R$ 10012.74) |
-| Summary | Buy & hold: R$ 2193.77 (21.94%) · Strategy vs buy & hold: -21.81 pp |
-
-
-### Test #36 · RSI reversion · BBAS3.SA
-
-- **Company:** Banco do Brasil S.A.
-- **Period:** 1y / 1d
-- **Date range:** 2025-06-05 → 2026-06-05
-- **Starting balance:** R$ 10000.00
-- **Strategy return:** -2.71%
-- **Buy & hold return:** -11.78%
-- **vs buy & hold:** +9.07 pp
-- **vs Ibovespa:** -26.78 pp
-- **vs USD/BRL:** +5.83 pp
-- **Trades:** 4 (2B / 2S)
-- **Final position:** Sold (0 shares)
-
-| Action | Message |
-| --- | --- |
-| Buy | Bought at 20.64; balance: 2509.17 |
-| Sell | Sold at 20.70; balance: 9949.67 |
-| Buy | Bought at 24.06; balance: 2491.21 |
-| Sell | Sold at 23.58; balance: 9728.81 |
-| Summary | Final position: Sold (0 shares, cash R$ 9728.81) |
-| Summary | Buy & hold: R$ -1177.70 (-11.78%) · Strategy vs buy & hold: +9.07 pp |
-
-
-### Test #37 · RSI reversion · RENT3.SA
-
-- **Company:** Localiza Rent a Car S.A.
-- **Period:** 1y / 1d
-- **Date range:** 2025-06-05 → 2026-06-05
-- **Starting balance:** R$ 10000.00
-- **Strategy return:** -3.73%
-- **Buy & hold return:** -3.57%
-- **vs buy & hold:** -0.15 pp
-- **vs Ibovespa:** -27.79 pp
-- **vs USD/BRL:** +4.81 pp
-- **Trades:** 4 (2B / 2S)
-- **Final position:** Sold (0 shares)
-
-| Action | Message |
-| --- | --- |
-| Buy | Bought at 35.95; balance: 2521.51 |
-| Sell | Sold at 35.92; balance: 9917.17 |
-| Buy | Bought at 44.37; balance: 2507.23 |
-| Sell | Sold at 43.07; balance: 9627.36 |
-| Summary | Final position: Sold (0 shares, cash R$ 9627.36) |
-| Summary | Buy & hold: R$ -357.31 (-3.57%) · Strategy vs buy & hold: -0.15 pp |
-
-
-### Test #38 · RSI reversion · LREN3.SA
-
-- **Company:** Lojas Renner S.A.
-- **Period:** 1y / 1d
-- **Date range:** 2025-06-05 → 2026-06-05
-- **Starting balance:** R$ 10000.00
-- **Strategy return:** 0.00%
-- **Buy & hold return:** -14.55%
-- **vs buy & hold:** +14.55 pp
-- **vs Ibovespa:** -24.06 pp
-- **vs USD/BRL:** +8.54 pp
-- **Trades:** 0 (0B / 0S)
-- **Final position:** Neutral (0 shares)
-
-| Action | Message |
-| --- | --- |
-| Summary | Final position: Neutral (0 shares, cash R$ 10000.00) |
-| Summary | Buy & hold: R$ -1455.30 (-14.55%) · Strategy vs buy & hold: +14.55 pp |
-
-
-### Test #39 · RSI reversion · CYRE3.SA
-
-- **Company:** Cyrela Brazil Realty S.A. Empreendimentos e Participações
-- **Period:** 1y / 1d
-- **Date range:** 2025-06-05 → 2026-06-05
-- **Starting balance:** R$ 10000.00
-- **Strategy return:** -0.80%
-- **Buy & hold return:** -15.65%
-- **vs buy & hold:** +14.85 pp
-- **vs Ibovespa:** -24.86 pp
-- **vs USD/BRL:** +7.74 pp
-- **Trades:** 2 (1B / 1S)
-- **Final position:** Sold (0 shares)
-
-| Action | Message |
-| --- | --- |
-| Buy | Bought at 26.94; balance: 2510.07 |
-| Sell | Sold at 26.92; balance: 9920.03 |
-| Summary | Final position: Sold (0 shares, cash R$ 9920.03) |
-| Summary | Buy & hold: R$ -1564.93 (-15.65%) · Strategy vs buy & hold: +14.85 pp |
-
-
-### Test #40 · RSI reversion · SUZB3.SA
-
-- **Company:** Suzano S.A.
-- **Period:** 1y / 1d
-- **Date range:** 2025-06-05 → 2026-06-05
-- **Starting balance:** R$ 10000.00
-- **Strategy return:** -3.45%
-- **Buy & hold return:** -19.36%
-- **vs buy & hold:** +15.92 pp
-- **vs Ibovespa:** -27.51 pp
-- **vs USD/BRL:** +5.09 pp
-- **Trades:** 4 (2B / 2S)
-- **Final position:** Sold (0 shares)
-
-| Action | Message |
-| --- | --- |
-| Buy | Bought at 51.43; balance: 2542.61 |
-| Sell | Sold at 50.86; balance: 9843.94 |
-| Buy | Bought at 55.79; balance: 2479.09 |
-| Sell | Sold at 54.91; balance: 9655.31 |
-| Summary | Final position: Sold (0 shares, cash R$ 9655.31) |
-| Summary | Buy & hold: R$ -1936.34 (-19.36%) · Strategy vs buy & hold: +15.92 pp |
-
-
-### Test #41 · 20-day breakout · ITUB4.SA
-
-- **Company:** Itaú Unibanco Holding S.A.
-- **Period:** 1y / 1d
-- **Date range:** 2025-06-05 → 2026-06-05
-- **Starting balance:** R$ 10000.00
-- **Strategy return:** 6.86%
-- **Buy & hold return:** 19.68%
-- **vs buy & hold:** -12.82 pp
-- **vs Ibovespa:** -17.21 pp
-- **vs USD/BRL:** +15.39 pp
-- **Trades:** 2 (1B / 1S)
-- **Final position:** Sold (0 shares)
-
-| Action | Message |
-| --- | --- |
-| Buy | Bought at 41.24; balance: 2535.09 |
-| Sell | Sold at 45.48; balance: 10685.52 |
-| Summary | Final position: Sold (0 shares, cash R$ 10685.52) |
-| Summary | Buy & hold: R$ 1967.69 (19.68%) · Strategy vs buy & hold: -12.82 pp |
-
-
-### Test #42 · 20-day breakout · BBDC4.SA
-
-- **Company:** Banco Bradesco S.A.
-- **Period:** 1y / 1d
-- **Date range:** 2025-06-05 → 2026-06-05
-- **Starting balance:** R$ 10000.00
-- **Strategy return:** -1.48%
-- **Buy & hold return:** 18.92%
-- **vs buy & hold:** -20.40 pp
-- **vs Ibovespa:** -25.55 pp
-- **vs USD/BRL:** +7.05 pp
-- **Trades:** 2 (1B / 1S)
-- **Final position:** Sold (0 shares)
-
-| Action | Message |
-| --- | --- |
-| Buy | Bought at 20.13; balance: 2512.42 |
-| Sell | Sold at 19.93; balance: 9851.62 |
-| Summary | Final position: Sold (0 shares, cash R$ 9851.62) |
-| Summary | Buy & hold: R$ 1892.05 (18.92%) · Strategy vs buy & hold: -20.40 pp |
-
-
-### Test #43 · 20-day breakout · RADL3.SA
-
-- **Company:** Raia Drogasil S.A.
-- **Period:** 1y / 1d
-- **Date range:** 2025-06-05 → 2026-06-05
-- **Starting balance:** R$ 10000.00
-- **Strategy return:** -2.37%
-- **Buy & hold return:** 21.48%
-- **vs buy & hold:** -23.84 pp
-- **vs Ibovespa:** -26.43 pp
-- **vs USD/BRL:** +6.17 pp
-- **Trades:** 2 (1B / 1S)
-- **Final position:** Sold (0 shares)
-
-| Action | Message |
-| --- | --- |
-| Buy | Bought at 25.54; balance: 2517.04 |
-| Sell | Sold at 24.98; balance: 9763.37 |
-| Summary | Final position: Sold (0 shares, cash R$ 9763.37) |
-| Summary | Buy & hold: R$ 2147.54 (21.48%) · Strategy vs buy & hold: -23.84 pp |
-
-
-### Test #44 · 20-day breakout · WEGE3.SA
-
-- **Company:** WEG S.A.
-- **Period:** 1y / 1d
-- **Date range:** 2025-06-05 → 2026-06-05
-- **Starting balance:** R$ 10000.00
-- **Strategy return:** -1.47%
-- **Buy & hold return:** 4.66%
-- **vs buy & hold:** -6.14 pp
-- **vs Ibovespa:** -25.54 pp
-- **vs USD/BRL:** +7.07 pp
-- **Trades:** 2 (1B / 1S)
-- **Final position:** Sold (0 shares)
-
-| Action | Message |
-| --- | --- |
-| Buy | Bought at 49.76; balance: 2535.80 |
-| Sell | Sold at 49.27; balance: 9852.75 |
-| Summary | Final position: Sold (0 shares, cash R$ 9852.75) |
-| Summary | Buy & hold: R$ 466.42 (4.66%) · Strategy vs buy & hold: -6.14 pp |
-
-
-### Test #45 · 20-day breakout · ABEV3.SA
-
-- **Company:** Ambev S.A.
-- **Period:** 1y / 1d
-- **Date range:** 2025-06-05 → 2026-06-05
-- **Starting balance:** R$ 10000.00
-- **Strategy return:** 5.79%
-- **Buy & hold return:** 21.94%
-- **vs buy & hold:** -16.15 pp
-- **vs Ibovespa:** -18.28 pp
-- **vs USD/BRL:** +14.33 pp
-- **Trades:** 2 (1B / 1S)
-- **Final position:** Sold (0 shares)
-
-| Action | Message |
-| --- | --- |
-| Buy | Bought at 14.31; balance: 2501.56 |
-| Sell | Sold at 15.57; balance: 10578.65 |
-| Summary | Final position: Sold (0 shares, cash R$ 10578.65) |
-| Summary | Buy & hold: R$ 2193.77 (21.94%) · Strategy vs buy & hold: -16.15 pp |
-
-
-### Test #46 · 20-day breakout · BBAS3.SA
-
-- **Company:** Banco do Brasil S.A.
-- **Period:** 1y / 1d
-- **Date range:** 2025-06-05 → 2026-06-05
-- **Starting balance:** R$ 10000.00
-- **Strategy return:** 8.75%
-- **Buy & hold return:** -11.78%
-- **vs buy & hold:** +20.53 pp
-- **vs Ibovespa:** -15.31 pp
-- **vs USD/BRL:** +17.29 pp
-- **Trades:** 2 (1B / 1S)
-- **Final position:** Sold (0 shares)
-
-| Action | Message |
-| --- | --- |
-| Buy | Bought at 22.00; balance: 2519.26 |
-| Sell | Sold at 24.82; balance: 10875.06 |
-| Summary | Final position: Sold (0 shares, cash R$ 10875.06) |
-| Summary | Buy & hold: R$ -1177.69 (-11.78%) · Strategy vs buy & hold: +20.53 pp |
-
-
-### Test #47 · 20-day breakout · RENT3.SA
-
-- **Company:** Localiza Rent a Car S.A.
-- **Period:** 1y / 1d
-- **Date range:** 2025-06-05 → 2026-06-05
-- **Starting balance:** R$ 10000.00
-- **Strategy return:** -4.25%
-- **Buy & hold return:** -3.57%
-- **vs buy & hold:** -0.68 pp
-- **vs Ibovespa:** -28.31 pp
-- **vs USD/BRL:** +4.29 pp
-- **Trades:** 4 (2B / 2S)
-- **Final position:** Sold (0 shares)
-
-| Action | Message |
-| --- | --- |
-| Buy | Bought at 47.15; balance: 2503.41 |
-| Sell | Sold at 46.36; balance: 9800.56 |
-| Buy | Bought at 49.36; balance: 2495.28 |
-| Sell | Sold at 48.32; balance: 9575.13 |
-| Summary | Final position: Sold (0 shares, cash R$ 9575.13) |
-| Summary | Buy & hold: R$ -357.31 (-3.57%) · Strategy vs buy & hold: -0.68 pp |
-
-
-### Test #48 · 20-day breakout · LREN3.SA
-
-- **Company:** Lojas Renner S.A.
-- **Period:** 1y / 1d
-- **Date range:** 2025-06-05 → 2026-06-05
-- **Starting balance:** R$ 10000.00
-- **Strategy return:** 1.66%
-- **Buy & hold return:** -14.55%
-- **vs buy & hold:** +16.21 pp
-- **vs Ibovespa:** -22.41 pp
-- **vs USD/BRL:** +10.20 pp
-- **Trades:** 2 (1B / 1S)
-- **Final position:** Sold (0 shares)
-
-| Action | Message |
-| --- | --- |
-| Buy | Bought at 14.28; balance: 2500.79 |
-| Sell | Sold at 14.75; balance: 10165.82 |
-| Summary | Final position: Sold (0 shares, cash R$ 10165.82) |
-| Summary | Buy & hold: R$ -1455.30 (-14.55%) · Strategy vs buy & hold: +16.21 pp |
-
-
-### Test #49 · 20-day breakout · CYRE3.SA
-
-- **Company:** Cyrela Brazil Realty S.A. Empreendimentos e Participações
-- **Period:** 1y / 1d
-- **Date range:** 2025-06-05 → 2026-06-05
-- **Starting balance:** R$ 10000.00
-- **Strategy return:** 0.00%
-- **Buy & hold return:** -15.65%
-- **vs buy & hold:** +15.65 pp
-- **vs Ibovespa:** -24.06 pp
-- **vs USD/BRL:** +8.54 pp
-- **Trades:** 0 (0B / 0S)
-- **Final position:** Neutral (0 shares)
-
-| Action | Message |
-| --- | --- |
-| Summary | Final position: Neutral (0 shares, cash R$ 10000.00) |
-| Summary | Buy & hold: R$ -1564.93 (-15.65%) · Strategy vs buy & hold: +15.65 pp |
-
-
-### Test #50 · 20-day breakout · SUZB3.SA
-
-- **Company:** Suzano S.A.
-- **Period:** 1y / 1d
-- **Date range:** 2025-06-05 → 2026-06-05
-- **Starting balance:** R$ 10000.00
-- **Strategy return:** 0.00%
-- **Buy & hold return:** -19.36%
-- **vs buy & hold:** +19.36 pp
-- **vs Ibovespa:** -24.06 pp
-- **vs USD/BRL:** +8.54 pp
-- **Trades:** 0 (0B / 0S)
-- **Final position:** Neutral (0 shares)
-
-| Action | Message |
-| --- | --- |
-| Summary | Final position: Neutral (0 shares, cash R$ 10000.00) |
-| Summary | Buy & hold: R$ -1936.34 (-19.36%) · Strategy vs buy & hold: +19.36 pp |
-
-
+| 1 | SMA-8 trend | ITUB4.SA | 8.90% | 0.93 | 7.0% | -10.78 pp | Vendido |
+| 2 | SMA-8 trend | BBDC4.SA | 7.38% | 0.85 | 5.8% | -11.54 pp | Vendido |
+| 3 | SMA-8 trend | RADL3.SA | 11.08% | 0.77 | 10.7% | -10.39 pp | Vendido |
+| 4 | SMA-8 trend | WEGE3.SA | 8.81% | 0.98 | 7.6% | +4.14 pp | Vendido |
+| 5 | SMA-8 trend | ABEV3.SA | 4.30% | 0.53 | 7.8% | -17.64 pp | Vendido |
+| 6 | SMA-8 trend | BBAS3.SA | -6.40% | -0.73 | 11.8% | +5.38 pp | Vendido |
+| 7 | SMA-8 trend | RENT3.SA | 6.19% | 0.51 | 12.0% | +9.77 pp | Vendido |
+| 8 | SMA-8 trend | LREN3.SA | -8.45% | -1.26 | 8.4% | +6.10 pp | Vendido |
+| 9 | SMA-8 trend | CYRE3.SA | 1.86% | 0.18 | 8.6% | +17.51 pp | Vendido |
+| 10 | SMA-8 trend | SUZB3.SA | -8.87% | -1.65 | 10.1% | +10.49 pp | Vendido |
+| 11 | SMA-20 trend | ITUB4.SA | 13.09% | 1.50 | 6.2% | -6.59 pp | Vendido |
+| 12 | SMA-20 trend | BBDC4.SA | 2.83% | 0.65 | 3.6% | -16.09 pp | Vendido |
+| 13 | SMA-20 trend | RADL3.SA | 0.00% | 0.00 | 0.0% | -21.48 pp | Neutro |
+| 14 | SMA-20 trend | WEGE3.SA | 0.00% | 0.00 | 0.0% | -4.66 pp | Neutro |
+| 15 | SMA-20 trend | ABEV3.SA | 0.00% | 0.00 | 0.0% | -21.94 pp | Neutro |
+| 16 | SMA-20 trend | BBAS3.SA | -2.62% | -0.55 | 7.1% | +9.15 pp | Vendido |
+| 17 | SMA-20 trend | RENT3.SA | 0.00% | 0.00 | 0.0% | +3.57 pp | Neutro |
+| 18 | SMA-20 trend | LREN3.SA | 0.00% | 0.00 | 0.0% | +14.55 pp | Neutro |
+| 19 | SMA-20 trend | CYRE3.SA | 8.66% | 0.90 | 8.5% | +24.31 pp | Vendido |
+| 20 | SMA-20 trend | SUZB3.SA | -1.37% | -0.28 | 4.1% | +17.99 pp | Vendido |
+| 21 | SMA crossover | ITUB4.SA | 0.00% | 0.00 | 0.0% | -19.68 pp | Neutro |
+| 22 | SMA crossover | BBDC4.SA | -1.14% | -0.20 | 7.0% | -20.06 pp | Vendido |
+| 23 | SMA crossover | RADL3.SA | 21.24% | 1.55 | 9.8% | -0.23 pp | Vendido |
+| 24 | SMA crossover | WEGE3.SA | 15.84% | 2.17 | 5.5% | +11.18 pp | Vendido |
+| 25 | SMA crossover | ABEV3.SA | -2.73% | -0.91 | 4.0% | -24.67 pp | Vendido |
+| 26 | SMA crossover | BBAS3.SA | -2.16% | -1.53 | 2.2% | +9.62 pp | Vendido |
+| 27 | SMA crossover | RENT3.SA | 0.00% | 0.00 | 0.0% | +3.57 pp | Neutro |
+| 28 | SMA crossover | LREN3.SA | -12.28% | -2.29 | 12.3% | +2.27 pp | Vendido |
+| 29 | SMA crossover | CYRE3.SA | 9.98% | 1.05 | 8.5% | +25.63 pp | Vendido |
+| 30 | SMA crossover | SUZB3.SA | 0.00% | 0.00 | 0.0% | +19.36 pp | Neutro |
+| 31 | RSI reversion | ITUB4.SA | 0.30% | 0.27 | 0.8% | -19.37 pp | Vendido |
+| 32 | RSI reversion | BBDC4.SA | 4.99% | 2.07 | 1.0% | -13.93 pp | Vendido |
+| 33 | RSI reversion | RADL3.SA | 8.53% | 1.10 | 3.9% | -12.95 pp | Vendido |
+| 34 | RSI reversion | WEGE3.SA | -0.12% | -0.13 | 0.8% | -4.78 pp | Vendido |
+| 35 | RSI reversion | ABEV3.SA | 0.13% | 0.12 | 0.8% | -21.81 pp | Vendido |
+| 36 | RSI reversion | BBAS3.SA | -1.06% | -1.49 | 1.1% | +10.71 pp | Vendido |
+| 37 | RSI reversion | RENT3.SA | -0.87% | -1.31 | 0.9% | +2.71 pp | Vendido |
+| 38 | RSI reversion | LREN3.SA | 0.00% | 0.00 | 0.0% | +14.55 pp | Neutro |
+| 39 | RSI reversion | CYRE3.SA | 0.90% | 0.56 | 0.8% | +16.55 pp | Vendido |
+| 40 | RSI reversion | SUZB3.SA | -1.16% | -1.55 | 1.2% | +18.21 pp | Vendido |
+| 41 | 20-day breakout | ITUB4.SA | 4.85% | 1.91 | 3.2% | -14.83 pp | Vendido |
+| 42 | 20-day breakout | BBDC4.SA | 5.33% | 2.24 | 2.2% | -13.59 pp | Vendido |
+| 43 | 20-day breakout | RADL3.SA | -1.97% | -0.81 | 3.1% | -23.44 pp | Vendido |
+| 44 | 20-day breakout | WEGE3.SA | 2.51% | 1.12 | 1.6% | -2.15 pp | Vendido |
+| 45 | 20-day breakout | ABEV3.SA | 1.72% | 0.92 | 2.1% | -20.21 pp | Vendido |
+| 46 | 20-day breakout | BBAS3.SA | 8.58% | 2.83 | 1.6% | +20.35 pp | Vendido |
+| 47 | 20-day breakout | RENT3.SA | 0.32% | 0.20 | 1.6% | +3.90 pp | Vendido |
+| 48 | 20-day breakout | LREN3.SA | 0.63% | 0.33 | 2.2% | +15.18 pp | Vendido |
+| 49 | 20-day breakout | CYRE3.SA | 0.00% | 0.00 | 0.0% | +15.65 pp | Neutro |
+| 50 | 20-day breakout | SUZB3.SA | 0.00% | 0.00 | 0.0% | +19.36 pp | Neutro |
+
+## Definições de métricas
+
+### Eficiência de risco
+**Guia da seção:** Sharpe e captura de alta ↑ melhor · Drawdown máx. ↓ melhor · Captura de baixa ↓ melhor (seletiva) · Runs sem trades ↓ melhor · Tabela: retorno e Sharpe ↑ · volatilidade e drawdown máx. ↓.
+**Orientação:** Somente contexto
+Métricas de risco do portfólio, média de todos os runs do benchmark vs comprar e manter nos mesmos papéis e janela.
+
+### Análise de exposição
+**Guia da seção:** Baixa exposição = muito em caixa, não timing seletivo. Captura de alta ↑ melhor · Captura de baixa ↓ melhor (seletiva) · Runs sem trades ↓ melhor.
+**Orientação:** Somente contexto
+Quanto tempo cada estratégia ficou posicionada vs em caixa. Baixa exposição com baixa captura costuma indicar redução de risco por estar fora do mercado.
+
+### Sinal vs motor de risco
+**Guia da seção:** Retorno e captura de alta ↑ melhor · DD máx. ↓ melhor · Exposição: contexto (baixa = menos investido) · Δ retorno vs A: sinalado (± vs só sinal).
+**Orientação:** Somente contexto
+Três modos experimentais por algoritmo: A só sinal, B adiciona saídas de risco, C é a estratégia completa com filtros de entrada.
+
+### Contexto de mercado
+**Guia da seção:** Retorno do benchmark ↑ melhor · Superar comprar e manter: contagem maior é melhor.
+**Orientação:** Somente contexto
+Retornos do período para Ibovespa, USD/BRL e a matriz de testes — mostra se a janela foi amplamente altista ou mista.
+
+### Algoritmos
+**Guia da seção:** Retorno, Sharpe, captura de alta, score de risco e valor de proteção ↑ melhor · DD máx. e captura de baixa ↓ melhor · vs C&M: excedente com sinal. Tabela por papel: retorno e Sharpe ↑ · DD máx. ↓ · vs C&M sinalado.
+**Orientação:** Somente contexto
+Performance, teoria e código-fonte de cada estratégia no catálogo do benchmark.
+
+### Testes individuais
+**Guia da seção:** Retorno e valor de proteção ↑ melhor · vs benchmarks: excedente com sinal.
+**Orientação:** Somente contexto
+Saída completa do backtest para cada combinação algoritmo × papel na matriz.
+
+### Performance por regime
+**Orientação:** Somente contexto
+Retornos diários anualizados da estratégia agrupados por rótulos heurísticos: alta, baixa, lateral, alta volatilidade.
+
+### Atribuição de saídas
+**Orientação:** Somente contexto
+PnL % por round-trip agrupado pela primeira razão de saída disparada (ATR, chandelier, saídas de sinal, etc.).
+
+### Sharpe
+**Orientação:** ↑ melhor
+**Meta:** ≥ 0,5 ou superar C&M
+Retorno anualizado menos taxa livre de risco 0%, dividido pela volatilidade anualizada dos retornos diários do portfólio (252 pregões). Calculado a partir da curva de patrimônio simulada.
+
+### Sharpe comprar e manter
+**Orientação:** ↑ melhor
+Mesma fórmula de Sharpe aplicada à curva de comprar e manter nas mesmas datas da estratégia.
+
+### Drawdown máximo
+**Orientação:** ↓ melhor
+**Meta:** ≪ comprar e manter
+Maior queda pico-a-vale no patrimônio durante a janela, em percentual positivo. Calculado barra a barra a partir de caixa mais posição marcada a mercado.
+
+### Drawdown máx. comprar e manter
+**Orientação:** ↓ melhor
+Drawdown máximo na curva alinhada de comprar e manter (100% investido desde a primeira barra).
+
+### Captura de baixa
+**Orientação:** Meta 20–40% (participar de parte das perdas, não todas)
+**Meta:** 20–40%
+Nos dias em que o retorno diário de comprar e manter é negativo: retorno médio diário da estratégia dividido pelo de comprar e manter, × 100. 100% = absorveu todas as perdas; 7% ≈ evitou a maior parte.
+
+### Captura de alta
+**Orientação:** Meta 50–70% (participar dos ganhos mantendo defesa)
+**Meta:** 50–70%
+Nos dias em que o retorno diário de comprar e manter é positivo: retorno médio diário da estratégia dividido pelo de comprar e manter, × 100. 100% = capturou todos os ganhos.
+
+### Tempo no mercado
+**Orientação:** Compare com ~100% comprar e manter; % baixo costuma significar muito em caixa
+**Meta:** 15–40%
+Barras com pelo menos uma ação ÷ total de barras na janela do backtest × 100.
+
+### Exposição
+**Orientação:** Igual ao tempo no mercado
+**Meta:** 15–40%
+Barras posicionadas ÷ total de barras × 100. Comprar e manter ≈ 100%.
+
+### Runs sem trades
+**Orientação:** ↓ melhor
+Quantidade de backtests em que a estratégia nunca entrou em posição (0 compras e 0 vendas).
+
+### Retorno
+**Orientação:** ↑ melhor
+(Patrimônio final − saldo inicial) ÷ saldo inicial × 100. Inclui caixa e posição aberta no último fechamento.
+
+### Retorno comprar e manter
+**Orientação:** ↑ melhor
+Retorno de comprar no primeiro fechamento e manter até o último, com o mesmo saldo inicial.
+
+### Volatilidade (an.)
+**Orientação:** ↓ melhor
+**Meta:** ≪ comprar e manter
+Desvio padrão dos retornos logarítmicos diários na curva de patrimônio × √252, em percentual.
+
+### Média de trades
+**Orientação:** Somente contexto
+Média de execuções de compra mais venda por papel (round trips ≈ vendas).
+
+### Score de risco
+**Orientação:** ↑ melhor
+**Meta:** ≥ 70
+Composto 0–100: 40% redução normalizada de drawdown vs C&M, 30% redução de volatilidade, 30% melhora de Sharpe — ranqueado entre os cinco algoritmos deste benchmark.
+
+### Valor de proteção
+**Orientação:** ↑ melhor
+**Meta:** > 0 pp
+Composto narrativo (pp): (DD máx. C&M − DD máx. estratégia) + (vol. C&M − vol. estratégia) − max(0, retorno C&M − retorno estratégia). Não é alpha de Jensen.
+
+### vs comprar e manter
+**Orientação:** Excedente com sinal (+ supera C&M)
+Retorno da estratégia menos retorno de comprar e manter no mesmo papel e janela, em pontos percentuais.
+
+### Superou comprar e manter
+**Orientação:** ↑ melhor
+Número de runs em que o retorno da estratégia superou comprar e manter.
+
+### Superou Ibovespa
+**Orientação:** ↑ melhor
+Runs em que o retorno da estratégia superou o retorno do Ibovespa (^BVSP) no período.
+
+### Superou USD/BRL
+**Orientação:** ↑ melhor
+Runs em que o retorno da estratégia superou a variação do USD/BRL no período (indexado).
+
+### Ibovespa
+**Orientação:** Somente contexto
+Variação percentual do ^BVSP do primeiro ao último fechamento na janela do benchmark.
+
+### USD/BRL
+**Orientação:** Somente contexto
+Variação percentual do USDBRL=X na janela (BRL por USD).
+
+### Testes executados
+**Orientação:** Somente contexto
+Total de backtests: algoritmos × papéis na matriz do benchmark.
+
+### Δ retorno vs A
+**Orientação:** ↑ melhor
+Retorno médio desta versão da decomposição menos a Versão A (só sinal) para o mesmo algoritmo.
+
+### Versão
+**Orientação:** Somente contexto
+A = sinais centrais · B = A + ATR/chandelier · C = estratégia completa com filtros e entrada relutante.
+
+### Estratégia
+**Orientação:** Somente contexto
+Nome do algoritmo no catálogo do benchmark.
+
+### Papel
+**Orientação:** Somente contexto
+Ticker B3 testado neste run.
+
+### Algoritmo
+**Orientação:** Somente contexto
+Script de estratégia executado neste backtest.
+
+### Janela
+**Orientação:** Somente contexto
+Período e intervalo de barras do yfinance (ex.: 1y / 1d) da simulação.
+
+### Intervalo de datas
+**Orientação:** Somente contexto
+Primeira e última data negociável da série após o warm-up dos indicadores.
+
+### Trades
+**Orientação:** Somente contexto
+Total de compras mais vendas no run.
+
+### Posição
+**Orientação:** Somente contexto
+Estado final: Comprado (com ações), Vendido (zerado após operar) ou Neutro (nunca entrou).
+
+### Alta
+**Orientação:** ↑ melhor
+Retorno diário médio anualizado em barras classificadas como alta (fechamento > MM-50 com inclinação positiva).
+
+### Baixa
+**Orientação:** Menos negativo pode ser defensivo
+Retorno anualizado em barras de baixa (fechamento < MM-50 com inclinação negativa).
+
+### Lateral
+**Orientação:** Somente contexto
+Retorno anualizado em barras não classificadas como alta, baixa ou alta volatilidade.
+
+### Alta vol.
+**Orientação:** Somente contexto
+Retorno anualizado quando o ATR(14) está acima do percentil 70 da janela.
+
+### PnL médio %
+**Orientação:** ↑ melhor
+Soma do PnL % por round-trip atribuída a cada razão de saída, média entre runs do algoritmo.
+
+### Motor de sinal
+**Orientação:** ↑ melhor
+PnL % agregado de saídas classificadas como sinal (rompimento de MM, RSI, breakout, etc.).
+
+### Motor de risco
+**Orientação:** ↑ melhor
+PnL % agregado de saídas classificadas como risco (stop ATR, trailing chandelier).
+
+### Melhor · Pior
+**Orientação:** Somente contexto
+Maior e menor retorno % da estratégia entre os dez papéis deste algoritmo.
+
+### Runs lucrativos
+**Orientação:** ↑ melhor
+Runs com ganho absoluto positivo em moeda.
+
+### vs Ibovespa
+**Orientação:** ↑ melhor
+Retorno da estratégia menos retorno do Ibovespa no período, em pontos percentuais.
+
+### vs USD/BRL
+**Orientação:** ↑ melhor
+Retorno da estratégia menos variação do USD/BRL no período, em pontos percentuais.
+
+### Saldo inicial
+**Orientação:** Somente contexto
+Caixa simulado inicial (R$) para cada run do benchmark.
+
+### Performance do papel
+**Orientação:** Somente contexto
+Retorno de comprar e manter deste papel no intervalo do run.
+
+### Perfil de risco
+**Orientação:** Somente contexto
+Sharpe, drawdown máximo e captura de baixa do run vs comprar e manter.
+
+### Final
+**Orientação:** Somente contexto
+Ações finais e saldo em caixa após a última barra.
+
+### Dispersão risco vs retorno
+**Orientação:** Somente contexto
+Cada ponto = retorno médio (Y) vs drawdown máximo médio (X) de um algoritmo. Inferior direito = defensivo; superior esquerdo = fraco.
+
+### Score de redução de risco
+**Orientação:** ↑ melhor
+Gráfico de barras do score 0–100 ranqueando os algoritmos.
+
+### Curva de drawdown
+**Orientação:** Somente contexto
+Drawdown diário % do pico para o algoritmo com melhor score de risco vs comprar e manter em um run representativo.
+
+### Sharpe móvel
+**Orientação:** Somente contexto
+Sharpe móvel de 90 pregões a partir dos retornos diários (amostra de runs por algoritmo).
+
+### Gráfico de contexto de mercado
+**Orientação:** Somente contexto
+Barras com retorno médio de estratégias, comprar e manter, Ibovespa e USD/BRL no período.
+
+### Ibovespa indexado
+**Orientação:** Somente contexto
+Fechamento do ^BVSP reindexado a 100 na primeira barra da janela.
+
+### USD/BRL indexado
+**Orientação:** Somente contexto
+USDBRL=X reindexado a 100 na primeira barra.
+
+### Comparação de retorno bruto
+**Orientação:** Somente contexto
+Barras agrupadas do retorno médio da estratégia vs comprar e manter por algoritmo.

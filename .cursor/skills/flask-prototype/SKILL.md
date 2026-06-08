@@ -13,11 +13,29 @@ description: Run, smoke-test, and iterate on this Flask financial setup simulato
 
 ## Start the App
 
+TA-Lib (candlestick patterns in `rsi_reversion.py`) needs the C library before `pip install TA-Lib`:
+
 ```bash
+# Arch Linux — NOT in official repos; pick one:
+
+# Option A: AUR (yay / paru)
+yay -S ta-lib
+# or: paru -S ta-lib
+
+# Option B: build from upstream (no AUR helper)
+curl -LJO https://github.com/ta-lib/ta-lib/releases/download/v0.6.4/ta-lib-0.6.4-src.tar.gz
+tar -xzf ta-lib-0.6.4-src.tar.gz && cd ta-lib-0.6.4
+./configure --prefix=/usr && make && sudo make install
+cd ..
+
+# Debian/Ubuntu: see https://ta-lib.org/install/ (ta-lib_0.6.4_amd64.deb)
+
 cd /home/hso/repos/financial-setup-simulator
-python3 -m pip install -r requirements.txt   # or: npm install
-python3 -m flask run                         # or: npm start
+python3 -m pip install -r requirements.txt
+python3 -m flask run
 ```
+
+If `import talib` already works (some pip wheels bundle the lib), skip the system install.
 
 App serves at `http://127.0.0.1:5000`.
 
