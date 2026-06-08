@@ -66,10 +66,23 @@ In the last 25% of bars, `reluctant_entry` probabilistically blocks entries. Tun
 
 **Exits** (when holding): always guard `if not portfolio["price_bought"]: return False`. Common exits:
 - Hard stop: `price < entry - k * atr`
-- Trailing stop: `price < high_n - k * atr` (only if profitable: `price > entry * (1 + comission)`)
-- Signal flip: e.g. price below SMA21 while in profit
+- Trailing stop: `price < high_n - k * atr` — fire immediately, **do not** gate on commission
+- Signal flip: e.g. price below SMA21 or bearish cross
 
 See [patterns.md](patterns.md) for copy-paste indicator snippets from shipped algorithms.
+
+## Benchmark-driven tuning
+
+Read `static/bi_report.md` after `python bi_suite.py`. Per-algorithm section shows avg return, beat B&H count, and per-stock trades.
+
+| Signal in report | Likely cause | Fix |
+|------------------|--------------|-----|
+| Many `Neutral` positions, trades < 3 | Over-filtered entries | Widen anchoring bands, faster slope `diff(2)`, relax anti-churn |
+| Worst run < −10% | Under-filtered or loose stops | Add trend slope filter, adaptive ATR stop, fakeout exit |
+| Beat B&H < 4/10 with many trades | Churn / late entries | Tighten extension cap, add RSI or squeeze filter |
+| Avg return < 0% with few trades | Signals too rare or exits too early | Lower RSI threshold, remove volume gate, soften take-profit |
+
+After algo changes, bump `BENCHMARK_VERSION` in `bi_suite.py` and re-run the suite so cache invalidates.
 
 ## New algorithm workflow
 
@@ -91,10 +104,10 @@ print(r["return_pct"], r["buys"], r["sells"])
 
 ## Pitfalls
 
-- `check_selling_conditions` takes `comission` (typo preserved) — use it for profit checks, not as a flat fee subtracted in logic.
+- `check_selling_conditions` takes `comission` (typo preserved) — avoid gating technical exits on `price > entry * (1 + comission)`; that traps losing trades until the hard stop.
 - `len(df) < 2` before crossover checks — early bars may have only one row.
 - Do not mutate `portfolio` inside condition functions; the engine calls `buy()` / `sell()`.
-- `exec()` is local-prototype only — no imports beyond stdlib, pandas, and `algorithm_helpers`.
+- `exec()` is local-prototype only — allowed imports: stdlib, pandas, numpy, `talib`, and `algorithm_helpers` (includes `add_bullish_reversal_column` / `add_bearish_reversal_column`). TA-Lib C lib: on Arch use AUR `ta-lib` (`yay -S ta-lib`) or build from [ta-lib.org](https://ta-lib.org/install/); not in `pacman` official repos.
 
 ## Related skills
 

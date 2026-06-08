@@ -27,7 +27,7 @@ def check_selling_conditions(df, price, portfolio, comission):
     if not entry:
         return False
     atr = df["atr14"].iloc[-1]
-    if price < entry - 3.0 * atr:
+    if price < entry - 30.0 * atr:
         return True
     trail = df["high22"].iloc[-1] - 2.5 * atr
     if price < trail:
@@ -39,11 +39,13 @@ def check_selling_conditions(df, price, portfolio, comission):
 
 def check_buying_conditions(df, price, portfolio):
     sma8 = df["sma8"].iloc[-1]
+    y = portfolio.get("_entry_reluctance", 1.0)
+    ext_limit = 1.035 - max(0.0, y - 1.0) * 0.008
     if price <= sma8 or df["sma8_slope"].iloc[-1] <= 0:
         return reluctant_entry(False, portfolio)
     if price < df["sma21"].iloc[-1] or price < df["sma50"].iloc[-1]:
         return reluctant_entry(False, portfolio)
-    if price > sma8 * 1.035:
+    if price > sma8 * ext_limit:
         return reluctant_entry(False, portfolio)
     sold = portfolio["price_sold"]
     if sold != float("inf") and sold * 0.96 < price < sold * 1.05:

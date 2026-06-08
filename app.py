@@ -2,7 +2,9 @@ from flask import Flask, Response, render_template, request, send_file
 from pathlib import Path
 from utis import get_stocks, buy, sell, get_amount, get_stock_name
 from algorithm_helpers import exec_user_algorithm, update_time_state
+from bi_metrics import BI_METRICS, action_label, exit_reason_label, position_label, score_metric
 from bi_report import render_markdown
+from cms import about_page_context, context_path, read_context_raw
 from bi_suite import load_algorithm_catalog, load_bi_results, save_bi_results
 from benchmarks import buy_and_hold_metrics, dollar_benchmark, ibovespa_benchmark
 from simulator import final_position_label
@@ -17,34 +19,173 @@ from collections import defaultdict
 
 # Configure application
 app = Flask(__name__)
+app.jinja_env.globals["bi_metrics"] = BI_METRICS
+app.jinja_env.globals["bi_score"] = score_metric
+app.jinja_env.globals["position_label"] = position_label
+app.jinja_env.globals["action_label"] = action_label
+app.jinja_env.globals["exit_reason_label"] = exit_reason_label
 
 
-def _build_bi_charts(results, market_benchmark, dollar_benchmark_data, summary):
-    algo_names = list(dict.fromkeys(row["algorithm"] for row in results if row["status"] == "ok"))
+def _avg_metric(rows, key):
+    vals = [r[key] for r in rows if r.get(key) is not None]
+    return sum(vals) / len(vals) if vals else 0.0
 
-    by_algo_strategy = defaultdict(list)
-    by_algo_buy_hold = defaultdict(list)
-    for row in results:
-        if row["status"] != "ok":
-            continue
-        by_algo_strategy[row["algorithm"]].append(row["return_pct"])
-        by_algo_buy_hold[row["algorithm"]].append(row["buy_hold_return_pct"])
 
-    strategy_avgs = [sum(by_algo_strategy[a]) / len(by_algo_strategy[a]) for a in algo_names]
-    buy_hold_avgs = [sum(by_algo_buy_hold[a]) / len(by_algo_buy_hold[a]) for a in algo_names]
+def _encode_fig(fig):
+    return json.loads(json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder))
+
+
+def _build_bi_charts(results, market_benchmark, dollar_benchmark_data, summary, algorithm_catalog):
+    ok_results = [r for r in results if r["status"] == "ok"]
+    algo_names = [a["name"] for a in algorithm_catalog]
+
+    by_algo = defaultdict(list)
+    for row in ok_results:
+        by_algo[row["algorithm"]].append(row)
+
+    strategy_avgs = [_avg_metric(by_algo[a], "return_pct") for a in algo_names]
+    buy_hold_avgs = [_avg_metric(by_algo[a], "buy_hold_return_pct") for a in algo_names]
     ibov_line = [summary["ibovespa_return_pct"]] * len(algo_names)
     dollar_line = [summary["dollar_return_pct"]] * len(algo_names)
 
+    # Risk vs return scatter
+    scatter_fig = go.Figure()
+    for algo in algorithm_catalog:
+        perf = algo.get("performance") or {}
+        if not perf:
+            continue
+        scatter_fig.add_trace(
+            go.Scatter(
+                x=[perf.get("avg_max_drawdown_pct", 0)],
+                y=[perf.get("avg_return_pct", 0)],
+                mode="markers+text",
+                name=algo["name"],
+                text=[algo["name"]],
+                textposition="top center",
+                marker=dict(size=12),
+            )
+        )
+    scatter_fig.add_trace(
+        go.Scatter(
+            x=[summary.get("avg_buy_hold_max_drawdown_pct", 0)],
+            y=[summary.get("avg_buy_hold_pct", 0)],
+            mode="markers+text",
+            name="Comprar e manter (média)",
+            text=["Comprar e manter"],
+            textposition="bottom center",
+            marker=dict(size=14, symbol="diamond", color="#fd7e14"),
+        )
+    )
+    scatter_fig.update_layout(
+        title="Risco vs retorno — menor drawdown e maior retorno é melhor",
+        xaxis_title="Drawdown máximo (%)",
+        yaxis_title="Retorno médio (%)",
+        height=420,
+        margin=dict(t=60, b=60),
+        shapes=[
+            dict(type="rect", xref="paper", yref="paper", x0=0, x1=0.5, y0=0.5, y1=1,
+                 fillcolor="rgba(13,110,253,0.04)", line_width=0),
+            dict(type="rect", xref="paper", yref="paper", x0=0.5, x1=1, y0=0, y1=0.5,
+                 fillcolor="rgba(253,126,20,0.04)", line_width=0),
+        ],
+        annotations=[
+            dict(x=0.12, y=0.95, xref="paper", yref="paper", text="Alpha genuíno", showarrow=False,
+                 font=dict(size=11, color="#6c757d")),
+            dict(x=0.72, y=0.95, xref="paper", yref="paper", text="Redução de risco", showarrow=False,
+                 font=dict(size=11, color="#6c757d")),
+            dict(x=0.72, y=0.08, xref="paper", yref="paper", text="Defensivo", showarrow=False,
+                 font=dict(size=11, color="#6c757d")),
+            dict(x=0.12, y=0.08, xref="paper", yref="paper", text="Subdesempenho", showarrow=False,
+                 font=dict(size=11, color="#6c757d")),
+        ],
+    )
+
+    # Risk score ranking
+    risk_scores = summary.get("risk_scores") or {}
+    score_names = sorted(risk_scores, key=risk_scores.get, reverse=True)
+    risk_score_fig = go.Figure(
+        data=[
+            go.Bar(
+                x=score_names,
+                y=[risk_scores[n] for n in score_names],
+                marker_color="#0d6efd",
+                text=[f"{risk_scores[n]:.0f}" for n in score_names],
+                textposition="outside",
+            )
+        ]
+    )
+    risk_score_fig.update_layout(
+        title="Score de redução de risco (maior = melhor perfil ajustado ao risco)",
+        yaxis_title="Score (0–100)",
+        height=340,
+        margin=dict(t=60, b=60),
+    )
+
+    # Drawdown showcase — best risk-score algo vs buy & hold on its best-symbol run
+    drawdown_fig = go.Figure()
+    best_algo = summary.get("best_risk_score_algo")
+    showcase = None
+    if best_algo and by_algo.get(best_algo):
+        showcase = max(by_algo[best_algo], key=lambda r: r.get("protection_alpha_pp", 0))
+    if showcase and showcase.get("drawdown_series"):
+        s_dates = [p["date"] for p in showcase["drawdown_series"]]
+        s_dd = [p["drawdown_pct"] for p in showcase["drawdown_series"]]
+        b_dd = [p["drawdown_pct"] for p in showcase.get("buy_hold_drawdown_series", [])]
+        drawdown_fig.add_trace(
+            go.Scatter(x=s_dates, y=s_dd, mode="lines", name=f"{best_algo}", line=dict(color="#0d6efd", width=2))
+        )
+        drawdown_fig.add_trace(
+            go.Scatter(x=s_dates, y=b_dd[: len(s_dates)], mode="lines", name="Comprar e manter", line=dict(color="#fd7e14", width=2, dash="dash"))
+        )
+        peak_s = min(s_dd) if s_dd else 0
+        peak_b = min(b_dd) if b_dd else 0
+        drawdown_fig.update_layout(
+            title=(
+                f"Curva de drawdown — {best_algo} · {showcase['symbol']} "
+                f"(pico {peak_s:.1f}% vs {peak_b:.1f}% comprar e manter)"
+            ),
+            yaxis_title="Drawdown (%)",
+            height=360,
+            margin=dict(t=60, b=60),
+        )
+    else:
+        drawdown_fig.update_layout(title="Curva de drawdown (sem dados)", height=200)
+
+    # Rolling 90-day Sharpe (avg across algos)
+    rolling_fig = go.Figure()
+    for algo in algorithm_catalog[:3]:
+        perf = algo.get("performance") or {}
+        rows = by_algo.get(algo["name"], [])
+        if not rows:
+            continue
+        sample = rows[0]
+        roll = (sample.get("rolling") or {}).get("90", {}).get("sharpe", [])
+        if roll:
+            rolling_fig.add_trace(
+                go.Scatter(
+                    x=[p["date"] for p in roll],
+                    y=[p["value"] for p in roll],
+                    mode="lines",
+                    name=algo["name"],
+                )
+            )
+    rolling_fig.update_layout(
+        title="Sharpe móvel 90 pregões (amostra — verificação de consistência)",
+        yaxis_title="Sharpe",
+        height=360,
+        margin=dict(t=60, b=60),
+    )
+
     comparison_fig = go.Figure()
-    comparison_fig.add_trace(go.Bar(name="Strategy", x=algo_names, y=strategy_avgs, text=[f"{v:.2f}%" for v in strategy_avgs], textposition="outside"))
-    comparison_fig.add_trace(go.Bar(name="Buy & hold", x=algo_names, y=buy_hold_avgs, text=[f"{v:.2f}%" for v in buy_hold_avgs], textposition="outside"))
+    comparison_fig.add_trace(go.Bar(name="Estratégia", x=algo_names, y=strategy_avgs, text=[f"{v:.2f}%" for v in strategy_avgs], textposition="outside"))
+    comparison_fig.add_trace(go.Bar(name="Comprar e manter", x=algo_names, y=buy_hold_avgs, text=[f"{v:.2f}%" for v in buy_hold_avgs], textposition="outside"))
     comparison_fig.add_trace(go.Scatter(name="Ibovespa", x=algo_names, y=ibov_line, mode="lines+markers", line=dict(color="#6f42c1", width=2)))
     comparison_fig.add_trace(go.Scatter(name="USD/BRL", x=algo_names, y=dollar_line, mode="lines+markers", line=dict(color="#20c997", width=2, dash="dash")))
     comparison_fig.update_layout(
-        title="Avg return by algorithm vs buy & hold, Ibovespa and USD/BRL",
+        title="Comparação de retorno bruto (secundário — ver métricas de risco acima)",
         yaxis_title="Return (%)",
         barmode="group",
-        height=420,
+        height=380,
         margin=dict(t=60, b=80),
     )
 
@@ -54,8 +195,8 @@ def _build_bi_charts(results, market_benchmark, dollar_benchmark_data, summary):
         values = [point["index"] for point in market_benchmark["normalized_series"]]
         ibov_fig.add_trace(go.Scatter(x=dates, y=values, mode="lines", name="Ibovespa (indexed)", line=dict(color="#6f42c1", width=2)))
     ibov_fig.update_layout(
-        title=f"Ibovespa over {market_benchmark.get('period', '')} / {market_benchmark.get('interval', '')} (start = 100)",
-        yaxis_title="Indexed level",
+        title=f"Ibovespa em {market_benchmark.get('period', '')} / {market_benchmark.get('interval', '')} (início = 100)",
+        yaxis_title="Nível indexado",
         height=360,
         margin=dict(t=60, b=60),
     )
@@ -66,8 +207,8 @@ def _build_bi_charts(results, market_benchmark, dollar_benchmark_data, summary):
         values = [point["index"] for point in dollar_benchmark_data["normalized_series"]]
         dollar_fig.add_trace(go.Scatter(x=dates, y=values, mode="lines", name="USD/BRL (indexed)", line=dict(color="#20c997", width=2)))
     dollar_fig.update_layout(
-        title=f"USD/BRL over {dollar_benchmark_data.get('period', '')} / {dollar_benchmark_data.get('interval', '')} (start = 100)",
-        yaxis_title="Indexed BRL per USD",
+        title=f"USD/BRL em {dollar_benchmark_data.get('period', '')} / {dollar_benchmark_data.get('interval', '')} (início = 100)",
+        yaxis_title="BRL por USD indexado",
         height=360,
         margin=dict(t=60, b=60),
     )
@@ -75,7 +216,7 @@ def _build_bi_charts(results, market_benchmark, dollar_benchmark_data, summary):
     benchmark_fig = go.Figure(
         data=[
             go.Bar(
-                x=["Strategies (avg)", "Buy & hold (avg)", "Ibovespa", "USD/BRL"],
+                x=["Estratégias (média)", "Comprar e manter (média)", "Ibovespa", "USD/BRL"],
                 y=[
                     summary["avg_return_pct"],
                     summary["avg_buy_hold_pct"],
@@ -94,18 +235,32 @@ def _build_bi_charts(results, market_benchmark, dollar_benchmark_data, summary):
         ]
     )
     benchmark_fig.update_layout(
-        title="Market context — was the sample period biased?",
+        title="Contexto de mercado — o período amostral foi enviesado?",
         yaxis_title="Return (%)",
         height=340,
         margin=dict(t=60, b=60),
     )
 
+    per_test_drawdown = {}
+    for row in ok_results:
+        if row.get("drawdown_series"):
+            per_test_drawdown[str(row["test_id"])] = {
+                "strategy": row["drawdown_series"],
+                "buy_hold": row.get("buy_hold_drawdown_series", []),
+                "title": f"{row['algorithm']} · {row['symbol']}",
+            }
+
     return json.dumps(
         {
-            "comparison": json.loads(json.dumps(comparison_fig, cls=plotly.utils.PlotlyJSONEncoder)),
-            "ibovespa": json.loads(json.dumps(ibov_fig, cls=plotly.utils.PlotlyJSONEncoder)),
-            "dollar": json.loads(json.dumps(dollar_fig, cls=plotly.utils.PlotlyJSONEncoder)),
-            "benchmark": json.loads(json.dumps(benchmark_fig, cls=plotly.utils.PlotlyJSONEncoder)),
+            "risk_scatter": _encode_fig(scatter_fig),
+            "risk_score": _encode_fig(risk_score_fig),
+            "drawdown": _encode_fig(drawdown_fig),
+            "rolling": _encode_fig(rolling_fig),
+            "comparison": _encode_fig(comparison_fig),
+            "ibovespa": _encode_fig(ibov_fig),
+            "dollar": _encode_fig(dollar_fig),
+            "benchmark": _encode_fig(benchmark_fig),
+            "per_test_drawdown": per_test_drawdown,
         }
     )
 
@@ -130,11 +285,26 @@ def _bi_page_context(data):
             data.get("market_benchmark", {}),
             data.get("dollar_benchmark", {}),
             data["summary"],
+            load_algorithm_catalog(data["results"]),
         ),
-        "report_url": "/bi/report",
         "expanded": False,
         "export_mode": False,
     }
+
+
+@app.route("/about")
+def about():
+    bi = load_bi_results()
+    return render_template("about.html", **about_page_context(bi))
+
+
+@app.route("/content/context.md")
+def cms_context_source():
+    return Response(
+        read_context_raw(),
+        mimetype="text/markdown; charset=utf-8",
+        headers={"Content-Disposition": f'inline; filename="{context_path().name}"'},
+    )
 
 
 @app.route("/bi")
@@ -146,11 +316,13 @@ def bi_dashboard():
 @app.route("/bi/export/html")
 def bi_export_html():
     data = load_bi_results()
+    static_dir = Path(app.root_path) / "static"
     context = _bi_page_context(data)
     context["expanded"] = True
     context["export_mode"] = True
-    context["inline_css"] = Path("static/styles.css").read_text(encoding="utf-8")
-    context["bi_page_js"] = Path("static/bi_page.js").read_text(encoding="utf-8")
+    context["inline_bootstrap_css"] = (static_dir / "vendor" / "bootstrap.min.css").read_text(encoding="utf-8")
+    context["inline_css"] = (static_dir / "styles.css").read_text(encoding="utf-8")
+    context["bi_page_js"] = (static_dir / "bi_page.js").read_text(encoding="utf-8")
     html = render_template("bi_export.html", **context)
     return Response(
         html,
