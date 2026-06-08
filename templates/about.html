@@ -1,0 +1,129 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Sobre
+{% endblock %}
+
+{% block main %}
+    <nav class="backtest-nav mb-4 d-flex flex-wrap align-items-center gap-2">
+        <a href="/" class="back-link">← Nova simulação</a>
+        <span class="text-muted mx-2">·</span>
+        <a href="/bi" class="back-link">Ver benchmark</a>
+        <span class="text-muted mx-2">·</span>
+        <span class="text-muted">Sobre</span>
+    </nav>
+
+    <header class="about-hero mb-4">
+        <span class="about-badge">Protótipo · backtesting B3</span>
+        <h1 class="mb-2">Trade SaaS</h1>
+        {% if sections.product and sections.product.body %}
+            <p class="lead text-muted mb-3">{{ sections.product.body[0] }}</p>
+        {% endif %}
+        <div class="d-flex flex-wrap gap-2">
+            <a href="/" class="btn btn-primary">Experimentar simulação</a>
+            <a href="/bi" class="btn btn-outline-primary">Ver benchmark</a>
+        </div>
+    </header>
+
+    <section class="about-section" aria-labelledby="about-proof-heading">
+        <h2 id="about-proof-heading" class="visually-hidden">Prova do benchmark</h2>
+        <div class="summary-grid bi-summary about-proof-grid mb-2">
+            <div class="summary-card">
+                <span class="summary-label">Escala do benchmark</span>
+                <span class="summary-value">{{ pitch.test_count }} testes</span>
+                <span class="text-muted small d-block mt-1">{{ pitch.algorithm_count }} algoritmos × {{ pitch.stock_count }} ações</span>
+            </div>
+            <div class="summary-card">
+                <span class="summary-label">Drawdown máximo médio</span>
+                <span class="summary-value">{{ "%.1f"|format(pitch.avg_max_drawdown_pct|default(0)) }}%</span>
+                <span class="text-muted small d-block mt-1">vs {{ "%.1f"|format(pitch.avg_buy_hold_max_drawdown_pct|default(0)) }}% buy &amp; hold</span>
+            </div>
+            <div class="summary-card">
+                <span class="summary-label">Exposição · Sharpe médio</span>
+                <span class="summary-value">{{ "%.0f"|format(pitch.avg_exposure_pct|default(0)) }}% · {{ "%.2f"|format(pitch.avg_sharpe|default(0)) }}</span>
+                <span class="text-muted small d-block mt-1">Tempo em mercado · risco ajustado</span>
+            </div>
+            <div class="summary-card">
+                <span class="summary-label">Melhor risk score</span>
+                <span class="summary-value">{{ "%.0f"|format(pitch.best_risk_score|default(0)) }}</span>
+                <span class="text-muted small d-block mt-1">{{ pitch.best_risk_score_algo }}</span>
+            </div>
+        </div>
+        <p class="text-muted small mb-0">
+            Simulação histórica · {{ pitch.scenario }} · Última atualização: {{ pitch.generated_at }}
+        </p>
+    </section>
+
+    <section class="about-section" aria-labelledby="about-what-heading">
+        <h2 id="about-what-heading" class="fs-4 mb-3">{{ sections.product.title }}</h2>
+        {% for paragraph in sections.product.body %}
+            <p>{{ paragraph }}</p>
+        {% endfor %}
+    </section>
+
+    <section class="about-section" aria-labelledby="about-demo-heading">
+        <h2 id="about-demo-heading" class="fs-4 mb-3">O que este protótipo demonstra</h2>
+        <p>
+            Este repositório é um protótipo funcional em Flask que valida a tese central do produto:
+            infraestrutura de backtesting para traders sistemáticos, com foco em métricas de risco
+            ajustado — não em recomendações de investimento.
+        </p>
+        <ul>
+            <li><strong>Editor Python integrado</strong> — escreva e execute estratégias com o contrato <code>process_data</code> / <code>check_buying_conditions</code> / <code>check_selling_conditions</code>.</li>
+            <li><strong>Simulação histórica</strong> — backtest em dados B3 (yfinance), com gráficos Plotly e log de operações.</li>
+            <li><strong>Painel BI</strong> — benchmark de {{ pitch.test_count }} testes com drawdown, exposição, Sharpe e risk score por algoritmo.</li>
+        </ul>
+        {% if pitch.risk_scores_top %}
+            <p class="text-muted small mb-0">
+                Top risk scores:
+                {% for name, score in pitch.risk_scores_top %}
+                    {{ name }} ({{ "%.0f"|format(score) }}){% if not loop.last %} · {% endif %}
+                {% endfor %}
+            </p>
+        {% endif %}
+    </section>
+
+    <section class="about-section" aria-labelledby="about-business-heading">
+        <h2 id="about-business-heading" class="fs-4 mb-3">{{ sections.business.title }}</h2>
+        {% for paragraph in business_intro %}
+            <p>{{ paragraph }}</p>
+        {% endfor %}
+    </section>
+
+    <section class="about-section" aria-labelledby="about-pricing-heading">
+        <h2 id="about-pricing-heading" class="fs-4 mb-2">Planos</h2>
+        <p class="text-muted small mb-3">Visão de produto — cobrança não implementada neste protótipo.</p>
+        <div class="row g-3">
+            {% for tier in pricing %}
+                <div class="col-md-4">
+                    <div class="about-pricing-card summary-card h-100{% if tier.featured %} about-pricing-card--featured{% endif %}">
+                        <span class="summary-label">{{ tier.name }}</span>
+                        <span class="summary-value">{{ tier.currency }} {{ tier.price }}<span class="fs-6 fw-normal text-muted">/{{ tier.period }}</span></span>
+                        <p class="text-muted small mb-0 mt-2">{{ tier.description }}</p>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section class="about-section" aria-labelledby="about-arch-heading">
+        <h2 id="about-arch-heading" class="fs-4 mb-3">{{ sections.architecture.title }}</h2>
+        {% for paragraph in sections.architecture.body %}
+            <p>{{ paragraph }}</p>
+        {% endfor %}
+        <div class="about-prototype-note mt-3">
+            <strong>Protótipo atual:</strong> Flask + Jinja2, execução local de código Python, cache JSON para o painel BI.
+            <br>
+            <strong>Visão de produção:</strong> FastAPI, Next.js, PostgreSQL, sandbox Docker com limites de CPU/RAM e sanitização de imports.
+        </div>
+    </section>
+
+    <section class="about-section mb-5" aria-labelledby="about-compliance-heading">
+        <h2 id="about-compliance-heading" class="fs-4 mb-3">{{ sections.compliance.title }}</h2>
+        <div class="about-disclaimer">
+            {% for paragraph in disclaimer %}
+                <p class="{% if not loop.last %}mb-2{% else %}mb-0{% endif %}">{{ paragraph }}</p>
+            {% endfor %}
+        </div>
+    </section>
+{% endblock %}
