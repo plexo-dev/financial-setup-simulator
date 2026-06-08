@@ -5,40 +5,81 @@
 {% endblock %}
 
 {% block main %}
-    <div>
-        <p class="fs-3" style="margin-left: 6px;">
-            <a href="/" style="text-decoration: none; color: black;">
-                Home
-            </a>
-        </p>
-        <table class="table table-borderless">
-            <td class="fs-5">Name: {{ name }}</td>
-            <td class="fs-5">Period: {{ period }}</td>
-            <td class="fs-5">Interval: {{ interval }}</td>
-            <td class="fs-5">Gains: $ {{ gains }}</td>
-        </table>
+    <nav class="backtest-nav mb-4">
+        <a href="/" class="back-link">← New simulation</a>
+        <span class="text-muted mx-2">·</span>
+        <a href="/bi" class="back-link">Strategy benchmark</a>
+    </nav>
+
+    <header class="backtest-header mb-4">
+        <h1 class="fs-2 mb-1">{{ name }} <span class="text-muted">({{ symbol }})</span></h1>
+        <p class="text-muted mb-0">{{ period }} · {{ interval }} · Historical simulation (not live trading)</p>
+    </header>
+
+    <div class="summary-grid mb-4">
+        <div class="summary-card">
+            <span class="summary-label">Portfolio value</span>
+            <span class="summary-value">R$ {{ total_value }}</span>
+        </div>
+        <div class="summary-card">
+            <span class="summary-label">Starting balance</span>
+            <span class="summary-value">R$ {{ initial_balance }}</span>
+        </div>
+        <div class="summary-card">
+            <span class="summary-label">Simulated return</span>
+            <span class="summary-value {% if gain_positive %}gain-positive{% else %}gain-negative{% endif %}">
+                {% if gain_positive %}+{% endif %}R$ {{ gain_amount }} ({{ return_pct }}%)
+            </span>
+        </div>
+        <div class="summary-card">
+            <span class="summary-label">Final position</span>
+            <span class="summary-value position-{{ final_position | lower }}">{{ final_position }}</span>
+            <span class="summary-label mt-1">{{ final_shares }} shares at end</span>
+        </div>
+        <div class="summary-card">
+            <span class="summary-label">Buy &amp; hold</span>
+            <span class="summary-value benchmark-buyhold">{{ buy_hold_return_pct }}%</span>
+            <span class="summary-label mt-1">vs strategy: {{ vs_buy_hold_pct }} pp</span>
+        </div>
+        <div class="summary-card">
+            <span class="summary-label">Ibovespa</span>
+            <span class="summary-value benchmark-ibov">{{ ibovespa_return_pct }}%</span>
+            <span class="summary-label mt-1">vs strategy: {{ vs_ibovespa_pct }} pp</span>
+        </div>
+        <div class="summary-card">
+            <span class="summary-label">USD/BRL</span>
+            <span class="summary-value benchmark-dollar">{{ dollar_return_pct }}%</span>
+            <span class="summary-label mt-1">vs strategy: {{ vs_dollar_pct }} pp</span>
+        </div>
     </div>
-    <div id="chart" class="chart"></div>
-    <br>
-    <br>
-    <p class="fs-3" style="margin-left: 6px;">Log</p>
-    <br>
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Action</th>
-                <th>Message</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for row in output %}
-                <tr>
-                    <td>{{ row["Action"] }}</td>
-                    <td>{{ row["Message"] }}</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+
+    <p class="chart-legend text-muted small mb-2">
+        Red ▲ buy · Green ▼ sell · Candlesticks show {{ symbol }} price history
+    </p>
+    <div id="chart" class="chart" role="img" aria-label="Backtest candlestick chart with buy and sell markers"></div>
+
+    <section class="trade-log mt-5">
+        <h2 class="fs-4 mb-3">Trade log</h2>
+        <div class="table-responsive">
+            <table class="table table-sm table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th scope="col">Action</th>
+                        <th scope="col">Message</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in output %}
+                        <tr class="{% if row['Action'] == 'Buy' %}log-buy{% elif row['Action'] == 'Sell' %}log-sell{% else %}log-summary{% endif %}">
+                            <td>{{ row["Action"] }}</td>
+                            <td>{{ row["Message"] }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
     <div id="graph-data" style="display:none;">{{ graph | safe }}</div>
 {% endblock %}
 
@@ -46,7 +87,6 @@
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <script>
         var graphData = JSON.parse(document.getElementById('graph-data').textContent);
-
         Plotly.newPlot("chart", graphData.data, graphData.layout, {responsive: true});
     </script>
 {% endblock %}
